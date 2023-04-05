@@ -1,0 +1,11 @@
+networkx >= 2.8
+numpy
+dimod
+pynauty
+matplotlib
+tikzplotlib
+dwave-networkx
+dwave-system
+dwave-ocean-sdk >= 6.3.0
+minorminer >= 0.2.11
+tqdm
