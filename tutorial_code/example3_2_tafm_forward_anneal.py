@@ -182,7 +182,7 @@ def run_iteration(param, shim, stats, embeddings, logical_bqm):
 
     adjust_fbos(result, param, shim, stats, embeddings)
     adjust_couplings(result, param, shim, stats, embeddings, logical_bqm)
-    stats['all_psi'].append(compute_psi(result), param, embeddings)
+    stats['all_psi'].append(compute_psi(result, param, embeddings))
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
 
