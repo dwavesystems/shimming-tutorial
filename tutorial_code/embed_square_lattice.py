@@ -46,12 +46,13 @@ def embed_square_lattice(_L, try_to_load=True, **kwargs):
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
+            print(f'Loaded embedding from file {cache_filename}')
             return embeddings, bqm
         except (ValueError, FileNotFoundError) as e:
             print(f"Failed to load {cache_filename} with `np.loadtxt`")
             print("Error:", e)
             print("Finding embedding via raster embedding search instead.")
-            embeddings = raster_embedding_search(A, G, **kwargs)
+    embeddings = raster_embedding_search(A, G, **kwargs)
 
     os.makedirs('cached_embeddings/', exist_ok=True)
     np.savetxt(cache_filename, embeddings, fmt='%d')
