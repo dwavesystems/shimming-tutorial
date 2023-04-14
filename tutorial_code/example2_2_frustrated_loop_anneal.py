@@ -103,7 +103,6 @@ def adjust_couplings(result):
     stats['all_couplings'].append(shim['couplings'].copy())
     stats['frust'].append(frust_matrix)
 
-    pass
 
 
 def run_iteration():
@@ -129,7 +128,6 @@ def run_iteration():
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
 
-    pass
 
 
 def run_experiment(alpha_Phi=0., alpha_J=0.):
@@ -167,7 +165,6 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
     plot_data(param, shim, stats)
     paper_plots_example2_2(param, shim, stats)
 
-    pass
 
 
 if __name__ == "__main__":
@@ -210,4 +207,3 @@ if __name__ == "__main__":
     }
 
     run_experiment(0.5e-5, 5e-2)
-    pass

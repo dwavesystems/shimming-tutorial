@@ -32,7 +32,6 @@ def write_lad_graph(_f, _graph):
             s += f'{u} '
         print(s)
         _f.write(s + '\n')
-        pass
 
 
 def get_chimera_subgrid(A, rows, cols, gridsize=16):
@@ -44,7 +43,6 @@ def get_chimera_subgrid(A, rows, cols, gridsize=16):
     :return: The subgraph of A induced on the nodes in "rows" and "cols"
     """
     raise Exception("Not implemented")
-    pass
 
 
 
@@ -100,7 +98,6 @@ def get_independent_embeddings(embs):
             V2 = set(emb2.values())
             if not V1.isdisjoint(V2):
                 Gemb.add_edge(i, j)
-            pass
     print(f'Built graph.  Took {time.process_time()-start} seconds')
     start = time.process_time()
 
@@ -203,4 +200,3 @@ if __name__ == "__main__":
 
     embmat = raster_embedding_search(A, G, raster_breadth=3)
 
-    pass

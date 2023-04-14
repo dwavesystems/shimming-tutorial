@@ -58,4 +58,3 @@ def embed_square_lattice(_L, try_to_load=True, **kwargs):
 if __name__ == "__main__":
     L = 12  # Linear size of square lattice to embed (LxL cylinder)
     embeddings, bqm = embed_square_lattice(L, raster_breadth=5, max_number_of_embeddings=1, timeout=100)
-    pass

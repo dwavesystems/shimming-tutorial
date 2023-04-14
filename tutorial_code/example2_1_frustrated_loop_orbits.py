@@ -98,4 +98,3 @@ if __name__ == "__main__":
     paper_plotting_functions.paper_plots_example2_1(Gnx, pos, options)
     plt.show()
 
-    pass

@@ -112,4 +112,3 @@ if __name__ == "__main__":
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
     plt.show()
 
-    pass

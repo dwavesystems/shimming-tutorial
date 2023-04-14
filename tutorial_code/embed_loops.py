@@ -49,4 +49,3 @@ def embed_loops(_L, try_to_load=True, raster_breadth=2):
 if __name__ == "__main__":
     L = 8  # Length of chain to embed
     embeddings = embed_loops(L, raster_breadth=2)
-    pass

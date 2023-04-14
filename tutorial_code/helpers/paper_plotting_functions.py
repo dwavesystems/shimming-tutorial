@@ -344,7 +344,6 @@ def paper_plots_example2_2(param, shim, stats, ):
     else:
         plt.show()
 
-    pass
 
 
 def paper_plots_example3_2(param, shim, stats, ):
@@ -541,7 +540,6 @@ def paper_plots_example3_2(param, shim, stats, ):
     else:
         plt.show()
 
-    pass
 
 
 def paper_plots_example3_3(param, shim, stats, ):
