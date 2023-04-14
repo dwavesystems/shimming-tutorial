@@ -89,7 +89,7 @@ def paper_plots_example1_1(param, shim, stats, ):
             standalone=True,
             axis_width='5cm', axis_height='5cm',
             float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,  # + ['ymajorticks=false'],
+            extra_axis_parameters=tikz_axis_parameters,
         )
         code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
 
@@ -116,7 +116,7 @@ def paper_plots_example1_1(param, shim, stats, ):
             standalone=True,
             axis_width='5cm', axis_height='5cm',
             float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,  # + ['ymajorticks=false'],
+            extra_axis_parameters=tikz_axis_parameters,
         )
         code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
 
@@ -140,7 +140,7 @@ def paper_plots_example1_1(param, shim, stats, ):
             standalone=True,
             axis_width='5cm', axis_height='5cm',
             float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,  # + ['ymajorticks=false'],
+            extra_axis_parameters=tikz_axis_parameters,
         )
         code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
 
@@ -148,7 +148,6 @@ def paper_plots_example1_1(param, shim, stats, ):
             f.write(code)
     else:
         plt.show()
-
 
 
 def paper_plots_example1_2(param, shim, stats, ):
@@ -187,7 +186,6 @@ def paper_plots_example1_2(param, shim, stats, ):
     plt.title('Couplings')
     plt.xlabel('Iteration')
     plt.ylabel(r'$J_{i,j}$')
-    # plt.ylim(max(abs(np.array(plt.ylim()))) * np.array([-1, 1]))
 
     if MAKE_TIKZ_PLOTS:
         fn = f'ex12_Js'
@@ -265,7 +263,6 @@ def paper_plots_example2_2(param, shim, stats, ):
     plt.title('Couplings (relative to nominal)')
     plt.xlabel('Iteration')
     plt.ylabel(r'$J_{i,j}/J_{i,j}^{{\ nominal}}$')
-    # plt.ylim(max(abs(np.array(plt.ylim()))) * np.array([-1, 1]))
 
     if MAKE_TIKZ_PLOTS:
         fn = f'ex22_Js'
@@ -476,8 +473,6 @@ def paper_plots_example3_2(param, shim, stats, ):
         y = np.imag(psi.ravel())
         extent = (-2, 2, -1.95, 1.95)
         numbins = 42
-        # hb = ax.hexbin(x, y, gridsize=numbins, cmap='inferno', extent=extent,
-        #               norm=matplotlib.colors.LogNorm(vmin=1,vmax=100))
         hb = ax.hexbin(x, y, gridsize=numbins, cmap='inferno', extent=extent,
                        norm=matplotlib.colors.Normalize(vmin=0, vmax=80))
 
@@ -573,9 +568,3 @@ def paper_plots_example3_3(param, shim, stats, ):
                 f.write(code)
         else:
             plt.show()
-    #
-    # plt.clf()
-    # ax = plt.gca()
-    # M = np.array([np.mean(np.abs(x)) for x in stats['all_psi']])
-    # plt.plot(M)
-    # plt.show()
