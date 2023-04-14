@@ -90,7 +90,6 @@ def adjust_couplings(result):
     stats['frust'].append(frust_matrix)
 
 
-
 def run_iteration():
     bqm = make_bqm()
     fbo_dict = make_fbo_dict()
@@ -113,7 +112,6 @@ def run_iteration():
     adjust_couplings(result)
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
-
 
 
 def run_experiment(alpha_Phi=0., alpha_J=0.):
@@ -150,7 +148,6 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
 
     plot_data(param, shim, stats)
     paper_plots_example1_2(param, shim, stats)
-
 
 
 if __name__ == "__main__":

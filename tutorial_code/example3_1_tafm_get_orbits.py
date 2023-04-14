@@ -22,8 +22,6 @@ import matplotlib.pyplot as plt
 from embed_square_lattice import embed_square_lattice
 
 
-
-
 if __name__ == "__main__":
     L = 6  # Length of square lattice to embed
 
@@ -64,4 +62,3 @@ if __name__ == "__main__":
     edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
     plt.show()
-

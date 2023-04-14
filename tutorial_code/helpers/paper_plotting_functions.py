@@ -34,6 +34,7 @@ tikz_axis_parameters = [
 PATH_TO_PAPER_DIR = "../paper_materials/"
 MAKE_TIKZ_PLOTS = False
 
+
 def paper_plots_example1_1(param, shim, stats, ):
     # Plot FBOs for first embedding
     plt.clf()
@@ -109,7 +110,6 @@ def paper_plots_example1_1(param, shim, stats, ):
     plt.ylabel(r'Mean absolute difference')
     plt.ylim([0, .7])
 
-
     if MAKE_TIKZ_PLOTS:
         fn = f'ex11_aPhi{shim["alpha_Phi"]:.6f}_mag_diff'
         code = tikzplotlib.get_tikz_code(
@@ -133,7 +133,6 @@ def paper_plots_example1_1(param, shim, stats, ):
     plt.xlabel('Iteration')
     plt.ylabel(r'$\sigma$')
     plt.ylim([0, .5])
-
 
     if MAKE_TIKZ_PLOTS:
         fn = f'ex11_aPhi{shim["alpha_Phi"]:.6f}_mag_std'
@@ -212,7 +211,6 @@ def paper_plots_example1_2(param, shim, stats, ):
 
 def paper_plots_example2_1(Gnx, pos, options):
 
-
     if MAKE_TIKZ_PLOTS:
         fn = f'ex2_1_graph_raw'
         code = tikzplotlib.get_tikz_code(
@@ -236,7 +234,6 @@ def paper_plots_example2_1(Gnx, pos, options):
 
 def paper_plots_example2_2(param, shim, stats, ):
 
-
     # Plot FBOs for first embedding
     plt.clf()
 
@@ -255,7 +252,7 @@ def paper_plots_example2_2(param, shim, stats, ):
             axis_width='4cm', axis_height='5cm',
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters +
-                                  [r'y tick label style={/pgf/number format/.cd,sci,precision=5}, scaled y ticks=false,'],
+            [r'y tick label style={/pgf/number format/.cd,sci,precision=5}, scaled y ticks=false,'],
         )
         code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
 
@@ -317,7 +314,6 @@ def paper_plots_example2_2(param, shim, stats, ):
     else:
         plt.show()
 
-
     plt.clf()
 
     M = np.array(stats['frust'])
@@ -347,7 +343,6 @@ def paper_plots_example2_2(param, shim, stats, ):
         plt.show()
 
 
-
 def paper_plots_example3_2(param, shim, stats, ):
     plt.clf()
 
@@ -367,7 +362,7 @@ def paper_plots_example3_2(param, shim, stats, ):
             axis_width='4cm', axis_height='5cm',
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters +
-                                  [r'y tick label style={/pgf/number format/.cd,sci,precision=5}, scaled y ticks=false,'],
+            [r'y tick label style={/pgf/number format/.cd,sci,precision=5}, scaled y ticks=false,'],
         )
         code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
 
@@ -541,7 +536,6 @@ def paper_plots_example3_2(param, shim, stats, ):
             f.write(code)
     else:
         plt.show()
-
 
 
 def paper_plots_example3_3(param, shim, stats, ):

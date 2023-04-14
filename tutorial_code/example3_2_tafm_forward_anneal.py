@@ -140,7 +140,6 @@ def adjust_couplings(result):
     stats['frust'].append(frust_matrix)
 
 
-
 def get_sublattices(_L):
     sl = np.zeros((_L * _L), dtype=int)
     for x in range(_L):
@@ -188,7 +187,6 @@ def run_iteration():
     stats['all_psi'].append(compute_psi(result))
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
-
 
 
 def run_experiment(alpha_Phi=0., alpha_J=0.):
@@ -242,7 +240,6 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
 
     plot_data(param, shim, stats)
     paper_plots_example3_2(param, shim, stats)
-
 
 
 if __name__ == "__main__":

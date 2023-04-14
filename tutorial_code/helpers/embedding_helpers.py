@@ -47,7 +47,6 @@ def get_chimera_subgrid(A, rows, cols, gridsize=16):
     raise Exception("Not implemented")
 
 
-
 def get_pegasus_subgrid(A, rows, cols, gridsize=16):
     """Make a subgraph of a Pegasus-16 (Advantage) graph on a set of rows and columns of unit cells.
 
@@ -75,15 +74,11 @@ def get_zephyr_subgrid(A, rows, cols, gridsize=4):
     coords = [dnx.zephyr_coordinates(gridsize).linear_to_zephyr(v) for v in A.nodes]
     c = np.asarray(coords)
     used_coords = [c for c in coords if
-                   (c[0]==0 and c[4] in cols and c[1] >= 2*min(rows) and c[1] <= 2*max(rows)+2) or
-                   (c[0]==1 and c[4] in rows and c[1] >= 2*min(cols) and c[1] <= 2*max(cols)+2)]
+                   (c[0] == 0 and c[4] in cols and c[1] >= 2*min(rows) and c[1] <= 2*max(rows)+2) or
+                   (c[0] == 1 and c[4] in rows and c[1] >= 2*min(cols) and c[1] <= 2*max(cols)+2)]
     # (u, w, k, z) -> (u, w, k / 2, k % 2, z)
 
     subgraph = A.subgraph([dnx.zephyr_coordinates(gridsize).zephyr_to_linear(c) for c in used_coords]).copy()
-    # print('not been tested!')
-    #plt.rcParams['figure.figsize'] = (16, 16)
-    #dnx.draw_zephyr(subgraph,node_size=100)
-    #plt.show()
 
     return subgraph
 
@@ -145,17 +140,17 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
     for row_offset in range(gridsize - raster_breadth + 1):
 
         for col_offset in range(gridsize - raster_breadth + 1):
-            if topology=='chimera':
+            if topology == 'chimera':
                 B = get_pegasus_subgrid(
                     A, range(row_offset, row_offset + raster_breadth),
                     range(col_offset, col_offset + raster_breadth), gridsize
                 )
-            if topology=='pegasus':
+            if topology == 'pegasus':
                 B = get_pegasus_subgrid(
                     A, range(row_offset, row_offset + raster_breadth),
                     range(col_offset, col_offset + raster_breadth), gridsize
                 )
-            elif topology=='zephyr':
+            elif topology == 'zephyr':
                 B = get_zephyr_subgrid(
                     A, range(row_offset, row_offset + raster_breadth),
                     range(col_offset, col_offset + raster_breadth), gridsize
@@ -173,11 +168,10 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
 
             if verify_embeddings:
                 for emb in sub_embs:
-                    X = list(embedding.diagnose_embedding({p:[emb[p]] for p in emb}, subgraph, _A))
+                    X = list(embedding.diagnose_embedding({p: [emb[p]] for p in emb}, subgraph, _A))
                     if len(X):
                         print(X[0])
                         raise Exception
-
 
             embs += sub_embs
 
@@ -201,4 +195,3 @@ if __name__ == "__main__":
     A = sampler.to_networkx_graph()
 
     embmat = raster_embedding_search(A, G, raster_breadth=3)
-

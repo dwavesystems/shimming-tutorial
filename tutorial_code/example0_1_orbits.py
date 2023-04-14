@@ -67,7 +67,6 @@ if __name__ == "__main__":
         print(f'CouplerOrbit{p} = -CouplerOrbit{q}')
     print('')
 
-
     qubit_orbit_sizes = [len([x for x in qubit_orbits.values() if int(x) == i]) for i in
                          range(len(qubit_orbits_opposite))]
     coupler_orbit_sizes = [len([x for x in coupler_orbits.values() if int(x) == i]) for i in
@@ -113,4 +112,3 @@ if __name__ == "__main__":
     edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
     plt.show()
-

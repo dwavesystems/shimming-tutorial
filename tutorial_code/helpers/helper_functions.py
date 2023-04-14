@@ -184,6 +184,7 @@ def get_coupler_colors(_G, _bqm):
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(_bqm.quadratic[E])) for E in _G.edges()]
 
+
 def get_qubit_colors(_G, _bqm):
     cm = matplotlib.cm.get_cmap(name='coolwarm')
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
@@ -229,7 +230,7 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
         data_dict['param']['sampler'].solver.client = None
         data_dict['param']['sampler'].client = None
 
-    os.makedirs('cached_experiment_data', exist_ok=True) 
+    os.makedirs('cached_experiment_data', exist_ok=True)
     with lzma.open(filepath, 'wb') as f:
         pickle.dump(data_dict, f)
 
