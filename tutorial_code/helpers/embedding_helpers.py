@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from minorminer import subgraph as glasgow
-from tqdm import tqdm
-import dwave_networkx as dnx
-import networkx as nx
-from dwave.system.samplers import DWaveSampler
-import dimod
 import time
+
+import dimod
 import numpy as np
-import matplotlib.pyplot as plt
+import networkx as nx
+import dwave_networkx as dnx
+
 from dwave import embedding
+from dwave.system.samplers import DWaveSampler
+
+from minorminer import subgraph as glasgow
+
 
 def write_lad_graph(_f, _graph):
     _f.write(f'{len(_graph)}\n')

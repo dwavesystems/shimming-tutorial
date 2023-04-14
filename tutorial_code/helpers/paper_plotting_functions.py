@@ -14,10 +14,12 @@
 #
 
 import numpy as np
-import matplotlib.pyplot as plt
-import tikzplotlib
-from .helper_functions import movmean
 import matplotlib
+import tikzplotlib
+
+import matplotlib.pyplot as plt
+from helpers.helper_functions import movmean
+
 
 extra_code = '\\usepackage{sfmath,siunitx}\\usepackage{mathspec}\\setmainfont{TeX Gyre Heros}\\setmathfont(Digits,Latin,Greek){TeX Gyre Heros}'
 

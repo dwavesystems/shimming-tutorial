@@ -13,13 +13,17 @@
 # limitations under the License.
 #
 
-import numpy as np
-import matplotlib.pyplot as plt
-from pathlib import Path
-import pickle, lzma
-import glob, os
+import os
 import copy
+
+import numpy as np
+import pickle
+import lzma
 import matplotlib
+
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 
 
 def movmean(x, w):

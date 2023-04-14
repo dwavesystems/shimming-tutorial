@@ -13,9 +13,11 @@
 # limitations under the License.
 #
 import dimod
-from helpers import orbits
 import networkx as nx
+
 import matplotlib.pyplot as plt
+
+from helpers import orbits
 from helpers.helper_functions import get_coupler_colors, get_qubit_colors
 
 

@@ -13,8 +13,10 @@
 # limitations under the License.
 #
 import networkx as nx
+
 from helpers import orbits
 from helpers.helper_functions import get_qubit_colors, get_coupler_colors
+
 import matplotlib.pyplot as plt
 
 from embed_square_lattice import embed_square_lattice

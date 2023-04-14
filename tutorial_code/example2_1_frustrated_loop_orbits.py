@@ -14,9 +14,11 @@
 #
 import networkx as nx
 import numpy as np
-import dimod
-from helpers import paper_plotting_functions, orbits
 import matplotlib
+import dimod
+
+from helpers import paper_plotting_functions, orbits
+
 import matplotlib.pyplot as plt
 
 

@@ -13,13 +13,19 @@
 # limitations under the License.
 #
 import dimod
-from dwave.system.samplers import DWaveSampler
 import numpy as np
+
+from dwave.system.samplers import DWaveSampler
+
 from embed_square_lattice import embed_square_lattice
-from helpers.helper_functions import \
-    plot_data, save_experiment_data, load_experiment_data, shim_parameter_rescaling
+
+from helpers.helper_functions import (shim_parameter_rescaling,
+                                      save_experiment_data,
+                                      load_experiment_data,
+                                      plot_data)
 from helpers.paper_plotting_functions import paper_plots_example3_2
 from helpers import orbits
+
 from tqdm import tqdm
 
 

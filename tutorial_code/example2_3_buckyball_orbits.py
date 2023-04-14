@@ -1,8 +1,11 @@
 import dimod
-from helpers.orbits import get_orbits
-from dwave.system import DWaveSampler
-from minorminer import find_embedding
 import numpy as np
+
+from helpers.orbits import get_orbits
+
+from dwave.system import DWaveSampler
+
+from minorminer import find_embedding
 
 
 if __name__ == "__main__":

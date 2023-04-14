@@ -13,11 +13,15 @@
 # limitations under the License.
 #
 import dimod
-from dwave.system.samplers import DWaveSampler
 import numpy as np
+
+from dwave.system.samplers import DWaveSampler
+
 from embed_loops import embed_loops
+
 from helpers.helper_functions import plot_data, save_experiment_data, load_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example1_1
+
 from tqdm import tqdm
 
 
