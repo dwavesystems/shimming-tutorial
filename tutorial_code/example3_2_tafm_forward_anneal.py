@@ -29,7 +29,7 @@ from helpers import orbits
 from tqdm import tqdm
 
 
-def make_fbo_dict():
+def make_fbo_dict(embeddings, shim):
     """Makes the FBO dict from the matrix of FBOs."""
     fbo_dict = {}
     for iemb, emb in enumerate(embeddings):
@@ -39,7 +39,7 @@ def make_fbo_dict():
     return fbo_dict
 
 
-def make_bqm():
+def make_bqm(shim, embeddings, logical_bqm):
     """Makes the BQM from the matrix of coupling values."""
 
     _bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
@@ -51,7 +51,7 @@ def make_bqm():
     return _bqm
 
 
-def make_logical_bqm():
+def make_logical_bqm(param):
     """Makes the BQM from the matrix of coupling values."""
 
     _bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
@@ -77,7 +77,7 @@ def make_logical_bqm():
     return _bqm
 
 
-def adjust_fbos(result):
+def adjust_fbos(result, param, shim, stats, embeddings):
     magnetizations = np.zeros(param['sampler'].properties['num_qubits'], dtype=float)
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
@@ -88,7 +88,7 @@ def adjust_fbos(result):
     stats['all_fbos'].append(shim['fbos'].copy())
 
 
-def adjust_couplings(result):
+def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
     vars = result.variables
 
     # Make a big array for the solutions, with zeros for unused qubits
@@ -146,7 +146,7 @@ def get_sublattices(_L):
     return sl
 
 
-def compute_psi(result):
+def compute_psi(result, param, embeddings):
     vars = result.variables
 
     # Make a big array for the solutions, with zeros for unused qubits
@@ -162,9 +162,9 @@ def compute_psi(result):
     return psi
 
 
-def run_iteration():
-    bqm = make_bqm()
-    fbo_dict = make_fbo_dict()
+def run_iteration(param, shim, stats, embeddings, logical_bqm):
+    bqm = make_bqm(shim, embeddings, logical_bqm)
+    fbo_dict = make_fbo_dict(embeddings, shim)
     fbo_list = [0] * param['sampler'].properties['num_qubits']
     for qubit, fbo in fbo_dict.items():
         fbo_list[qubit] = fbo
@@ -180,18 +180,14 @@ def run_iteration():
         answer_mode="raw",
     )
 
-    adjust_fbos(result)
-    adjust_couplings(result)
-    stats['all_psi'].append(compute_psi(result))
+    adjust_fbos(result, param, shim, stats, embeddings)
+    adjust_couplings(result, param, shim, stats, embeddings, logical_bqm)
+    stats['all_psi'].append(compute_psi(result), param, embeddings)
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(alpha_Phi=0., alpha_J=0.):
-    global param
-    global shim
-    global stats
-
+def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., alpha_J=0.):
     prefix = f'example3_2_{shim["type"]}{"_adaptive" * int(param["adaptive_step_size"])}' \
              f'_halve{param["halve_boundary_couplers"]}_aPhi{alpha_Phi}_aJ{alpha_J}'
 
@@ -219,7 +215,7 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
                 else:
                     shim['alpha_J'] = alpha_J
 
-                run_iteration()
+                run_iteration(param, shim, stats, embeddings, logical_bqm)
 
         else:
             # Adaptive step sizes
@@ -227,7 +223,7 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
             shim['alpha_Phi'] = alpha_Phi
             shim['alpha_J'] = alpha_J
             for iteration in pbar:
-                run_iteration()
+                run_iteration(param, shim, stats, embeddings, logical_bqm)
                 shim['alpha_Phi'] *= shim_parameter_rescaling(stats['all_fbos'], num_iters=20, ratio=1.1)
                 shim['alpha_J'] *= shim_parameter_rescaling(stats['all_couplings'], num_iters=20, ratio=1.1)
 
@@ -240,8 +236,7 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
     paper_plots_example3_2(param, shim, stats)
 
 
-if __name__ == "__main__":
-
+def main():
     shimtype = 'embedded_finite'
     adaptive_step_size = False
     halve_boundary_couplers = False
@@ -262,7 +257,7 @@ if __name__ == "__main__":
 
     # Make the logical BQM to get orbits for a single embedding.  Doing it for all embeddings together
     # is very slow with pynauty.
-    logical_bqm = make_logical_bqm()
+    logical_bqm = make_logical_bqm(param)
     unsigned_orbits = orbits.get_orbits(logical_bqm)
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
@@ -301,4 +296,8 @@ if __name__ == "__main__":
         'all_psi': [],
     }
 
-    run_experiment(2e-6, 0.02)
+    run_experiment(param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02)
+
+
+if __name__ == "__main__":
+    main()

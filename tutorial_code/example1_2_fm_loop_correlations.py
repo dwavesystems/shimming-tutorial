@@ -25,7 +25,7 @@ from helpers.paper_plotting_functions import paper_plots_example1_2
 from tqdm import tqdm
 
 
-def make_fbo_dict():
+def make_fbo_dict(param, shim, embeddings):
     """Makes the FBO dict from the matrix of FBOs."""
     fbo_dict = {}
     for iemb, emb in enumerate(embeddings):
@@ -35,7 +35,7 @@ def make_fbo_dict():
     return fbo_dict
 
 
-def make_bqm():
+def make_bqm(param, shim, embeddings):
     """Makes the BQM from the matrix of coupling values."""
 
     bqm = dimod.BinaryQuadraticModel(
@@ -48,7 +48,7 @@ def make_bqm():
     return bqm
 
 
-def adjust_fbos(result):
+def adjust_fbos(result, param, shim, stats, embeddings):
     magnetizations = [0] * param['sampler'].properties['num_qubits']
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
@@ -65,7 +65,7 @@ def adjust_fbos(result):
     stats['all_fbos'].append(shim['fbos'].copy())
 
 
-def adjust_couplings(result):
+def adjust_couplings(result, param, shim, stats, embeddings):
     vars = result.variables
 
     # Make a big array for the solutions, with zeros for unused qubits
@@ -88,9 +88,9 @@ def adjust_couplings(result):
     stats['frust'].append(frust_matrix)
 
 
-def run_iteration():
-    bqm = make_bqm()
-    fbo_dict = make_fbo_dict()
+def run_iteration(param, shim, stats, embeddings):
+    bqm = make_bqm(param, shim, embeddings)
+    fbo_dict = make_fbo_dict(param, shim, embeddings)
     fbo_list = [0] * param['sampler'].properties['num_qubits']
     for qubit, fbo in fbo_dict.items():
         fbo_list[qubit] = fbo
@@ -106,17 +106,13 @@ def run_iteration():
         answer_mode="raw",
     )
 
-    adjust_fbos(result)
-    adjust_couplings(result)
+    adjust_fbos(result, param, shim, stats, embeddings)
+    adjust_couplings(result, param, shim, stats, embeddings)
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(alpha_Phi=0., alpha_J=0.):
-    global param
-    global shim
-    global stats
-
+def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
     prefix = f'example1_2_aPhi{alpha_Phi}_aJ{alpha_J}'
 
     data_dict = {'param': param, 'shim': shim, 'stats': stats}
@@ -137,7 +133,7 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
                 shim['alpha_J'] = 0.
             else:
                 shim['alpha_J'] = alpha_J
-            run_iteration()
+            run_iteration(param, shim, stats, embeddings)
 
         save_experiment_data(
             prefix,
@@ -148,11 +144,7 @@ def run_experiment(alpha_Phi=0., alpha_J=0.):
     paper_plots_example1_2(param, shim, stats)
 
 
-if __name__ == "__main__":
-    global param
-    global shim
-    global stats
-
+def main():
     param = {
         'L': 64,
         'sampler': DWaveSampler(),  # As configured
@@ -181,4 +173,8 @@ if __name__ == "__main__":
         'all_alpha_J': [],
     }
 
-    run_experiment(1e-5, 5e-3)
+    run_experiment(param, shim, stats, embeddings, 1e-5, 5e-3)
+
+
+if __name__ == "__main__":
+    main()
