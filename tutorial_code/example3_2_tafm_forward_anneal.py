@@ -87,8 +87,6 @@ def adjust_fbos(result):
     stats['mags'].append(magnetizations[embeddings])
     stats['all_fbos'].append(shim['fbos'].copy())
 
-    return
-
 
 def adjust_couplings(result):
     vars = result.variables

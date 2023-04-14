@@ -64,8 +64,6 @@ def adjust_fbos(result):
     stats['mags'].append(mag_array)
     stats['all_fbos'].append(shim['fbos'].copy())
 
-    return
-
 
 def adjust_couplings(result):
     # Make a big array for the solutions, with zeros for unused qubits

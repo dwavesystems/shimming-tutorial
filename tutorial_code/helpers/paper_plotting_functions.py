@@ -149,7 +149,6 @@ def paper_plots_example1_1(param, shim, stats, ):
     else:
         plt.show()
 
-    return
 
 
 def paper_plots_example1_2(param, shim, stats, ):
@@ -206,8 +205,6 @@ def paper_plots_example1_2(param, shim, stats, ):
     else:
         plt.show()
 
-    return
-
 
 def paper_plots_example2_1(Gnx, pos, options):
 
@@ -228,8 +225,6 @@ def paper_plots_example2_1(Gnx, pos, options):
             f.write(code)
     else:
         plt.show()
-
-    return
 
 
 def paper_plots_example2_2(param, shim, stats, ):

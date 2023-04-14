@@ -77,8 +77,6 @@ def adjust_fbos(result):
     stats['mags'].append(mag_array)
     stats['all_fbos'].append(shim['fbos'].copy())
 
-    return
-
 
 def adjust_couplings(result):
     """In this example we implicitly use the fact that all couplers are in the same orbit or its opposite, so
