@@ -35,10 +35,11 @@ def embed_loops(_L, try_to_load=True, raster_breadth=2):
             embeddings = np.loadtxt(cache_filename, dtype=int)
             print(f'Loaded embedding from file {cache_filename}')
             return embeddings
-        except:
-            pass
-
-    embeddings = raster_embedding_search(A, G, raster_breadth=raster_breadth)
+        except (ValueError, FileNotFoundError) as e:
+            print(f"Failed to load {cache_filename} with `np.loadtxt`")
+            print("Error:", e)
+            print("Finding embedding via raster embedding search instead.")
+            embeddings = raster_embedding_search(A, G, raster_breadth=raster_breadth)
 
     os.makedirs('cached_embeddings/', exist_ok=True)
     np.savetxt(cache_filename, embeddings, fmt='%d')
