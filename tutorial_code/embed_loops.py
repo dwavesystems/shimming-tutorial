@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import dimod
-from dwave.system.samplers import DWaveSampler
-import numpy as np
-from helpers.embedding_helpers import raster_embedding_search
 import os
+
+import dimod
+import numpy as np
+
+from dwave.system.samplers import DWaveSampler
+
+from helpers.embedding_helpers import raster_embedding_search
 
 
 def embed_loops(_L, try_to_load=True, raster_breadth=2):

@@ -16,14 +16,14 @@
 import os
 import copy
 
+from pathlib import Path
+
 import numpy as np
 import pickle
 import lzma
 import matplotlib
 
-from pathlib import Path
-
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
 
 def movmean(x, w):

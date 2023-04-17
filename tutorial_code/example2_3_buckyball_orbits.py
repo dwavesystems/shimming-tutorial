@@ -14,12 +14,14 @@
 #
 import dimod
 import numpy as np
-
-from helpers.orbits import get_orbits
+import networkx as nx
 
 from dwave.system import DWaveSampler
-
 from minorminer import find_embedding
+from matplotlib import pyplot as plt
+
+from helpers.orbits import get_orbits
+from helpers import orbits
 
 
 def main(visualize=True):
@@ -40,10 +42,6 @@ def main(visualize=True):
     embedding = find_embedding(graph_bqm, graph_qpu)
 
     if visualize:
-        import networkx as nx
-        import matplotlib.pyplot as plt
-        from helpers import orbits
-
         # Plotting configurations
         cm = plt.cm.get_cmap(name='coolwarm')
         norm = plt.Normalize(vmin=-2, vmax=2)

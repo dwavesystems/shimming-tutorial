@@ -17,9 +17,9 @@ import numpy as np
 import matplotlib
 import dimod
 
-from helpers import paper_plotting_functions, orbits
+from matplotlib import pyplot as plt
 
-import matplotlib.pyplot as plt
+from helpers import paper_plotting_functions, orbits
 
 
 def get_vertex_coordinates():

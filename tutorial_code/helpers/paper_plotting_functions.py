@@ -17,7 +17,8 @@ import numpy as np
 import matplotlib
 import tikzplotlib
 
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+
 from helpers.helper_functions import movmean
 
 
