@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import dimod
 import networkx as nx
 import numpy as np
-import dimod
 import pynauty
 
 

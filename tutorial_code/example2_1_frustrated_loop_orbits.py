@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import dimod
+import matplotlib
 import networkx as nx
 import numpy as np
-import matplotlib
-import dimod
 
 from matplotlib import pyplot as plt
 

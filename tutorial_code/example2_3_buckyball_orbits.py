@@ -13,15 +13,15 @@
 # limitations under the License.
 #
 import dimod
-import numpy as np
 import networkx as nx
+import numpy as np
 
 from dwave.system import DWaveSampler
-from minorminer import find_embedding
 from matplotlib import pyplot as plt
+from minorminer import find_embedding
 
-from helpers.orbits import get_orbits
 from helpers import orbits
+from helpers.orbits import get_orbits
 
 
 def main(visualize=True):

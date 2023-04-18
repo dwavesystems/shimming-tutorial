@@ -13,8 +13,8 @@
 # limitations under the License.
 #
 
-import numpy as np
 import matplotlib
+import numpy as np
 import tikzplotlib
 
 from matplotlib import pyplot as plt

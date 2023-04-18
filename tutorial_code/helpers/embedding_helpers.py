@@ -15,13 +15,13 @@
 import time
 
 import dimod
-import numpy as np
-import networkx as nx
 import dwave_networkx as dnx
+import networkx as nx
+import numpy as np
 
-from minorminer import subgraph as glasgow
 from dwave import embedding
 from dwave.system.samplers import DWaveSampler
+from minorminer import subgraph as glasgow
 
 
 def get_pegasus_subgrid(A, rows, cols, gridsize=16):

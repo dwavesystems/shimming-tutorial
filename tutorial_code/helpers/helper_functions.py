@@ -13,15 +13,15 @@
 # limitations under the License.
 #
 
-import os
 import copy
+import os
 
 from pathlib import Path
 
-import numpy as np
-import pickle
 import lzma
 import matplotlib
+import numpy as np
+import pickle
 
 from matplotlib import pyplot as plt
 

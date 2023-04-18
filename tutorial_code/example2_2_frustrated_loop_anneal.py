@@ -19,9 +19,8 @@ from dwave.system.samplers import DWaveSampler
 from tqdm import tqdm
 
 from embed_loops import embed_loops
+from helpers.helper_functions import load_experiment_data, plot_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example2_2
-from helpers.helper_functions import (plot_data, save_experiment_data,
-                                      load_experiment_data)
 
 
 def make_fbo_dict(param, shim, embeddings):
