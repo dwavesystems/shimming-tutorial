@@ -24,28 +24,6 @@ from dwave import embedding
 from dwave.system.samplers import DWaveSampler
 
 
-def write_lad_graph(_f, _graph):
-    _f.write(f'{len(_graph)}\n')
-    _graph = nx.convert_node_labels_to_integers(_graph.copy())
-    for v in _graph:
-        s = f'{_graph.degree(v)} '
-        for u in _graph.neighbors(v):
-            s += f'{u} '
-        print(s)
-        _f.write(s + '\n')
-
-
-def get_chimera_subgrid(A, rows, cols, gridsize=16):
-    """Make a subgraph of a Chimera-16 (DW2000Q) graph on a set of rows and columns of unit cells.
-
-    :param A: Qubit connectivity graph
-    :param rows: Iterable of rows of unit cells to include
-    :param cols: Iterable of columns of unit cells to include
-    :return: The subgraph of A induced on the nodes in "rows" and "cols"
-    """
-    raise Exception("Not implemented")
-
-
 def get_pegasus_subgrid(A, rows, cols, gridsize=16):
     """Make a subgraph of a Pegasus-16 (Advantage) graph on a set of rows and columns of unit cells.
 
@@ -83,6 +61,14 @@ def get_zephyr_subgrid(A, rows, cols, gridsize=4):
 
 
 def get_independent_embeddings(embs):
+    """Finds a list of non-overlapping embeddings in `embs`.
+
+    Args:
+        embs (list[dict]): a list of embeddings (dict)
+
+    Returns:
+        list[dict]: a list of embeddings (dict)
+    """
     start = time.process_time()
 
     Gemb = nx.Graph()
@@ -114,6 +100,18 @@ def get_independent_embeddings(embs):
 
 
 def search_for_subgraphs_in_subgrid(B, subgraph, timeout=20, max_number_of_embeddings=np.inf, verbose=True):
+    """Find a list of subgraph (embeddings) in a subgrid.
+
+    Args:
+        B (nx.Graph): a subgrid
+        subgraph (nx.Graph): subgraphs in B to search for
+        timeout (int, optional): time limit for search. Defaults to 20.
+        max_number_of_embeddings (int, optional): maximum number of embeddings to look for. Defaults to np.inf.
+        verbose (bool, optional): Flag for verbosity. Defaults to True.
+
+    Returns:
+        List[dict]: a list of embeddings
+    """
     embs = []
     while True and len(embs) < max_number_of_embeddings:
         temp = glasgow.find_subgraph(subgraph, B, timeout=timeout, triggered_restarts=True)
@@ -132,6 +130,26 @@ def search_for_subgraphs_in_subgrid(B, subgraph, timeout=20, max_number_of_embed
 
 def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
                             verbose=True, topology='pegasus', gridsize=16, verify_embeddings=False, **kwargs):
+    """Returns a matrix (n, L) of subgraph embeddings to _A.
+
+    Args:
+        _A (nx.Graph): target graph to embed to
+        subgraph (nx.Graph): A smaller graph to embed into _A
+        raster_breadth (int, optional): Breadth parameter of raster search. Defaults to 5.
+        delete_used (bool, optional): Flag whether nodes in _A can appear in multiple embeddings.
+                                      If set to true, nodes cannot be used in multiple embeddings. Defaults to False.
+        verbose (bool, optional): Whether to print progress. Defaults to True.
+        topology (str, optional): Name of topology. Defaults to 'pegasus'.
+        gridsize (int, optional): Size of grid. Defaults to 16.
+        verify_embeddings (bool, optional): Flag whether embeddings should be verified. Defaults to False.
+
+    Raises:
+        ValueError: Raise an error if given `topology` is unsupported
+        Exception: Exception raised when embeddings are invalid and when `verify_embeddings` is True.
+
+    Returns:
+        numpy.ndarray: a matrix of embeddings
+    """
 
     A = _A.copy()
 
@@ -139,11 +157,6 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
     for row_offset in range(gridsize - raster_breadth + 1):
 
         for col_offset in range(gridsize - raster_breadth + 1):
-            if topology == 'chimera':
-                B = get_pegasus_subgrid(
-                    A, range(row_offset, row_offset + raster_breadth),
-                    range(col_offset, col_offset + raster_breadth), gridsize
-                )
             if topology == 'pegasus':
                 B = get_pegasus_subgrid(
                     A, range(row_offset, row_offset + raster_breadth),
@@ -155,7 +168,7 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
                     range(col_offset, col_offset + raster_breadth), gridsize
                 )
             else:
-                raise ValueError("Supported topologies are currently chimera, pegasus and zephyr.")
+                raise ValueError("Supported topologies are currently pegasus and zephyr.")
 
             if verbose:
                 print(f'row,col=({row_offset},{col_offset}) starting with {len(B)} vertices')
