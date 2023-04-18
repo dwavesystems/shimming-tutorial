@@ -19,12 +19,19 @@ import pynauty
 
 
 def map_to_consecutive_integers(_mydict):
-    """Utility function for mapping the values of a dict (these will be orbits) to consecutive integers 0,...,n-1"""
+    """Utility function for mapping the values of a dict (these will be orbits) to consecutive integers 0,...,n-1
+
+    Args:
+        _mydict (dict): dictionary whose values are to be mapped to consecutive integers.
+
+    Returns:
+        dict: dictionary with keys in `_mydict`, and values in a range of consecutive integers
+    """
 
     # Reduce coupler orbits to consecutive positive integers
     values = list(set(_mydict.values()))
     value_mapping = {values[i]: i for i in range(len(values))}
-    ret = {}
+    ret = dict()
     for key in sorted(_mydict):
         ret[key] = value_mapping[_mydict[key]]
     return ret
@@ -32,7 +39,15 @@ def map_to_consecutive_integers(_mydict):
 
 def map_to_consecutive_integers_with_opposites(_mydict, _opposites):
     """Utility function for mapping the values of a dict (these will be orbits) to consecutive integers 0,...,n-1
-    while also handling opposite orbits."""
+    while also handling opposite orbits.
+
+    Args:
+        _mydict (dict): dict of orbits
+        _opposites (dict): dict of opposite orbits
+
+    Returns:
+        Tuple[dict, dict]: a tuple of two dict of orbits with values mapped to consecutive integers
+    """
 
     # Reduce coupler orbits to consecutive positive integers
     values = list(set(_mydict.values()))
@@ -55,12 +70,17 @@ def map_to_consecutive_integers_with_opposites(_mydict, _opposites):
 
 
 def make_signed_bqm(_bqm):
-    """Takes a bqm and duplicates every spin s into two copies corresponding to
-    s and -s.
-    Each field h gets mapped to two opposing fields:
-     h(s1) = -h(s2)
-    each coupler gets mapped to four couplers:
-     J(s1,s2) = J(-s1,-s2) = -J(s1,-s2) = -J(-s1,s2)
+    """Takes a bqm and duplicates every spin s into two copies corresponding to s and -s.
+       Each field h gets mapped to two opposing fields:
+        h(s1) = -h(s2)
+       each coupler gets mapped to four couplers:
+        J(s1,s2) = J(-s1,-s2) = -J(s1,-s2) = -J(-s1,s2)
+
+    Args:
+        _bqm (dimod.BQM): a binary quadratic model, i.e., Ising model under analysis
+
+    Returns:
+        dimod.BQM: a BQM representing a signed BQM
     """
 
     ret = dimod.BinaryQuadraticModel(vartype='SPIN')
@@ -84,7 +104,7 @@ def make_signed_bqm(_bqm):
 
 
 def get_bqm_orbits(_bqm):
-    """Takes a bqm, especially a "signed" bqm from make_signed_bqm, and converts it into a vertex-colored
+    """Takes a bqm, especially a "signed bqm" from `make_signed_bqm`, and converts it into a vertex-colored
     pynauty graph as needed, then gets orbits.
 
     Since pynauty only takes edge colorings, the couplings (J terms) need to be specified using
@@ -92,6 +112,12 @@ def get_bqm_orbits(_bqm):
     give it the color corresponding to J(u,v) in the BQM.
 
     To avoid ambiguity, we add a pendant (degree 1) vertex corresponding to each original vertex.
+
+    Args:
+        _bqm (dimod.BQM): a binary quadratic model
+
+    Returns:
+        Tuple[dict, dict]: a tuple of qubit and coupler orbits
     """
 
     # The function first adds auxiliary elements to a BQM, then converts the BQM to a pynauty Graph()
@@ -153,7 +179,16 @@ def get_bqm_orbits(_bqm):
 
 def get_unsigned_bqm_orbits(_signed_qubit_orbits, _signed_coupler_orbits, _bqm):
     """Assumes that orbits are given for a signed BQM, and turns them into signed orbits for an unsigned BQM.
-    We also need to keep track of self-symmetric pairs of spins."""
+    We also need to keep track of self-symmetric pairs of spins.
+
+    Args:
+        _signed_qubit_orbits (dict): qubit orbits
+        _signed_coupler_orbits (dict): coupler orbits
+        _bqm (dimod.BQM): a binary quadratic model
+
+    Returns:
+        Tuple[dict, dict, dict, dict]: qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite
+    """
 
     # Combine coupler orbits so that O(p1p2)=O(m1m2) and O(p1m2)=O(m1p2)
     for (u, v) in _bqm.quadratic:
@@ -197,13 +232,13 @@ def get_unsigned_bqm_orbits(_signed_qubit_orbits, _signed_coupler_orbits, _bqm):
 
 
 def get_orbits(_bqm):
-    """
-    Provide a _bqm and receive a set of usable orbits derived from the signed BQM.
-    :param _bqm: Ising model to analyze
-    :return: (qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite)
-    ret is a BQM with linear and quadratic terms respectively specifying qubit and coupler orbits,
-    h_opposite gives opposite orbits for qubit orbits (orbits may be empty),
-    J_opposite gives opposite orbits for coupler orbits (orbits may be empty).
+    """Provide a binary quadratic model (BQM) and receive a set of usable orbits derived from the BQM.
+
+    Args:
+        _bqm (dimod.BQM): a binary quadratic model
+
+    Returns:
+        Tuple[dict, dict, dict, dict]: (qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite)
     """
 
     _bqm2 = dimod.BinaryQuadraticModel(vartype='SPIN')
@@ -220,7 +255,15 @@ def get_orbits(_bqm):
 
 def to_networkx_graph(_qubit_orbits, _coupler_orbits):
     """Takes outputs of unsigned_bqm_orbits or get_bqm_orbits and makes a networkx graph whose linear and quadratic terms are
-    qubit and coupler orbits."""
+    qubit and coupler orbits.
+
+    Args:
+        _qubit_orbits (dict): qubit orbits
+        _coupler_orbits (dict): coupler orbits
+
+    Returns:
+        nx.Graph: a networkx graph corresponding whose linear and quadratic terms are qubit and coupler orbits respectively.
+    """
 
     Gnx = nx.Graph()
     Gnx.add_nodes_from(_qubit_orbits)

@@ -23,6 +23,16 @@ from helpers.embedding_helpers import raster_embedding_search
 
 
 def embed_loops(_L, try_to_load=True, raster_breadth=2):
+    """Embed loops of length _L
+
+    Args:
+        _L (int): chain length
+        try_to_load (bool, optional): Flag for loading from cached data. Defaults to True.
+        raster_breadth (int, optional): breadth parameter for raster embedding search. Defaults to 2.
+
+    Returns:
+        numpy.ndarray: a matrix of embeddings
+    """
     sampler = DWaveSampler()  # As configured
     bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',

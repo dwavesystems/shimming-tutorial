@@ -23,6 +23,15 @@ from helpers.embedding_helpers import raster_embedding_search
 
 
 def embed_square_lattice(_L, try_to_load=True, **kwargs):
+    """Embeds a square lattice of length `_L` (LxL cylinder).
+
+    Args:
+        _L (int): lattice length
+        try_to_load (bool, optional): Flag for whether to load from cached data. Defaults to True.
+
+    Returns:
+        Tuple[np.ndarray, dimod.BQM]: A matrix of embeddings and BQM for the lattice.
+    """
     sampler = DWaveSampler()  # As configured
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 

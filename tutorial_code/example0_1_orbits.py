@@ -22,7 +22,11 @@ from helpers.helper_functions import get_coupler_colors, get_qubit_colors
 
 
 def make_bqm():
-    """Makes a simple four-spin BQM"""
+    """Makes a simple four-spin BQM
+
+    Returns:
+        dimod.BQM: a binary quadratic model with four spins
+    """
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 
     for x in range(4):

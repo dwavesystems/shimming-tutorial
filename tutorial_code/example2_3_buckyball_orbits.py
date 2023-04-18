@@ -25,6 +25,11 @@ from helpers import orbits
 
 
 def main(visualize=True):
+    """Main function to run example.
+
+    Args:
+        visualize (bool, optional): flag for visualization. Defaults to True.
+    """
     # Parse the BQM
     J = {(int(e[0]), int(e[1])): w
          for *e, w in np.loadtxt("tutorial_code/data/bucky_ball.csv", delimiter=",")}

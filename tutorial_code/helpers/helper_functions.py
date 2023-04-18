@@ -27,7 +27,15 @@ from matplotlib import pyplot as plt
 
 
 def movmean(x, w):
-    # Takes a moving mean along the first axis, padded at the front.
+    """Takes a moving mean along the first axis, padded at the front.
+
+    Args:
+        x (np.ndarray): the input array to compute a moving mean for
+        w (int): moving mean window size
+
+    Returns:
+        np.ndarray: an array of the same shape as `x` with rolling means computed along the first axis
+    """
 
     D = np.reshape(x, (x.shape[0], -1))
     Q = np.tile(np.atleast_2d(D[1, :]).T, (1, w)).T
@@ -66,7 +74,14 @@ def shim_parameter_rescaling(statistic, num_iters=20, ratio=1.1, tol=0.1):
     return 1.0
 
 
-def plot_data(param, shim, stats, ):
+def plot_data(param, shim, stats,):
+    """Plots data
+
+    Args:
+        param (dict): parameters of data
+        shim (dict): shimmed values
+        stats (dict): statistics
+    """
     plt.rcParams['figure.figsize'] = (18, 10)
     fig = plt.figure(1)
     plt.clf()
@@ -180,18 +195,45 @@ def plot_data(param, shim, stats, ):
 
 
 def get_coupler_colors(_G, _bqm):
+    """Uses normalized weights in the BQM to create a list of colour maps
+
+    Args:
+        _G (nx.Graph): a graph
+        _bqm (dimod.BQM): a bqm whose weights are used to determine colours of the graph
+
+    Returns:
+        list[tuple[float]]: list of tuples whose coordinates represent colours used in matplotlib
+    """
     cm = matplotlib.cm.get_cmap(name='coolwarm')
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(_bqm.quadratic[E])) for E in _G.edges()]
 
 
 def get_qubit_colors(_G, _bqm):
+    """Uses normalized weights in the BQM to create a list of colour maps
+
+    Args:
+        _G (nx.Graph): a graph
+        _bqm (dimod.BQM): a bqm whose weights are used to determine colours of the graph
+
+    Returns:
+        list[tuple[float]]: list of tuples whose coordinates represent colours used in matplotlib
+    """
     cm = matplotlib.cm.get_cmap(name='coolwarm')
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(_bqm.linear[V])) for V in _G.nodes()]
 
 
 def load_experiment_data(prefix, data_dict):
+    """Load a dictionary of data frome filepath.
+
+    Args:
+        prefix (str): prefix used in naming cached data.
+        data_dict (dict): dictionary to populate with experiment data.
+
+    Returns:
+        dict: dictionary of experiment data.
+    """
     filename = 'savedata_' + prefix + '.pkl'
     filepath = Path('cached_experiment_data').joinpath(''.join(filename))
 
@@ -215,6 +257,16 @@ def load_experiment_data(prefix, data_dict):
 
 
 def save_experiment_data(prefix, data_dict, overwrite=True):
+    """Save experiment data.
+
+    Args:
+        prefix (str): prefix used in naming cached data.
+        data_dict (dict): dictionary of data to store.
+        overwrite (bool, optional): Flag for overwriting stored data. Defaults to True.
+
+    Returns:
+        bool: indicator for successful storage of data.
+    """
     filename = 'savedata_' + prefix + '.pkl'
     filepath = Path('cached_experiment_data').joinpath(''.join(filename))
 

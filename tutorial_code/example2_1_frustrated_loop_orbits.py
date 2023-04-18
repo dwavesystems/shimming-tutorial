@@ -22,7 +22,17 @@ from matplotlib import pyplot as plt
 from helpers import paper_plotting_functions, orbits
 
 
-def get_vertex_coordinates():
+def get_vertex_coordinates(Gnx, L, num_loops):
+    """Get vertex coordinates for plotting in matplotlib.
+
+    Args:
+        Gnx (nx.Graph): the graph to plot
+        L (int): length of frustrated loops
+        num_loops (int): number of frustrated loops
+
+    Returns:
+        dict: a dictionary of positions keyed by node
+    """
     pos = nx.kamada_kawai_layout(Gnx)
     # Adjust node positions
     spacing = 1.2 * (max([pos[v][0] for v in range(L)]) - min([pos[v][0] for v in range(L)]))
@@ -33,14 +43,24 @@ def get_vertex_coordinates():
     return pos
 
 
-def get_edge_colors():
+def get_edge_colors(Gnx, bqm):
+    """Generate a list of edge colours given a graph and BQM
+
+    Args:
+        Gnx (nx.Graph): the graph to plot
+        bqm (dimod.BinaryQuadraticModel): the BQM to visualize
+
+    Returns:
+        List[tuple[float, float, float, float]]: a list of tuple of RGBA values
+    """
     cm = matplotlib.cm.get_cmap(name='RdBu_r')
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(bqm.get_quadratic(u, v))) for (u, v) in Gnx.edges()]
 
 
-if __name__ == "__main__":
-
+def main():
+    """Main function to run example
+    """
     # Make an example BQM of three frustrated loops
     L = 6
     num_loops = 3
@@ -81,10 +101,10 @@ if __name__ == "__main__":
         'node_size': 400,
         'width': 4,
     }
-    pos = get_vertex_coordinates()
+    pos = get_vertex_coordinates(Gnx, L, num_loops)
     nx.draw(Gnx,
             pos=pos,
-            edge_color=get_edge_colors(),
+            edge_color=get_edge_colors(Gnx, bqm),
             **options)
 
     # Draw the node labels
@@ -99,3 +119,7 @@ if __name__ == "__main__":
 
     paper_plotting_functions.paper_plots_example2_1(Gnx, pos, options)
     plt.show()
+
+
+if __name__ == "__main__":
+    main()

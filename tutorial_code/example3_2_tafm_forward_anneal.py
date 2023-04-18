@@ -30,7 +30,22 @@ from tqdm import tqdm
 
 
 def make_fbo_dict(embeddings, shim):
-    """Makes the FBO dict from the matrix of FBOs."""
+    """Makes the FBO dict from the matrix of FBOs.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+
+    Returns:
+        dict: flux bias offsets as a dict
+    """
     fbo_dict = {}
     for iemb, emb in enumerate(embeddings):
         for ispin, spin in enumerate(emb):
@@ -40,7 +55,16 @@ def make_fbo_dict(embeddings, shim):
 
 
 def make_bqm(shim, embeddings, logical_bqm):
-    """Makes the BQM from the matrix of coupling values."""
+    """Makes the BQM from the matrix of coupling values.
+
+    Args:
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+        logical_bqm (dimod.BinaryQuadraticModel): a logical BQM
+
+    Returns:
+        dimod.BinaryQuadraticModel: a shimmed BQM
+    """
 
     _bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 
@@ -52,7 +76,20 @@ def make_bqm(shim, embeddings, logical_bqm):
 
 
 def make_logical_bqm(param):
-    """Makes the BQM from the matrix of coupling values."""
+    """Makes the BQM from the matrix of coupling values.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+
+    Returns:
+        dimod.BinaryQuadraticModel: a shimmed BQM
+    """
 
     _bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 
@@ -78,6 +115,21 @@ def make_logical_bqm(param):
 
 
 def adjust_fbos(result, param, shim, stats, embeddings):
+    """Adjust flux bias offsets in-place.
+
+    Args:
+        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting shims
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        stats (dict): dict of sampled statistics
+        embeddings (List[dict]): list of embeddings
+    """
     magnetizations = np.zeros(param['sampler'].properties['num_qubits'], dtype=float)
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
@@ -89,6 +141,23 @@ def adjust_fbos(result, param, shim, stats, embeddings):
 
 
 def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
+    """Adjust couplings given a sample set.
+
+    Args:
+        result (dimod.SampleSet):  a sample set of spins used for computing statistics and adjusting shims
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        stats (dict): dict of sampled statistics
+        embeddings (List[dict]): list of embeddings
+        logical_bqm (dimod.BinaryQuadraticModel): a logical BQM
+
+    """
     vars = result.variables
 
     # Make a big array for the solutions, with zeros for unused qubits
@@ -139,6 +208,14 @@ def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
 
 
 def get_sublattices(_L):
+    """Get lattice of size _L x _L
+
+    Args:
+        _L (int): linear length of lattice
+
+    Returns:
+        np.ndarray: a matrix representing 
+    """
     sl = np.zeros((_L * _L), dtype=int)
     for x in range(_L):
         for y in range(_L):
@@ -147,6 +224,22 @@ def get_sublattices(_L):
 
 
 def compute_psi(result, param, embeddings):
+    """Compute psi
+
+    Args:
+        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting shims
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+        embeddings (List[dict]): list of embeddings
+
+    Returns:
+        np.ndarray: an array of psi values, one for each embedding
+    """
     vars = result.variables
 
     # Make a big array for the solutions, with zeros for unused qubits
@@ -163,6 +256,22 @@ def compute_psi(result, param, embeddings):
 
 
 def run_iteration(param, shim, stats, embeddings, logical_bqm):
+    """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
+    bias offsets and couplings, and update statistics.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        stats (dict): dict of sampled statistics
+        embeddings (List[dict]): list of embeddings
+        logical_bqm (dimod.BinaryQuadraticModel): a logical BQM
+    """
     bqm = make_bqm(shim, embeddings, logical_bqm)
     fbo_dict = make_fbo_dict(embeddings, shim)
     fbo_list = [0] * param['sampler'].properties['num_qubits']
@@ -188,6 +297,23 @@ def run_iteration(param, shim, stats, embeddings, logical_bqm):
 
 
 def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., alpha_J=0.):
+    """Run the full experiment
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      "chain_strength" for the chain strength of embeddings,
+                      "halve_boundary_couplers" a flag for whether to divide J
+                      by two on the boundaries, "adaptive_step_size" flag to
+                      adaptively tune step sizes for shim.
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        stats (dict): dict of sampled statistics
+        embeddings (List[dict]): list of embeddings
+        logical_bqm (dimod.BinaryQuadraticModel): a logical BQM
+        alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0..
+        alpha_J (float, optional): learning rate for coupling shims. Defaults to 0..
+    """
     prefix = f'example3_2_{shim["type"]}{"_adaptive" * int(param["adaptive_step_size"])}' \
              f'_halve{param["halve_boundary_couplers"]}_aPhi{alpha_Phi}_aJ{alpha_J}'
 
@@ -237,6 +363,8 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
 
 
 def main():
+    """Main function to run example.
+    """
     shimtype = 'embedded_finite'
     adaptive_step_size = False
     halve_boundary_couplers = False

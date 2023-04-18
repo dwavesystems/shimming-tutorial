@@ -24,9 +24,19 @@ from helpers.helper_functions import (plot_data, save_experiment_data,
                                       load_experiment_data)
 
 
-
 def make_fbo_dict(param, shim, embeddings):
-    """Makes the FBO dict from the matrix of FBOs."""
+    """Makes the FBO dict from the matrix of FBOs.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+
+    Returns:
+        dict: flux bias offsets as a dict
+    """
     fbo_dict = {}
     for iemb, emb in enumerate(embeddings):
         for spin in range(param['L']):
@@ -36,7 +46,18 @@ def make_fbo_dict(param, shim, embeddings):
 
 
 def make_bqm(param, shim, embeddings):
-    """Makes the BQM from the matrix of coupling values."""
+    """Makes the BQM from the matrix of coupling values.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+
+    Returns:
+        dimod.BinaryQuadraticModel: a shimmed BQM
+    """
 
     bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',
@@ -49,7 +70,17 @@ def make_bqm(param, shim, embeddings):
 
 
 def make_logical_bqm(param, shim):
-    """Makes the BQM from the matrix of coupling values."""
+    """Makes the BQM from the matrix of coupling values.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+
+    Returns:
+        dimod.BinaryQuadraticModel: a shimmed BQM
+    """
 
     _bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',
@@ -61,6 +92,17 @@ def make_logical_bqm(param, shim):
 
 
 def adjust_fbos(result, param, shim, embeddings, stats):
+    """Adjust flux bias offsets in-place.
+
+    Args:
+        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting shims
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+        stats (dict): dict of sampled statistics
+    """
     magnetizations = [0] * param['sampler'].properties['num_qubits']
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
@@ -78,8 +120,17 @@ def adjust_fbos(result, param, shim, embeddings, stats):
 
 
 def adjust_couplings(result, param, shim, embeddings, stats):
-    """In this example we implicitly use the fact that all couplers are in the same orbit or its opposite, so
-    we simply homogenize all frustration probabilities together."""
+    """Adjust couplings given a sample set.
+
+    Args:
+        result (dimod.SampleSet):  a sample set of spins used for computing statistics and adjusting shims
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+        stats (dict): dict of sampled statistics
+    """
 
     vars = result.variables
 
@@ -106,6 +157,17 @@ def adjust_couplings(result, param, shim, embeddings, stats):
 
 
 def run_iteration(param, shim, embeddings, stats):
+    """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
+    bias offsets and couplings, and update statistics.
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        embeddings (List[dict]): list of embeddings
+        stats (dict): dict of sampled statistics
+    """
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
     fbo_list = [0] * param['sampler'].properties['num_qubits']
@@ -130,6 +192,18 @@ def run_iteration(param, shim, embeddings, stats):
 
 
 def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
+    """Run the full experiment
+
+    Args:
+        param (dict): parameters with keys "L" for length, "sampler" for
+                      sampler (QPU), "coupling" for the coupling energy scale,
+                      and "num_iters" for the number of shimming iterations.
+        shim (dict): shimming data
+        stats (dict): dict of sampled statistics
+        embeddings (List[dict]): list of embeddings
+        alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0..
+        alpha_J (float, optional): learning rate for coupling shims. Defaults to 0..
+    """
 
     prefix = f'example2_2_aPhi{alpha_Phi}_aJ{alpha_J}'
 
@@ -163,6 +237,8 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
 
 
 def main():
+    """Main function to run example.
+    """
     param = {
         'L': 16,
         'sampler': DWaveSampler(),  # As configured
