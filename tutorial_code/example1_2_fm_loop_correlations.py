@@ -63,7 +63,8 @@ def make_bqm(param, shim, embeddings):
     )
     for iemb, emb in enumerate(embeddings):
         for spin in range(param['L']):
-            bqm.add_quadratic(emb[spin], emb[(spin + 1) % param['L']], shim['couplings'][iemb, spin])
+            bqm.add_quadratic(emb[spin], emb[(spin + 1) % param['L']],
+                              shim['couplings'][iemb, spin])
 
     return bqm
 
@@ -124,7 +125,9 @@ def adjust_couplings(result, param, shim, stats, embeddings):
             ))
             frust_matrix[iemb, spin] = (mean_correlation * np.sign(param['coupling']) + 1) / 2
 
-    shim['couplings'] += np.sign(param['coupling']) * shim['alpha_J'] * (frust_matrix - np.mean(frust_matrix))
+    shim['couplings'] += (np.sign(param['coupling'])
+                          * shim['alpha_J']
+                          * (frust_matrix - np.mean(frust_matrix)))
     stats['all_couplings'].append(shim['couplings'].copy())
     stats['frust'].append(frust_matrix)
 

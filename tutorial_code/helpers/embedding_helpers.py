@@ -55,7 +55,8 @@ def get_zephyr_subgrid(A, rows, cols, gridsize=4):
                    (c[0] == 1 and c[4] in rows and c[1] >= 2*min(cols) and c[1] <= 2*max(cols)+2)]
     # (u, w, k, z) -> (u, w, k / 2, k % 2, z)
 
-    subgraph = A.subgraph([dnx.zephyr_coordinates(gridsize).zephyr_to_linear(c) for c in used_coords]).copy()
+    subgraph = A.subgraph([dnx.zephyr_coordinates(gridsize).zephyr_to_linear(c)
+                          for c in used_coords]).copy()
 
     return subgraph
 

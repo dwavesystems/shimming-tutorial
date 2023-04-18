@@ -219,8 +219,12 @@ def get_unsigned_bqm_orbits(_signed_qubit_orbits, _signed_coupler_orbits, _bqm):
         qubit_orbits[v] = _signed_qubit_orbits[(f'p{v}')]
 
     for (u, v) in _bqm.quadratic:
-        coupler_orbits_opposite[_signed_coupler_orbits[(f'p{u}', f'p{v}')]] = _signed_coupler_orbits[(f'm{u}', f'p{v}')]
-        coupler_orbits_opposite[_signed_coupler_orbits[(f'm{u}', f'p{v}')]] = _signed_coupler_orbits[(f'p{u}', f'p{v}')]
+        coupler_orbits_opposite[_signed_coupler_orbits[(f'p{u}', f'p{v}')]] = (
+            _signed_coupler_orbits[(f'm{u}', f'p{v}')]
+        )
+        coupler_orbits_opposite[_signed_coupler_orbits[(f'm{u}', f'p{v}')]] = (
+            _signed_coupler_orbits[(f'p{u}', f'p{v}')]
+        )
         coupler_orbits[(u, v)] = _signed_coupler_orbits[(f'p{u}', f'p{v}')]
 
     qubit_orbits, qubit_orbits_opposite = map_to_consecutive_integers_with_opposites(

@@ -189,7 +189,9 @@ def plot_data(param, shim, stats,):
     plt.yscale('log')
     plt.title('$\\alpha_J$')
 
-    plt.suptitle(f'J={param["coupling"]}, L={param["L"]}, alpha_Phi={shim["alpha_Phi"]}, alpha_J={shim["alpha_J"]}')
+    plt.suptitle(
+        f'J={param["coupling"]}, L={param["L"]}, alpha_Phi={shim["alpha_Phi"]}, alpha_J={shim["alpha_J"]}'
+    )
     plt.tight_layout()
     plt.show()
 

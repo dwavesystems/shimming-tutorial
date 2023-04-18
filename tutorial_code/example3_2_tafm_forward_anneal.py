@@ -97,15 +97,21 @@ def make_logical_bqm(param):
         for y in range(param['L']):
             if (x + y) % 2:
                 if param['halve_boundary_couplers'] and (x == 0 or x == param['L'] - 1):
-                    _bqm.set_quadratic(x * param['L'] + y, x * param['L'] + ((y + 1) % param['L']),
+                    _bqm.set_quadratic(x * param['L'] + y,
+                                       x * param['L'] + ((y + 1) % param['L']),
                                        param['coupling'] / 2)
                 else:
-                    _bqm.set_quadratic(x * param['L'] + y, x * param['L'] + ((y + 1) % param['L']), param['coupling'])
+                    _bqm.set_quadratic(x * param['L'] + y,
+                                       x * param['L'] + ((y + 1) % param['L']),
+                                       param['coupling'])
             else:
-                _bqm.set_quadratic(x * param['L'] + y, x * param['L'] + ((y + 1) % param['L']),
+                _bqm.set_quadratic(x * param['L'] + y,
+                                   x * param['L'] + ((y + 1) % param['L']),
                                    -param['chain_strength'] * param['coupling'])
             if x < param['L'] - 1:
-                _bqm.set_quadratic(x * param['L'] + y, (x + 1) * param['L'] + y, param['coupling'])
+                _bqm.set_quadratic(x * param['L'] + y,
+                                   (x + 1) * param['L'] + y,
+                                   param['coupling'])
 
     return _bqm
 
@@ -114,7 +120,8 @@ def adjust_fbos(result, param, shim, stats, embeddings):
     """Adjust flux bias offsets in-place.
 
     Args:
-        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting shims
+        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting
+                                  shims
         param (dict): parameters with keys "L" for length, "sampler" for
                       sampler (QPU), "coupling" for the coupling energy scale,
                       "chain_strength" for the chain strength of embeddings,
@@ -140,7 +147,8 @@ def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
     """Adjust couplings given a sample set.
 
     Args:
-        result (dimod.SampleSet):  a sample set of spins used for computing statistics and adjusting shims
+        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting
+                                  shims
         param (dict): parameters with keys "L" for length, "sampler" for
                       sampler (QPU), "coupling" for the coupling energy scale,
                       "chain_strength" for the chain strength of embeddings,
@@ -168,7 +176,9 @@ def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
                 bigarr[emb[u]],
                 bigarr[emb[v]]
             ))
-            frust_matrix[iemb, iedge] = (mean_correlation * np.sign(shim['nominal_couplings'][iedge]) + 1) / 2
+            frust_matrix[iemb, iedge] = (
+                (mean_correlation * np.sign(shim['nominal_couplings'][iedge]) + 1) / 2
+            )
 
     # Get frustration per orbit.
     _orbits = np.unique(shim['coupler_orbits'])
@@ -223,7 +233,8 @@ def compute_psi(result, param, embeddings):
     """Compute psi
 
     Args:
-        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting shims
+        result (dimod.SampleSet): a sample set of spins used for computing statistics and adjusting
+                                  shims
         param (dict): parameters with keys "L" for length, "sampler" for
                       sampler (QPU), "coupling" for the coupling energy scale,
                       "chain_strength" for the chain strength of embeddings,
@@ -346,8 +357,10 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
             shim['alpha_J'] = alpha_J
             for iteration in pbar:
                 run_iteration(param, shim, stats, embeddings, logical_bqm)
-                shim['alpha_Phi'] *= shim_parameter_rescaling(stats['all_fbos'], num_iters=20, ratio=1.1)
-                shim['alpha_J'] *= shim_parameter_rescaling(stats['all_couplings'], num_iters=20, ratio=1.1)
+                shim['alpha_Phi'] *= shim_parameter_rescaling(stats['all_fbos'], num_iters=20,
+                                                              ratio=1.1)
+                shim['alpha_J'] *= shim_parameter_rescaling(stats['all_couplings'], num_iters=20,
+                                                            ratio=1.1)
 
         save_experiment_data(
             prefix,
@@ -369,18 +382,20 @@ def main():
     param = {
         'L': 12,
         'sampler': DWaveSampler(),  # As configured
-        'chain_strength': 2.0,  # Magnitude of coupling for FM chains, as a multiple of AFM coupling.
+        # Magnitude of coupling for FM chains, as a multiple of AFM coupling.
+        'chain_strength': 2.0,
         'coupling': 0.9,  # Coupling energy scale.  Should be positive.
         'num_iters': 800,
-        'halve_boundary_couplers': halve_boundary_couplers,  # Option to divide J by two on the boundaries.
+        # Option to divide J by two on the boundaries.
+        'halve_boundary_couplers': halve_boundary_couplers,
         'adaptive_step_size': adaptive_step_size,  # Option to adaptively tune step sizes for shim.
     }
 
     # Make the logical BQM and a bunch of disjoint embeddings
     embeddings, _ = embed_square_lattice(param['L'])
 
-    # Make the logical BQM to get orbits for a single embedding.  Doing it for all embeddings together
-    # is very slow with pynauty.
+    # Make the logical BQM to get orbits for a single embedding.
+    # Doing it for all embeddings together is very slow with pynauty.
     logical_bqm = make_logical_bqm(param)
     unsigned_orbits = orbits.get_orbits(logical_bqm)
 

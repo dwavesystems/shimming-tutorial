@@ -55,10 +55,12 @@ def main(visualize=True):
         fig = plt.figure(figsize=(8, 8), dpi=80)
 
         orbits_graph = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
-        edge_color = [cm(norm(1)) if orbits_graph[u][v]['orbit'] else cm(norm(-1)) for u, v in orbits_graph.edges]
+        edge_color = [cm(norm(1)) if orbits_graph[u][v]['orbit'] else cm(norm(-1))
+                      for u, v in orbits_graph.edges]
         node_color = [cm(norm(qubit_orbits[u])) for u in orbits_graph.nodes]
         pos = nx.layout.spring_layout(orbits_graph, iterations=10000, seed=5)
-        nx.draw_networkx(orbits_graph, pos=pos, with_labels=False, node_size=200, width=4, edge_color=edge_color, node_color=node_color,)
+        nx.draw_networkx(orbits_graph, pos=pos, with_labels=False, node_size=200, width=4,
+                         edge_color=edge_color, node_color=node_color,)
         plt.axis("off")
         fig.savefig("buckyball_orbits.pdf", format="pdf")
 

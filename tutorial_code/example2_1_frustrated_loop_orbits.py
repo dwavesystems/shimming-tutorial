@@ -114,7 +114,8 @@ def main():
     # Draw the edge labels, indicating the orbit of each edge (coupler)
     nx.draw_networkx_edge_labels(
         Gnx, pos=pos,
-        edge_labels={key: f'{int(val)}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()},
+        edge_labels={key: f'{int(val)}'
+                     for key, val in nx.get_edge_attributes(Gnx, "orbit").items()},
     )
 
     paper_plotting_functions.paper_plots_example2_1(Gnx, pos, options)

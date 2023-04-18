@@ -56,7 +56,8 @@ def paper_plots_example1_1(param, shim, stats, ):
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters,
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -92,7 +93,8 @@ def paper_plots_example1_1(param, shim, stats, ):
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters,
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -119,7 +121,8 @@ def paper_plots_example1_1(param, shim, stats, ):
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters,
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -143,7 +146,8 @@ def paper_plots_example1_1(param, shim, stats, ):
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters,
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -171,7 +175,8 @@ def paper_plots_example1_2(param, shim, stats, ):
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters,
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -197,7 +202,8 @@ def paper_plots_example1_2(param, shim, stats, ):
             extra_axis_parameters=tikz_axis_parameters + [
                 r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=3,},'],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -218,7 +224,8 @@ def paper_plots_example2_1(Gnx, pos, options):
                 'scale only axis',
             ],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -248,7 +255,8 @@ def paper_plots_example2_2(param, shim, stats, ):
             extra_axis_parameters=tikz_axis_parameters +
             [r'y tick label style={/pgf/number format/.cd,sci,precision=5}, scaled y ticks=false,'],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -274,7 +282,8 @@ def paper_plots_example2_2(param, shim, stats, ):
             extra_axis_parameters=tikz_axis_parameters + [
                 r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=3,},'],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -300,7 +309,8 @@ def paper_plots_example2_2(param, shim, stats, ):
             extra_axis_parameters=tikz_axis_parameters + [
                 r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=2,},'],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -328,7 +338,8 @@ def paper_plots_example2_2(param, shim, stats, ):
                 r'scaled y ticks=false,'
             ],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -357,7 +368,8 @@ def paper_plots_example3_2(param, shim, stats, ):
             extra_axis_parameters=tikz_axis_parameters +
             [r'y tick label style={/pgf/number format/.cd,sci,precision=5}, scaled y ticks=false,'],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -387,7 +399,8 @@ def paper_plots_example3_2(param, shim, stats, ):
             extra_axis_parameters=tikz_axis_parameters + [
                 r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=2,},'],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -414,7 +427,8 @@ def paper_plots_example3_2(param, shim, stats, ):
                 r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=2,},',
             ],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -453,7 +467,8 @@ def paper_plots_example3_2(param, shim, stats, ):
                 r'scaled y ticks=false,'
             ],
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -498,7 +513,8 @@ def paper_plots_example3_2(param, shim, stats, ):
                     r'colorbar style={ytick={0,' + f'{hb.colorbar.norm.vmax}' + r'}}',
                 ],
             )
-            code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
 
             with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
                 f.write(code)
@@ -521,7 +537,8 @@ def paper_plots_example3_2(param, shim, stats, ):
             float_format='.5g',
             extra_axis_parameters=tikz_axis_parameters,
         )
-        code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+        code = code.replace('\\documentclass{standalone}',
+                            '\\documentclass{standalone}\n' + extra_code)
 
         with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
             f.write(code)
@@ -563,7 +580,8 @@ def paper_plots_example3_3(param, shim, stats, ):
                 float_format='.5g',
                 extra_axis_parameters=tikz_axis_parameters,
             )
-            code = code.replace('\\documentclass{standalone}', '\\documentclass{standalone}\n' + extra_code)
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
 
             with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
                 f.write(code)
