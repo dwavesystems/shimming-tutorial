@@ -25,7 +25,7 @@ from helpers.orbits import get_orbits
 
 
 def main(visualize=True):
-    """Main function to run example.
+    """Main function to run example
 
     Args:
         visualize (bool, optional): flag for visualization. Defaults to True.

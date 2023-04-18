@@ -213,7 +213,7 @@ def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
     stats['frust'].append(frust_matrix)
 
 
-def get_sublattices(_L):
+def get_sublattices(L):
     """Get lattice of size _L x _L
 
     Args:
@@ -222,10 +222,10 @@ def get_sublattices(_L):
     Returns:
         np.ndarray: a matrix representing 
     """
-    sl = np.zeros((_L * _L), dtype=int)
-    for x in range(_L):
-        for y in range(_L):
-            sl[x * _L + y] = (np.floor((y + 3 * x) / 2)) % 3
+    sl = np.zeros((L * L), dtype=int)
+    for x in range(L):
+        for y in range(L):
+            sl[x * L + y] = (np.floor((y + 3 * x) / 2)) % 3
     return sl
 
 
@@ -372,7 +372,7 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
 
 
 def main():
-    """Main function to run example.
+    """Main function to run example
     """
     shimtype = 'embedded_finite'
     adaptive_step_size = False

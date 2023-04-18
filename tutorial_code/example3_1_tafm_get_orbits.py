@@ -21,7 +21,9 @@ from helpers import orbits
 from helpers.helper_functions import get_qubit_colors, get_coupler_colors
 
 
-if __name__ == "__main__":
+def main():
+    """Main function to run example
+    """
     L = 6  # Length of square lattice to embed
 
     # Make the logical BQM and a bunch of disjoint embeddings
@@ -61,3 +63,7 @@ if __name__ == "__main__":
     edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
     plt.show()
+
+
+if __name__ == "__main__":
+    main()

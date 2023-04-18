@@ -22,11 +22,11 @@ from dwave.system.samplers import DWaveSampler
 from helpers.embedding_helpers import raster_embedding_search
 
 
-def embed_square_lattice(_L, try_to_load=True, **kwargs):
-    """Embeds a square lattice of length `_L` (LxL cylinder).
+def embed_square_lattice(L, try_to_load=True, **kwargs):
+    """Embeds a square lattice of length `L` (LxL cylinder).
 
     Args:
-        _L (int): lattice length
+        L (int): lattice length
         try_to_load (bool, optional): Flag for whether to load from cached data. Defaults to True.
 
     Returns:
@@ -35,23 +35,23 @@ def embed_square_lattice(_L, try_to_load=True, **kwargs):
     sampler = DWaveSampler()  # As configured
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 
-    for x in range(_L):
-        for y in range(_L):
-            bqm.add_variable(x * _L + y)
+    for x in range(L):
+        for y in range(L):
+            bqm.add_variable(x * L + y)
 
-    for x in range(_L):
-        for y in range(_L):
+    for x in range(L):
+        for y in range(L):
             if (x + y) % 2:
-                bqm.set_quadratic(x * _L + y, x * _L + ((y + 1) % _L), 1)
+                bqm.set_quadratic(x * L + y, x * L + ((y + 1) % L), 1)
             else:
-                bqm.set_quadratic(x * _L + y, x * _L + ((y + 1) % _L), -1)
-            if x < _L - 1:
-                bqm.set_quadratic(x * _L + y, (x + 1) * _L + y, 1)
+                bqm.set_quadratic(x * L + y, x * L + ((y + 1) % L), -1)
+            if x < L - 1:
+                bqm.set_quadratic(x * L + y, (x + 1) * L + y, 1)
 
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{_L:02d}_square_embeddings_cached.txt'
+    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{L:02d}_square_embeddings_cached.txt'
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
@@ -69,7 +69,11 @@ def embed_square_lattice(_L, try_to_load=True, **kwargs):
     return embeddings, bqm
 
 
-if __name__ == "__main__":
+def main():
     L = 12  # Linear size of square lattice to embed (LxL cylinder)
     embeddings, bqm = embed_square_lattice(L, raster_breadth=5, max_number_of_embeddings=1,
                                            timeout=100)
+
+
+if __name__ == "__main__":
+    main()

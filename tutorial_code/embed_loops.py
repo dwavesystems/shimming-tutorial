@@ -22,11 +22,11 @@ from dwave.system.samplers import DWaveSampler
 from helpers.embedding_helpers import raster_embedding_search
 
 
-def embed_loops(_L, try_to_load=True, raster_breadth=2):
-    """Embed loops of length _L
+def embed_loops(L, try_to_load=True, raster_breadth=2):
+    """Embed loops of length L
 
     Args:
-        _L (int): chain length
+        L (int): chain length
         try_to_load (bool, optional): Flag for loading from cached data. Defaults to True.
         raster_breadth (int, optional): breadth parameter for raster embedding search. Defaults to 2.
 
@@ -37,12 +37,12 @@ def embed_loops(_L, try_to_load=True, raster_breadth=2):
     bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',
     )
-    for spin in range(_L):
-        bqm.add_quadratic(spin, (spin + 1) % _L, -1)
+    for spin in range(L):
+        bqm.add_quadratic(spin, (spin + 1) % L, -1)
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{_L:04d}_embeddings_cached.txt'
+    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{L:04d}_embeddings_cached.txt'
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
@@ -60,6 +60,10 @@ def embed_loops(_L, try_to_load=True, raster_breadth=2):
     return embeddings
 
 
-if __name__ == "__main__":
+def main():
     L = 8  # Length of chain to embed
     embeddings = embed_loops(L, raster_breadth=2)
+
+
+if __name__ == "__main__":
+    main()

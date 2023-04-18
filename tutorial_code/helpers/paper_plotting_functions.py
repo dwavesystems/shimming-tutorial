@@ -36,7 +36,7 @@ PATH_TO_PAPER_DIR = "../paper_materials/"
 MAKE_TIKZ_PLOTS = False
 
 
-def paper_plots_example1_1(param, shim, stats, ):
+def paper_plots_example1_1(param, shim, stats):
     # Plot FBOs for first embedding
     plt.clf()
 
@@ -155,7 +155,7 @@ def paper_plots_example1_1(param, shim, stats, ):
         plt.show()
 
 
-def paper_plots_example1_2(param, shim, stats, ):
+def paper_plots_example1_2(param, shim, stats):
     # Plot FBOs for first embedding
     plt.clf()
 
@@ -233,7 +233,7 @@ def paper_plots_example2_1(Gnx, pos, options):
         plt.show()
 
 
-def paper_plots_example2_2(param, shim, stats, ):
+def paper_plots_example2_2(param, shim, stats):
 
     # Plot FBOs for first embedding
     plt.clf()
@@ -347,7 +347,7 @@ def paper_plots_example2_2(param, shim, stats, ):
         plt.show()
 
 
-def paper_plots_example3_2(param, shim, stats, ):
+def paper_plots_example3_2(param, shim, stats):
     plt.clf()
 
     plt.plot(
@@ -546,7 +546,7 @@ def paper_plots_example3_2(param, shim, stats, ):
         plt.show()
 
 
-def paper_plots_example3_3(param, shim, stats, ):
+def paper_plots_example3_3(param, shim, stats):
     # Plot histogram heatmaps
     psi_data = []
     psi_data.append(np.array([x[0] for x in stats['all_psi'][0:100]]))

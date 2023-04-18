@@ -38,7 +38,6 @@ def movmean(x, w):
     """
 
     D = np.reshape(x, (x.shape[0], -1))
-    Q = np.tile(np.atleast_2d(D[1, :]).T, (1, w)).T
 
     ret = np.zeros_like(D)
     for i in range(len(D)):
@@ -53,11 +52,14 @@ def shim_parameter_rescaling(statistic, num_iters=20, ratio=1.1, tol=0.1):
     based on statistic, which is presumed to be either a list or ndarray whose first dimension
     represents iterations.
 
-    :param statistic: Recorded shim history of the parameters being shimmed
-    :param num_iters: Number of iterations to look back over to calculate the exponent
-    :param ratio: Multiplier for increasing step size ( *= 1/ratio if decreasing)
-    :param tol: Tolerance about 0.5, within which step size is unchanged
-    :return: scaling factor
+    Args:
+        statistic (List[float]): Recorded shim history of the parameters being shimmed
+        num_iters (int): Number of iterations to look back over to calculate the exponent
+        ratio (float): Multiplier for increasing step size ( *= 1/ratio if decreasing)
+        tol (float): Tolerance about 0.5, within which step size is unchanged
+
+    Returns:
+        float: scaling factor
     """
 
     if len(statistic) >= num_iters:
@@ -196,7 +198,7 @@ def plot_data(param, shim, stats,):
     plt.show()
 
 
-def get_coupler_colors(_G, _bqm):
+def get_coupler_colors(G, bqm):
     """Uses normalized weights in the BQM to create a list of colour maps
 
     Args:
@@ -208,10 +210,10 @@ def get_coupler_colors(_G, _bqm):
     """
     cm = matplotlib.cm.get_cmap(name='coolwarm')
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
-    return [cm(norm(_bqm.quadratic[E])) for E in _G.edges()]
+    return [cm(norm(bqm.quadratic[E])) for E in G.edges()]
 
 
-def get_qubit_colors(_G, _bqm):
+def get_qubit_colors(G, bqm):
     """Uses normalized weights in the BQM to create a list of colour maps
 
     Args:
@@ -223,7 +225,7 @@ def get_qubit_colors(_G, _bqm):
     """
     cm = matplotlib.cm.get_cmap(name='coolwarm')
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
-    return [cm(norm(_bqm.linear[V])) for V in _G.nodes()]
+    return [cm(norm(bqm.linear[V])) for V in G.nodes()]
 
 
 def load_experiment_data(prefix, data_dict):

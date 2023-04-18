@@ -27,10 +27,12 @@ from minorminer import subgraph as glasgow
 def get_pegasus_subgrid(A, rows, cols, gridsize=16):
     """Make a subgraph of a Pegasus-16 (Advantage) graph on a set of rows and columns of unit cells.
 
-    :param A: Qubit connectivity graph
-    :param rows: Iterable of rows of unit cells to include
-    :param cols: Iterable of columns of unit cells to include
-    :return: The subgraph of A induced on the nodes in "rows" and "cols"
+    Args:
+        A (nx.Graph): Qubit connectivity graph
+        rows (Iterable): Iterable of rows of unit cells to include
+        cols (Iterable): Iterable of columns of unit cells to include
+    Returns:
+        nx.Graph: The subgraph of A induced on the nodes in "rows" and "cols"
     """
 
     coords = [dnx.pegasus_coordinates(gridsize).linear_to_nice(v) for v in A.nodes]
@@ -42,10 +44,13 @@ def get_pegasus_subgrid(A, rows, cols, gridsize=16):
 def get_zephyr_subgrid(A, rows, cols, gridsize=4):
     """Make a subgraph of a Zephyr (Advantage2) graph on a set of rows and columns of unit cells.
 
-    :param A: Qubit connectivity graph
-    :param rows: Iterable of rows of unit cells to include
-    :param cols: Iterable of columns of unit cells to include
-    :return: The subgraph of A induced on the nodes in "rows" and "cols"
+    Args:
+        A (nx.Graph): Qubit connectivity graph
+        rows (Iterable): Iterable of rows of unit cells to include
+        cols (Iterable): Iterable of columns of unit cells to include
+
+    Returns:
+        nx.Graph: The subgraph of A induced on the nodes in "rows" and "cols"
     """
 
     coords = [dnx.zephyr_coordinates(gridsize).linear_to_zephyr(v) for v in A.nodes]
@@ -68,7 +73,7 @@ def get_independent_embeddings(embs):
         embs (list[dict]): a list of embeddings (dict)
 
     Returns:
-        list[dict]: a list of embeddings (dict)
+        List[dict]: a list of embeddings (dict)
     """
     start = time.process_time()
 
@@ -129,7 +134,7 @@ def search_for_subgraphs_in_subgrid(B, subgraph, timeout=20, max_number_of_embed
     return embs
 
 
-def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
+def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
                             verbose=True, topology='pegasus', gridsize=16, verify_embeddings=False, **kwargs):
     """Returns a matrix (n, L) of subgraph embeddings to _A.
 
@@ -152,7 +157,7 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
         numpy.ndarray: a matrix of embeddings
     """
 
-    A = _A.copy()
+    A = A_.copy()
 
     embs = []
     for row_offset in range(gridsize - raster_breadth + 1):
@@ -181,7 +186,7 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
 
             if verify_embeddings:
                 for emb in sub_embs:
-                    X = list(embedding.diagnose_embedding({p: [emb[p]] for p in emb}, subgraph, _A))
+                    X = list(embedding.diagnose_embedding({p: [emb[p]] for p in emb}, subgraph, A_))
                     if len(X):
                         print(X[0])
                         raise Exception
@@ -195,16 +200,18 @@ def raster_embedding_search(_A, subgraph, raster_breadth=5, delete_used=False,
     return embmat
 
 
-if __name__ == "__main__":
+def main():
     L = 64  # Length of chain to embed
 
     sampler = DWaveSampler()  # As configured
-    bqm = dimod.BinaryQuadraticModel(
-        vartype='SPIN',
-    )
+    bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
     for spin in range(L):
         bqm.add_quadratic(spin, (spin + 1) % L, -1)
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
     embmat = raster_embedding_search(A, G, raster_breadth=3)
+
+
+if __name__ == "__main__":
+    main()

@@ -210,6 +210,8 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
 
 
 def main():
+    """Main function to run example
+    """
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L': 64,

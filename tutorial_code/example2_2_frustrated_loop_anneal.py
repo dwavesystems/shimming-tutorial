@@ -239,7 +239,7 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
 
 
 def main():
-    """Main function to run example.
+    """Main function to run example
     """
     param = {
         'L': 16,
