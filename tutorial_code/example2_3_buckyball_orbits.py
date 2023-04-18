@@ -32,7 +32,7 @@ def main(visualize=True):
     """
     # Parse the BQM
     J = {(int(e[0]), int(e[1])): w
-         for *e, w in np.loadtxt("tutorial_code/data/bucky_ball.csv", delimiter=",")}
+         for *e, w in np.loadtxt("data/bucky_ball.csv", delimiter=",")}
     bqm = dimod.BQM.from_ising(h={}, J=J)
 
     # Compute the BQM's orbits
