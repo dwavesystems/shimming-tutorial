@@ -367,8 +367,16 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
             {'param': param, 'shim': shim, 'stats': stats}
         )
 
-    plot_data(param, shim, stats)
-    paper_plots_example3_2(param, shim, stats)
+    plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
+              all_couplings=stats['all_couplings'], frust=stats['frust'],
+              all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
+              coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
+              coupling=param["coupling"], L=param["L"])
+    paper_plots_example3_2(halve_boundary_couplers=param['halve_boundary_couplers'],
+                           type_=shim['type'], nominal_couplings=shim['nominal_couplings'],
+                           coupler_orbits=shim['coupler_orbits'], all_fbos=stats['all_fbos'],
+                           all_couplings=stats['all_couplings'], mags=stats['mags'],
+                           frust=stats['frust'], all_psi=stats['all_psi'])
 
 
 def main():

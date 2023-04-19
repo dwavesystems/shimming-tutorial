@@ -207,8 +207,12 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
             {'param': param, 'shim': shim, 'stats': stats}
         )
 
-    plot_data(param, shim, stats)
-    paper_plots_example1_2(stats)
+    plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
+              all_couplings=stats['all_couplings'], frust=stats['frust'],
+              all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
+              coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
+              coupling=param["coupling"], L=param["L"])
+    paper_plots_example1_2(all_couplings=stats['all_couplings'], all_fbos=stats['all_fbos'])
 
 
 def main():

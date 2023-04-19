@@ -76,13 +76,23 @@ def shim_parameter_rescaling(statistic, num_iters=20, ratio=1.1, tol=0.1):
     return 1.0
 
 
-def plot_data(param, shim, stats,):
-    """Plots data
+def plot_data(*, all_fbos, mags, all_couplings, frust, all_alpha_phi, all_alpha_j,
+              coupler_orbits, alpha_phi, alpha_j,
+              coupling, L):
+    """Plots diagnostics for the convergence of shims
 
     Args:
-        param (dict): parameters of data
-        shim (dict): shimmed values
-        stats (dict): statistics
+        all_fbos (list(np.ndarray)): 'all_fbos' in the experiment's stats dictionary
+        mags (np.ndarray): 'mags' in the experiment's stats dictionary
+        all_couplings (list(np.ndarray)): 'all_couplings' in the experiment's stats dictionary
+        frust (np.ndarray): 'frust' in the experiment's stats dictionary
+        all_alpha_phi (list[float]): 'all_alpha_Phi' in the experiment's stats dictionary
+        all_alpha_j (list[float]): 'all_alpha_J' in the experiment's stats dictionary
+        coupler_orbits (list[int]): 'coupler_orbits' in the experiment's shim dictionary
+        alpha_phi (float): 'alpha_Phi' in the experiment's shim dictionary
+        alpha_j (float): 'alpha_J' in the experiment's shim dictionary
+        coupling (float): 'coupling' in the experiment's param dictionary
+        L (int): 'L' in the experiment's param dictionary
     """
     plt.rcParams['figure.figsize'] = (18, 10)
     fig = plt.figure(1)
@@ -91,11 +101,11 @@ def plot_data(param, shim, stats,):
 
     plt.sca(axs[0, 0])
     plt.plot(
-        np.reshape(np.array(stats['all_fbos']), (len(stats['all_fbos']), -1))[:, ::10]
+        np.reshape(np.array(all_fbos), (len(all_fbos), -1))[:, ::10]
     )
     plt.title('FBOs')
 
-    M = np.array(stats['mags'])
+    M = np.array(mags)
     Y = movmean(M, 10)
     plt.sca(axs[0, 1])
     plt.plot(
@@ -117,20 +127,20 @@ def plot_data(param, shim, stats,):
     plt.sca(axs[1, 0])
     plt.plot(
         np.reshape(
-            np.divide(np.array(stats['all_couplings']), stats['all_couplings'][0]),
-            (len(stats['all_couplings']), -1))[:, ::10]
+            np.divide(np.array(all_couplings), all_couplings[0]),
+            (len(all_couplings), -1))[:, ::10]
     )
     plt.title('couplings (vs. nominal)')
 
-    M = np.array(stats['frust'])
+    M = np.array(frust)
     Y = movmean(M, 10)
 
     # Get Y for orbits
-    orbits = np.unique(shim['coupler_orbits'])
+    orbits = np.unique(coupler_orbits)
     Y_orbit = np.zeros((Y.shape[0], len(orbits)))
 
     for iorbit, orbit in enumerate(orbits):
-        mymat = Y[:, :, shim['coupler_orbits'] == orbit]
+        mymat = Y[:, :, coupler_orbits == orbit]
         Y_orbit[:, iorbit] = np.std(mymat, axis=(1, 2))
 
     plt.sca(axs[1, 1])
@@ -152,7 +162,7 @@ def plot_data(param, shim, stats,):
     plt.title('mean abs difference in f')
 
     # Convergence of FBOs
-    M = np.array(stats['all_fbos'])
+    M = np.array(all_fbos)
 
     # Plot mean sign diff
     plt.sca(axs[0, 4])
@@ -167,12 +177,12 @@ def plot_data(param, shim, stats,):
     plt.title('fluctuation variance exponent')
 
     plt.sca(axs[0, 5])
-    plt.plot(np.array(stats['all_alpha_Phi']))
+    plt.plot(np.array(all_alpha_phi))
     plt.yscale('log')
     plt.title('$\\alpha_\Phi$')
 
     # Convergence of couplings
-    M = np.array(stats['all_couplings'])
+    M = np.array(all_couplings)
 
     # Plot 20-iteration trailing fluctuation variance exponent
     plt.sca(axs[1, 4])
@@ -187,12 +197,12 @@ def plot_data(param, shim, stats,):
     plt.title('fluctuation variance exponent')
 
     plt.sca(axs[1, 5])
-    plt.plot(np.array(stats['all_alpha_J']))
+    plt.plot(np.array(all_alpha_j))
     plt.yscale('log')
     plt.title('$\\alpha_J$')
 
     plt.suptitle(
-        f'J={param["coupling"]}, L={param["L"]}, alpha_Phi={shim["alpha_Phi"]}, alpha_J={shim["alpha_J"]}'
+        f'J={coupling}, L={L}, alpha_Phi={alpha_phi}, alpha_J={alpha_j}'
     )
     plt.tight_layout()
     plt.show()

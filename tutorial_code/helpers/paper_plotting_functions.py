@@ -36,18 +36,19 @@ PATH_TO_PAPER_DIR = "../paper_materials/"
 MAKE_TIKZ_PLOTS = False
 
 
-def paper_plots_example1_1(shim, stats):
+def paper_plots_example1_1(*, alpha_phi, all_fbos, mags):
     """Plotting function for example1_1
 
     Args:
-        shim (dict): the shimming dictionary from example1_1 with key 'alpha_Phi'
-        stats (_type_): the stats dictionary from example1_1 with keys 'all_fbos' and 'mags'
+        alpha_phi (float): 'alpha_Phi' in the shim dictionary from example1_1
+        all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_1
+        mags (list[np.ndarray]): 'mags' in the stats dictionary from example1_1
     """
     # Plot FBOs for first embedding
     plt.clf()
 
     plt.plot(
-        np.array([x[0] for x in stats['all_fbos']])
+        np.array([x[0] for x in all_fbos])
     )
     plt.title('Flux-bias offsets')
     plt.xlabel('Iteration')
@@ -55,7 +56,7 @@ def paper_plots_example1_1(shim, stats):
     plt.ylim(max(abs(np.array(plt.ylim()))) * np.array([-1, 1]))
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{shim["alpha_Phi"]:.6f}_fbos'
+        fn = f'ex11_aPhi{alpha_phi:.6f}_fbos'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='5cm', axis_height='5cm',
@@ -73,7 +74,7 @@ def paper_plots_example1_1(shim, stats):
     # Plot histograms of mags
     plt.clf()
 
-    M = np.array(stats['mags'])
+    M = np.array(mags)
     Y = movmean(M, 10)
 
     plt.hist(Y[10].ravel(), alpha=0.5, bins=np.arange(-.51, .5, 0.02),
@@ -92,7 +93,7 @@ def paper_plots_example1_1(shim, stats):
     plt.ylim((0, plt.ylim()[-1] * 1.4))
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{shim["alpha_Phi"]:.6f}_mag_hist'
+        fn = f'ex11_aPhi{alpha_phi:.6f}_mag_hist'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='5cm', axis_height='5cm',
@@ -120,7 +121,7 @@ def paper_plots_example1_1(shim, stats):
     plt.ylim([0, .7])
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{shim["alpha_Phi"]:.6f}_mag_diff'
+        fn = f'ex11_aPhi{alpha_phi:.6f}_mag_diff'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='5cm', axis_height='5cm',
@@ -145,7 +146,7 @@ def paper_plots_example1_1(shim, stats):
     plt.ylim([0, .5])
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{shim["alpha_Phi"]:.6f}_mag_std'
+        fn = f'ex11_aPhi{alpha_phi:.6f}_mag_std'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='5cm', axis_height='5cm',
@@ -161,17 +162,18 @@ def paper_plots_example1_1(shim, stats):
         plt.show()
 
 
-def paper_plots_example1_2(stats):
+def paper_plots_example1_2(*, all_couplings, all_fbos):
     """Plotting function for example1_2
 
     Args:
-        stats (dict): the stats dictionary from example1_1 with keys 'all_couplings' and 'all_fbos'
+        all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example1_2
+        all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_2
     """
     # Plot FBOs for first embedding
     plt.clf()
 
     plt.plot(
-        np.array([x[0] for x in stats['all_fbos']])
+        np.array([x[0] for x in all_fbos])
     )
     plt.title('Flux-bias offsets')
     plt.xlabel('Iteration')
@@ -198,7 +200,7 @@ def paper_plots_example1_2(stats):
     plt.clf()
 
     plt.plot(
-        np.array([x[0] for x in stats['all_couplings']])
+        np.array([x[0] for x in all_couplings])
     )
     plt.title('Couplings')
     plt.xlabel('Iteration')
@@ -246,19 +248,22 @@ def paper_plots_example2_1():
         plt.show()
 
 
-def paper_plots_example2_2(shim, stats):
+def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, frust):
     """Plotting function for example2_2.
 
     Args:
-        shim (dict): the shimming dictionary from example2_2 with key 'nominal_couplings'
-        stats (dict): the stats dictionary from example2_2 with keys 'all_fbos', 'all_couplings', 'mags', and 'frust'
+        nominal_couplings (np.ndarray): 'nominal_couplings' in the shim dict from example2_2
+        all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example2_2
+        all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example2_2
+        mags (np.ndarray): 'mags' in the stats dictionary from example2_2
+        frust (np.ndarray): 'frust' in the stats dictionary from example2_2
     """
 
     # Plot FBOs for first embedding
     plt.clf()
 
     plt.plot(
-        np.array([x[0] for x in stats['all_fbos']])
+        np.array([x[0] for x in all_fbos])
     )
     plt.title('Flux-bias offsets')
     plt.xlabel('Iteration')
@@ -286,7 +291,7 @@ def paper_plots_example2_2(shim, stats):
     plt.clf()
 
     plt.plot(
-        np.array([x[0] / shim['nominal_couplings'] for x in stats['all_couplings']])
+        np.array([x[0] / nominal_couplings for x in all_couplings])
     )
     plt.title('Couplings (relative to nominal)')
     plt.xlabel('Iteration')
@@ -311,7 +316,7 @@ def paper_plots_example2_2(shim, stats):
 
     plt.clf()
 
-    M = np.array(stats['mags'])
+    M = np.array(mags)
     Y = movmean(M, 10)
 
     plt.plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
@@ -338,7 +343,7 @@ def paper_plots_example2_2(shim, stats):
 
     plt.clf()
 
-    M = np.array(stats['frust'])
+    M = np.array(frust)
     Y = movmean(M, 10)
 
     plt.plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
@@ -366,18 +371,26 @@ def paper_plots_example2_2(shim, stats):
         plt.show()
 
 
-def paper_plots_example3_2(param, shim, stats):
+def paper_plots_example3_2(*, halve_boundary_couplers,
+                           type_, nominal_couplings, coupler_orbits,
+                           all_fbos, all_couplings, mags, frust, all_psi):
     """Plotting function for example3_2.
 
     Args:
-        param (dict): the param dict from example3_2 with key "halve_boundary_couplers"
-        shim (dict): the shim dict from example3_2 with keys "type", "nominal_couplings", "coupler_orbits"
-        stats (dict): the stats dict from example3_2 with keys "all_fbos", "all_couplings", "mags", "frust", "all_psi"
+        halve_boundary_couplers (bool): 'halve_boundary_couplers' in the param dictionary from example3_2
+        type_ (str): 'type' in the shim dictionary from example3_2
+        nominal_couplings (np.ndarray): 'nominal_couplings' in the shim dictionary from example3_2
+        coupler_orbits (list[int]): 'coupler_orbits' in the shim dictionary from example3_2
+        all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example3_2
+        all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example3_2
+        mags (np.ndarray): 'mags' in the stats dictionary from example3_2
+        frust (np.ndarray): 'frust' in the stats dictionary from example3_2
+        all_psi (list[np.ndarray]): 'all_psi' in the stats dictionary from example3_2
     """
     plt.clf()
 
     plt.plot(
-        np.array([x[0] for x in stats['all_fbos']])[:, :12],
+        np.array([x[0] for x in all_fbos])[:, :12],
         alpha=0.5
     )
     plt.title('Flux-bias offsets')
@@ -386,7 +399,7 @@ def paper_plots_example3_2(param, shim, stats):
     plt.ylim(max(abs(np.array(plt.ylim()))) * np.array([-1, 1]))
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex32_fbos_{shim["type"]}{"_halved" * param["halve_boundary_couplers"]}'
+        fn = f'ex32_fbos_{type_}{"_halved" * halve_boundary_couplers}'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='4cm', axis_height='5cm',
@@ -404,9 +417,9 @@ def paper_plots_example3_2(param, shim, stats):
 
     # Plot Js for first embedding
     plt.clf()
-    Jdata = np.array([x[0] / shim['nominal_couplings'] for x in stats['all_couplings']])
-    if shim['type'] == 'embedded_finite':
-        indices = np.array(shim['coupler_orbits']) == shim['coupler_orbits'][0]
+    Jdata = np.array([x[0] / nominal_couplings for x in all_couplings])
+    if type_ == 'embedded_finite':
+        indices = np.array(coupler_orbits) == coupler_orbits[0]
     else:
         indices = np.arange(0, Jdata.shape[1], 5)
 
@@ -417,7 +430,7 @@ def paper_plots_example3_2(param, shim, stats):
     plt.ylabel(r'$J_{i,j}/J_{i,j}^{{\ nominal}}$')
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex32_Js_{shim["type"]}{"_halved" * param["halve_boundary_couplers"]}'
+        fn = f'ex32_Js_{type_}{"_halved" * halve_boundary_couplers}'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='4cm', axis_height='5cm',
@@ -435,7 +448,7 @@ def paper_plots_example3_2(param, shim, stats):
 
     plt.clf()
 
-    M = np.array(stats['mags'])
+    M = np.array(mags)
     Y = movmean(M, 10)
 
     plt.plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
@@ -444,7 +457,7 @@ def paper_plots_example3_2(param, shim, stats):
     plt.ylabel(r'$\sigma_m$')
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex32_mag_std_{shim["type"]}{"_halved" * param["halve_boundary_couplers"]}'
+        fn = f'ex32_mag_std_{type_}{"_halved" * halve_boundary_couplers}'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='4cm', axis_height='5cm',
@@ -463,15 +476,15 @@ def paper_plots_example3_2(param, shim, stats):
 
     plt.clf()
 
-    M = np.array(stats['frust'])
+    M = np.array(frust)
     Y = movmean(M, 10)
 
     # Get Y for orbits
-    orbits = np.unique(shim['coupler_orbits'])
+    orbits = np.unique(coupler_orbits)
     Y_orbit = np.zeros((Y.shape[0], len(orbits)))
 
     for iorbit, orbit in enumerate(orbits):
-        mymat = Y[:, :, shim['coupler_orbits'] == orbit]
+        mymat = Y[:, :, coupler_orbits == orbit]
         Y_orbit[:, iorbit] = np.std(mymat, axis=(1, 2))
 
     plt.plot(range(10, len(Y)),
@@ -483,7 +496,7 @@ def paper_plots_example3_2(param, shim, stats):
     plt.ylabel(r'$\sigma_f$')
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex32_frust_std_{shim["type"]}{"_halved" * param["halve_boundary_couplers"]}'
+        fn = f'ex32_frust_std_{type_}{"_halved" * halve_boundary_couplers}'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='4cm', axis_height='5cm',
@@ -503,9 +516,9 @@ def paper_plots_example3_2(param, shim, stats):
 
     # Plot histogram heatmaps
     psi_data = []
-    psi_data.append(np.array([x[0] for x in stats['all_psi'][0:100]]))
-    psi_data.append(np.array([x[0] for x in stats['all_psi'][200:300]]))
-    psi_data.append(np.array([x[0] for x in stats['all_psi'][700:800]]))
+    psi_data.append(np.array([x[0] for x in all_psi[0:100]]))
+    psi_data.append(np.array([x[0] for x in all_psi[200:300]]))
+    psi_data.append(np.array([x[0] for x in all_psi[700:800]]))
 
     for ipsi in range(len(psi_data)):
         plt.clf()
@@ -530,7 +543,7 @@ def paper_plots_example3_2(param, shim, stats):
         ax.set_aspect('equal', 'box')
 
         if MAKE_TIKZ_PLOTS:
-            fn = f'ex32_heatmap{ipsi}_{shim["type"]}{"_halved" * param["halve_boundary_couplers"]}'
+            fn = f'ex32_heatmap{ipsi}_{type_}{"_halved" * halve_boundary_couplers}'
             code = tikzplotlib.get_tikz_code(
                 standalone=True,
                 axis_width='5cm', axis_height='5cm',
@@ -548,7 +561,7 @@ def paper_plots_example3_2(param, shim, stats):
             plt.show()
 
     plt.clf()
-    M = np.array([np.mean(np.abs(x)) for x in stats['all_psi']])
+    M = np.array([np.mean(np.abs(x)) for x in all_psi])
     plt.plot(M)
     plt.title(r'$\langle |\psi|\rangle$')
     plt.xlabel('Iteration')
@@ -556,7 +569,7 @@ def paper_plots_example3_2(param, shim, stats):
     plt.ylim([0.5, 0.8])
 
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex32_m_{shim["type"]}{"_halved" * param["halve_boundary_couplers"]}'
+        fn = f'ex32_m_{type_}{"_halved" * halve_boundary_couplers}'
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width='4cm', axis_height='5cm',
@@ -570,5 +583,3 @@ def paper_plots_example3_2(param, shim, stats):
             f.write(code)
     else:
         plt.show()
-
-
