@@ -36,7 +36,13 @@ PATH_TO_PAPER_DIR = "../paper_materials/"
 MAKE_TIKZ_PLOTS = False
 
 
-def paper_plots_example1_1(param, shim, stats):
+def paper_plots_example1_1(shim, stats):
+    """Plotting function for example1_1
+
+    Args:
+        shim (dict): the shimming dictionary from example1_1 with key 'alpha_Phi'
+        stats (_type_): the stats dictionary from example1_1 with keys 'all_fbos' and 'mags'
+    """
     # Plot FBOs for first embedding
     plt.clf()
 
@@ -155,7 +161,12 @@ def paper_plots_example1_1(param, shim, stats):
         plt.show()
 
 
-def paper_plots_example1_2(param, shim, stats):
+def paper_plots_example1_2(stats):
+    """Plotting function for example1_2
+
+    Args:
+        stats (dict): the stats dictionary from example1_1 with keys 'all_couplings' and 'all_fbos'
+    """
     # Plot FBOs for first embedding
     plt.clf()
 
@@ -211,7 +222,9 @@ def paper_plots_example1_2(param, shim, stats):
         plt.show()
 
 
-def paper_plots_example2_1(Gnx, pos, options):
+def paper_plots_example2_1():
+    """Plotting function for example1_1
+    """
 
     if MAKE_TIKZ_PLOTS:
         fn = f'ex2_1_graph_raw'
@@ -233,7 +246,13 @@ def paper_plots_example2_1(Gnx, pos, options):
         plt.show()
 
 
-def paper_plots_example2_2(param, shim, stats):
+def paper_plots_example2_2(shim, stats):
+    """Plotting function for example2_2.
+
+    Args:
+        shim (dict): the shimming dictionary from example2_2 with key 'nominal_couplings'
+        stats (dict): the stats dictionary from example2_2 with keys 'all_fbos', 'all_couplings', 'mags', and 'frust'
+    """
 
     # Plot FBOs for first embedding
     plt.clf()
@@ -348,6 +367,13 @@ def paper_plots_example2_2(param, shim, stats):
 
 
 def paper_plots_example3_2(param, shim, stats):
+    """Plotting function for example3_2.
+
+    Args:
+        param (dict): the param dict from example3_2 with key "halve_boundary_couplers"
+        shim (dict): the shim dict from example3_2 with keys "type", "nominal_couplings", "coupler_orbits"
+        stats (dict): the stats dict from example3_2 with keys "all_fbos", "all_couplings", "mags", "frust", "all_psi"
+    """
     plt.clf()
 
     plt.plot(
@@ -546,44 +572,3 @@ def paper_plots_example3_2(param, shim, stats):
         plt.show()
 
 
-def paper_plots_example3_3(param, shim, stats):
-    # Plot histogram heatmaps
-    psi_data = []
-    psi_data.append(np.array([x[0] for x in stats['all_psi'][0:100]]))
-    psi_data.append(np.array([x[0] for x in stats['all_psi'][-101:-1]]))
-
-    for ipsi in range(len(psi_data)):
-        plt.clf()
-        ax = plt.gca()
-        psi = psi_data[ipsi]
-        x = np.real(psi.ravel())
-        y = np.imag(psi.ravel())
-        extent = (-2, 2, -1.95, 1.95)
-        numbins = 42
-        hb = ax.hexbin(x, y, gridsize=numbins, cmap='inferno', extent=extent,
-                       norm=matplotlib.colors.LogNorm(vmin=1, vmax=100))
-
-        ax.set_title(r'$\psi$')
-        cb = plt.gcf().colorbar(hb, ax=ax)
-        cb.set_label('count')
-        plt.plot([-1 / np.sqrt(3), 1 / np.sqrt(3)], [-1, 1], color='w', linestyle='-')
-        plt.plot([-1 / np.sqrt(3), 1 / np.sqrt(3)], [1, -1], color='w', linestyle='-')
-        plt.plot([-2 / np.sqrt(3), 2 / np.sqrt(3)], [0, 0], color='w', linestyle='-')
-        ax.axis([-1.2, 1.2, -1.2, 1.2])
-        ax.set_aspect('equal', 'box')
-
-        if MAKE_TIKZ_PLOTS:
-            fn = f'ex33_s{param["s"]:0.3f}_heatmap{ipsi}'
-            code = tikzplotlib.get_tikz_code(
-                standalone=True,
-                axis_width='5cm', axis_height='5cm',
-                float_format='.5g',
-                extra_axis_parameters=tikz_axis_parameters,
-            )
-            code = code.replace('\\documentclass{standalone}',
-                                '\\documentclass{standalone}\n' + extra_code)
-
-            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-                f.write(code)
-        else:
-            plt.show()

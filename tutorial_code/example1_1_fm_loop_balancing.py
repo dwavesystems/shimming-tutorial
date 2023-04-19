@@ -206,7 +206,7 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
         )
 
     plot_data(param, shim, stats)
-    paper_plots_example1_1(param, shim, stats)
+    paper_plots_example1_1(shim, stats)
 
 
 def main():

@@ -118,7 +118,7 @@ def main():
                      for key, val in nx.get_edge_attributes(Gnx, "orbit").items()},
     )
 
-    paper_plotting_functions.paper_plots_example2_1(Gnx, pos, options)
+    paper_plotting_functions.paper_plots_example2_1()
     plt.show()
 
 
