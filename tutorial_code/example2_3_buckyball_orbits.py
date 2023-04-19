@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from os.path import exists
+
 import dimod
 import networkx as nx
 import numpy as np
 
 from dwave.system import DWaveSampler
 from matplotlib import pyplot as plt
-from minorminer import find_embedding
 
 from helpers import orbits
+from helpers.embedding_helpers import raster_embedding_search
 from helpers.orbits import get_orbits
 
 
@@ -31,8 +33,11 @@ def main(visualize=True):
         visualize (bool, optional): flag for visualization. Defaults to True.
     """
     # Parse the BQM
+    path_to_csv = "data/bucky_ball.csv"
+    if not exists(path_to_csv):
+        path_to_csv = f"tutorial_code/{path_to_csv}"
     J = {(int(e[0]), int(e[1])): w
-         for *e, w in np.loadtxt("data/bucky_ball.csv", delimiter=",")}
+         for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
     bqm = dimod.BQM.from_ising(h={}, J=J)
 
     # Compute the BQM's orbits
@@ -43,8 +48,9 @@ def main(visualize=True):
     qpu = DWaveSampler(solver="Advantage_system4.1")
     graph_qpu = qpu.to_networkx_graph()
     graph_bqm = dimod.to_networkx_graph(bqm)
-    # Here we use an off-the-shelf heuristic method to find embeddings of the Ising model to the QPU
-    embedding = find_embedding(graph_bqm, graph_qpu)
+
+    embeddings = raster_embedding_search(graph_qpu, graph_bqm, raster_breadth=2)
+    print(embeddings)
 
     if visualize:
         # Plotting configurations
