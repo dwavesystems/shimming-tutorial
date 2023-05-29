@@ -1,6 +1,6 @@
 # Shimming Tutorial
 
-This repository contains supplementary code for the tutorial "Calibration refinement in quantum annealing".
+This repository contains supplementary code for the tutorial [Calibration refinement in quantum annealing](https://arxiv.org/abs/2304.10352).
 
 Install the dependencies with
 ```bash
