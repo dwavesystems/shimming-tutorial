@@ -186,7 +186,7 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
 
             if verify_embeddings:
                 for emb in sub_embs:
-                    X = list(embedding.diagnose_embedding({p: [emb[p]] for p in emb}, subgraph, A_))
+                    X = list(embedding.diagnose_embedding({p: [q] for p, q in enumerate(emb)}, subgraph, A_))
                     if len(X):
                         print(X[0])
                         raise Exception
