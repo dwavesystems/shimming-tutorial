@@ -15,7 +15,7 @@
 import dimod
 import numpy as np
 
-from dwave.system.samplers import DWaveSampler
+from dwave.system.testing import MockDWaveSampler
 from tqdm import tqdm
 
 from embed_loops import embed_loops
@@ -220,11 +220,11 @@ def main():
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L': 64,
-            'sampler': DWaveSampler(),  # As configured
+            'sampler': MockDWaveSampler(topology_type='pegasus', topology_shape=[16]),  # As configured
             'coupling': -0.2,  # Coupling energy scale.
             'num_iters': 100,
         }
-        embeddings = embed_loops(param['L'])
+        embeddings = embed_loops(param['L'], sampler = param['sampler'])
 
         # Where the shim data (parameters and Hamiltonian terms) are stored
         shim = {
