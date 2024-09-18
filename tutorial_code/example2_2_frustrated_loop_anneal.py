@@ -15,7 +15,7 @@
 import dimod
 import numpy as np
 
-from dwave.system.samplers import DWaveSampler
+from dwave.system.testing import MockDWaveSampler
 from tqdm import tqdm
 
 from embed_loops import embed_loops
@@ -106,12 +106,15 @@ def adjust_fbos(result, param, shim, embeddings, stats):
     magnetizations = [0] * param['sampler'].properties['num_qubits']
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
-        magnetizations[v] = used_qubit_magnetizations[iv]
+        if v < len(magnetizations):
+            magnetizations[v] = used_qubit_magnetizations[iv]
 
     mag_array = np.zeros_like(shim['fbos'])
     for iemb in range(len(embeddings)):
         for iqubit in range(param['L']):
-            mag_array[iemb, iqubit] = magnetizations[embeddings[iemb][iqubit]]
+            qubit_index = embeddings[iemb][iqubit]
+            if qubit_index < len(magnetizations):
+                mag_array[iemb, iqubit] = magnetizations[qubit_index]
 
     shim['fbos'] -= shim['alpha_Phi'] * mag_array
 
@@ -136,19 +139,22 @@ def adjust_couplings(result, param, shim, embeddings, stats):
 
     # Make a big array for the solutions, with zeros for unused qubits
     bigarr = np.zeros(shape=(param['sampler'].properties['num_qubits'], len(result)), dtype=np.int8)
-    bigarr[vars, :] = dimod.as_samples(result)[0].T
+    for iv, v in enumerate(vars):
+        if v < bigarr.shape[0]:
+            bigarr[v, :] = dimod.as_samples(result)[0].T[iv]
 
     frust_matrix = np.zeros_like(shim['couplings'])
 
     for iemb, emb in enumerate(embeddings):
         for spin in range(param['L']):
-            mean_correlation = np.mean(np.multiply(
-                bigarr[emb[spin]],
-                bigarr[emb[(spin + 1) % param['L']]]
-            ))
-            frust_matrix[iemb, spin] = (
-                (mean_correlation * np.sign(shim['nominal_couplings'][spin]) + 1) / 2
-            )
+            qubit_1 = emb[spin]
+            qubit_2 = emb[(spin + 1) % param['L']]
+            
+            if qubit_1 < bigarr.shape[0] and qubit_2 < bigarr.shape[0]:
+                mean_correlation = np.mean(np.multiply(bigarr[qubit_1], bigarr[qubit_2]))
+                frust_matrix[iemb, spin] = (
+                    (mean_correlation * np.sign(shim['nominal_couplings'][spin]) + 1) / 2
+                )
 
     shim['couplings'] += shim['alpha_J'] * np.multiply(
         np.sign(shim['nominal_couplings']), (frust_matrix - np.mean(frust_matrix))
@@ -174,7 +180,9 @@ def run_iteration(param, shim, embeddings, stats):
     fbo_dict = make_fbo_dict(param, shim, embeddings)
     fbo_list = [0] * param['sampler'].properties['num_qubits']
     for qubit, fbo in fbo_dict.items():
-        fbo_list[qubit] = fbo
+        if qubit < len(fbo_list):  # Ensure qubit is within range
+            fbo_list[qubit] = fbo
+     
 
     result = param['sampler'].sample(
         bqm,
@@ -251,12 +259,13 @@ def main():
     """
     param = {
         'L': 16,
-        'sampler': DWaveSampler(),  # As configured
+        'sampler': MockDWaveSampler(topology_type='pegasus', topology_shape=[16]),  # As configured
         'coupling': -0.9,  # Coupling energy scale.
         'num_iters': 300,
     }
 
-    embeddings = embed_loops(param['L'])
+    embeddings = embed_loops(param['L'], sampler = param['sampler'])
+    print(f"Embeddings: {embeddings}")
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
@@ -271,7 +280,11 @@ def main():
     shim['couplings'][:, 0] *= -1
 
     # Save the nominal couplings so we can refer to their sign later
-    shim['nominal_couplings'] = shim['couplings'][0].copy()
+    if shim['couplings'].size > 0:
+        shim['nominal_couplings'] = shim['couplings'][0].copy()
+    else:
+        print("Error: 'couplings' array is empty.")
+
 
     # Data for plotting after the fact
     stats = {
