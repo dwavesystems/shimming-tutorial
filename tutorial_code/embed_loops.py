@@ -22,7 +22,7 @@ from dwave.system.samplers import DWaveSampler
 from helpers.embedding_helpers import raster_embedding_search
 
 
-def embed_loops(L, try_to_load=True, raster_breadth=2):
+def embed_loops(L, try_to_load=True, raster_breadth=2, sampler = None):
     """Embed loops of length L
 
     Args:
@@ -33,7 +33,10 @@ def embed_loops(L, try_to_load=True, raster_breadth=2):
     Returns:
         numpy.ndarray: a matrix of embeddings
     """
-    sampler = DWaveSampler()  # As configured
+
+    if sampler is None :
+        sampler = DWaveSampler()  # As configured
+
     bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',
     )
@@ -42,7 +45,9 @@ def embed_loops(L, try_to_load=True, raster_breadth=2):
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{L:04d}_embeddings_cached.txt'
+    solver_name = sampler.properties['chip_id'] # sampler.solver.name
+    cache_filename = f'cached_embeddings/{solver_name}__L{L:04d}_embeddings_cached.txt'
+    
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
