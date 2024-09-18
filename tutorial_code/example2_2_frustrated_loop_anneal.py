@@ -106,6 +106,7 @@ def adjust_fbos(result, param, shim, embeddings, stats):
     magnetizations = [0] * param['sampler'].properties['num_qubits']
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
+        # Added constraint for index out of bounds 
         if v < len(magnetizations):
             magnetizations[v] = used_qubit_magnetizations[iv]
 
@@ -113,6 +114,7 @@ def adjust_fbos(result, param, shim, embeddings, stats):
     for iemb in range(len(embeddings)):
         for iqubit in range(param['L']):
             qubit_index = embeddings[iemb][iqubit]
+            # Added constraint for index out of bounds 
             if qubit_index < len(magnetizations):
                 mag_array[iemb, iqubit] = magnetizations[qubit_index]
 
@@ -140,6 +142,7 @@ def adjust_couplings(result, param, shim, embeddings, stats):
     # Make a big array for the solutions, with zeros for unused qubits
     bigarr = np.zeros(shape=(param['sampler'].properties['num_qubits'], len(result)), dtype=np.int8)
     for iv, v in enumerate(vars):
+        # Added constraint for index out of bounds 
         if v < bigarr.shape[0]:
             bigarr[v, :] = dimod.as_samples(result)[0].T[iv]
 
@@ -147,9 +150,10 @@ def adjust_couplings(result, param, shim, embeddings, stats):
 
     for iemb, emb in enumerate(embeddings):
         for spin in range(param['L']):
+            # changed the below portin of the code 
             qubit_1 = emb[spin]
             qubit_2 = emb[(spin + 1) % param['L']]
-            
+            # Added constraint for index out of bounds 
             if qubit_1 < bigarr.shape[0] and qubit_2 < bigarr.shape[0]:
                 mean_correlation = np.mean(np.multiply(bigarr[qubit_1], bigarr[qubit_2]))
                 frust_matrix[iemb, spin] = (
@@ -180,6 +184,7 @@ def run_iteration(param, shim, embeddings, stats):
     fbo_dict = make_fbo_dict(param, shim, embeddings)
     fbo_list = [0] * param['sampler'].properties['num_qubits']
     for qubit, fbo in fbo_dict.items():
+        # added contraint for index out of bounds
         if qubit < len(fbo_list):  # Ensure qubit is within range
             fbo_list[qubit] = fbo
      
