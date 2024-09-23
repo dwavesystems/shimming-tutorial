@@ -15,7 +15,7 @@
 import dimod
 import numpy as np
 
-from dwave.system.samplers import DWaveSampler
+from helpers.sampler_wrapper import SamplerWrapper
 from tqdm import tqdm
 
 from embed_square_lattice import embed_square_lattice
@@ -382,6 +382,12 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
 def main():
     """Main function to run example
     """
+    # Use mock sampler with custom topology
+    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
+    
+    # Or, use real DWaveSampler with no extra parameters
+    # sampler_wrapper = SamplerWrapper(sampler_type='real')
+
     shimtype = 'embedded_finite'
     adaptive_step_size = False
     halve_boundary_couplers = False
@@ -389,7 +395,7 @@ def main():
 
     param = {
         'L': 12,
-        'sampler': DWaveSampler(),  # As configured
+        'sampler': sampler_wrapper.get_sampler(),  # As configured
         # Magnitude of coupling for FM chains, as a multiple of AFM coupling.
         'chain_strength': 2.0,
         'coupling': 0.9,  # Coupling energy scale.  Should be positive.

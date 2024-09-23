@@ -15,7 +15,7 @@
 import dimod
 import numpy as np
 
-from dwave.system.testing import MockDWaveSampler
+from helpers.sampler_wrapper import SamplerWrapper
 from tqdm import tqdm
 
 from embed_loops import embed_loops
@@ -103,20 +103,17 @@ def adjust_fbos(result, param, shim, embeddings, stats):
         embeddings (List[dict]): list of embeddings
         stats (dict): dict of sampled statistics
     """
-    magnetizations = [0] * param['sampler'].properties['num_qubits']
+    # [0] * param['sampler'].properties['num_qubits']
+    magnetizations = [0] * (max(result.variables) + 1)
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
-        # Added constraint for index out of bounds 
-        if v < len(magnetizations):
-            magnetizations[v] = used_qubit_magnetizations[iv]
+        magnetizations[v] = used_qubit_magnetizations[iv]
 
     mag_array = np.zeros_like(shim['fbos'])
     for iemb in range(len(embeddings)):
         for iqubit in range(param['L']):
             qubit_index = embeddings[iemb][iqubit]
-            # Added constraint for index out of bounds 
-            if qubit_index < len(magnetizations):
-                mag_array[iemb, iqubit] = magnetizations[qubit_index]
+            mag_array[iemb, iqubit] = magnetizations[qubit_index]
 
     shim['fbos'] -= shim['alpha_Phi'] * mag_array
 
@@ -262,9 +259,15 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
 def main():
     """Main function to run example
     """
+    # Use mock sampler with custom topology
+    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
+    
+    # Or, use real DWaveSampler with no extra parameters
+    # sampler_wrapper = SamplerWrapper(sampler_type='real')
+
     param = {
         'L': 16,
-        'sampler': MockDWaveSampler(topology_type='pegasus', topology_shape=[16]),  # As configured
+        'sampler': sampler_wrapper.get_sampler(),  # As configured
         'coupling': -0.9,  # Coupling energy scale.
         'num_iters': 300,
     }

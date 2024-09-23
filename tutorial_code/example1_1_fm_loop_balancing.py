@@ -15,7 +15,7 @@
 import dimod
 import numpy as np
 
-from dwave.system.testing import MockDWaveSampler
+from helpers.sampler_wrapper import SamplerWrapper
 from tqdm import tqdm
 
 from embed_loops import embed_loops
@@ -217,10 +217,16 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
 def main():
     """Main function to run example
     """
+    # Use mock sampler with custom topology
+    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
+    
+    # Or, use real DWaveSampler with no extra parameters
+    # sampler_wrapper = SamplerWrapper(sampler_type='real')
+
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L': 64,
-            'sampler': MockDWaveSampler(topology_type='pegasus', topology_shape=[16]),  # As configured
+            'sampler': sampler_wrapper.get_sampler(),  # As configured
             'coupling': -0.2,  # Coupling energy scale.
             'num_iters': 100,
         }

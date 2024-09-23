@@ -18,7 +18,7 @@ import dimod
 import networkx as nx
 import numpy as np
 
-from dwave.system import DWaveSampler
+from helpers.sampler_wrapper import SamplerWrapper
 from matplotlib import pyplot as plt
 
 from helpers import orbits
@@ -32,6 +32,12 @@ def main(visualize=True):
     Args:
         visualize (bool, optional): flag for visualization. Defaults to True.
     """
+    # Use mock sampler with custom topology
+    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
+    
+    # Or, use real DWaveSampler with specific solver type
+    # sampler_wrapper = SamplerWrapper(sampler_type='real', solver="Advantage_system4.1")
+
     # Parse the BQM
     path_to_csv = "data/bucky_ball.csv"
     if not exists(path_to_csv):
@@ -45,7 +51,7 @@ def main(visualize=True):
         qubit_orbits_opposite, coupler_orbits_opposite) = get_orbits(bqm)
 
     # Embed the BQM onto the QPU
-    qpu = DWaveSampler(solver="Advantage_system4.1")
+    qpu = sampler_wrapper.get_sampler()
     graph_qpu = qpu.to_networkx_graph()
     graph_bqm = dimod.to_networkx_graph(bqm)
 

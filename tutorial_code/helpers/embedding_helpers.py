@@ -19,8 +19,8 @@ import dwave_networkx as dnx
 import networkx as nx
 import numpy as np
 
+from sampler_wrapper import SamplerWrapper
 from dwave import embedding
-from dwave.system.samplers import DWaveSampler
 from minorminer import subgraph as glasgow
 
 
@@ -201,9 +201,14 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
 
 
 def main():
-    L = 64  # Length of chain to embed
+    L = 32  # Length of chain to embed
+    # Use mock sampler with custom topology
+    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
+    
+    # Or, use real DWaveSampler with no extra parameters
+    # sampler_wrapper = SamplerWrapper(sampler_type='real')
 
-    sampler = DWaveSampler()  # As configured
+    sampler = sampler_wrapper.get_sampler()  # As configured
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
     for spin in range(L):
         bqm.add_quadratic(spin, (spin + 1) % L, -1)
@@ -211,7 +216,7 @@ def main():
     A = sampler.to_networkx_graph()
 
     embmat = raster_embedding_search(A, G, raster_breadth=3)
-
+    print(embmat)
 
 if __name__ == "__main__":
     main()
