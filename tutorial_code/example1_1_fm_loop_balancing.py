@@ -15,7 +15,8 @@
 import dimod
 import numpy as np
 
-from helpers.sampler_wrapper import SamplerWrapper
+from helpers.sampler_wrapper import ShimmingMockSampler
+from dwave.system.samplers import DWaveSampler
 from tqdm import tqdm
 
 from embed_loops import embed_loops
@@ -214,19 +215,23 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
                            all_fbos=stats['all_fbos'], mags=stats['mags'])
 
 
-def main():
+def main(sampler_type='mock'):
     """Main function to run example
+
+    Args:
+        sampler_type (string, optional): option to specify sampler type. Defaults to MockDWaveSampler.
     """
-    # Use mock sampler with custom topology
-    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
-    
-    # Or, use real DWaveSampler with no extra parameters
-    # sampler_wrapper = SamplerWrapper(sampler_type='real')
+
+    if sampler_type == 'mock':
+        sampler_instance = ShimmingMockSampler()
+        sampler = sampler_instance.get_sampler()
+    else:
+        sampler = DWaveSampler()
 
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L': 64,
-            'sampler': sampler_wrapper.get_sampler(),  # As configured
+            'sampler': sampler,  # As configured
             'coupling': -0.2,  # Coupling energy scale.
             'num_iters': 100,
         }

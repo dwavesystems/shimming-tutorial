@@ -19,7 +19,8 @@ import dwave_networkx as dnx
 import networkx as nx
 import numpy as np
 
-from sampler_wrapper import SamplerWrapper
+from helpers.sampler_wrapper import ShimmingMockSampler
+from dwave.system.samplers import DWaveSampler
 from dwave import embedding
 from minorminer import subgraph as glasgow
 
@@ -200,15 +201,15 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
     return embmat
 
 
-def main():
+def main(sampler_type='mock'):
     L = 32  # Length of chain to embed
-    # Use mock sampler with custom topology
-    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
     
-    # Or, use real DWaveSampler with no extra parameters
-    # sampler_wrapper = SamplerWrapper(sampler_type='real')
-
-    sampler = sampler_wrapper.get_sampler()  # As configured
+    if sampler_type == 'mock':
+        sampler_instance = ShimmingMockSampler()
+        sampler = sampler_instance.get_sampler()
+    else:
+        sampler = DWaveSampler()
+    
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
     for spin in range(L):
         bqm.add_quadratic(spin, (spin + 1) % L, -1)

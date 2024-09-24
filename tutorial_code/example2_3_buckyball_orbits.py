@@ -18,7 +18,8 @@ import dimod
 import networkx as nx
 import numpy as np
 
-from helpers.sampler_wrapper import SamplerWrapper
+from helpers.sampler_wrapper import ShimmingMockSampler
+from dwave.system.samplers import DWaveSampler
 from matplotlib import pyplot as plt
 
 from helpers import orbits
@@ -26,17 +27,19 @@ from helpers.embedding_helpers import raster_embedding_search
 from helpers.orbits import get_orbits
 
 
-def main(visualize=True):
+def main(sampler_type='mock', visualize=True):
     """Main function to run example
 
     Args:
+        sampler_type (string, optional): option to specify sampler type. Defaults to MockDWaveSampler.
         visualize (bool, optional): flag for visualization. Defaults to True.
     """
-    # Use mock sampler with custom topology
-    sampler_wrapper = SamplerWrapper(sampler_type='mock', topology_type='pegasus', topology_shape=[16])
     
-    # Or, use real DWaveSampler with specific solver type
-    # sampler_wrapper = SamplerWrapper(sampler_type='real', solver="Advantage_system4.1")
+    if sampler_type == 'mock':
+        sampler_instance = ShimmingMockSampler()
+        sampler = sampler_instance.get_sampler()
+    else:
+        sampler = DWaveSampler()
 
     # Parse the BQM
     path_to_csv = "data/bucky_ball.csv"
@@ -51,7 +54,7 @@ def main(visualize=True):
         qubit_orbits_opposite, coupler_orbits_opposite) = get_orbits(bqm)
 
     # Embed the BQM onto the QPU
-    qpu = sampler_wrapper.get_sampler()
+    qpu = sampler
     graph_qpu = qpu.to_networkx_graph()
     graph_bqm = dimod.to_networkx_graph(bqm)
 
