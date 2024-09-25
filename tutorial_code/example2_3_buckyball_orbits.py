@@ -31,7 +31,7 @@ def main(sampler_type='mock', visualize=True):
     """Main function to run example
 
     Args:
-        sampler_type (string, optional): option to specify sampler type. Defaults to MockDWaveSampler.
+        sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
         visualize (bool, optional): flag for visualization. Defaults to True.
     """
     

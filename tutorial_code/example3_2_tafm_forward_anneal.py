@@ -384,7 +384,7 @@ def main(sampler_type='mock'):
     """Main function to run example
 
     Args:
-        sampler_type (string, optional): option to specify sampler type. Defaults to MockDWaveSampler.
+        sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
     """
     
     if sampler_type == 'mock':
