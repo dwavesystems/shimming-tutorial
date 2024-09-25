@@ -17,12 +17,13 @@ import os
 import dimod
 import numpy as np
 
+from helpers.sampler_wrapper import ShimmingMockSampler
 from dwave.system.samplers import DWaveSampler
 
 from helpers.embedding_helpers import raster_embedding_search
 
 
-def embed_square_lattice(L, try_to_load=True, **kwargs):
+def embed_square_lattice(L, try_to_load=True, sampler_type='mock', **kwargs):
     """Embeds a square lattice of length `L` (LxL cylinder).
 
     Args:
@@ -32,7 +33,11 @@ def embed_square_lattice(L, try_to_load=True, **kwargs):
     Returns:
         Tuple[np.ndarray, dimod.BQM]: A matrix of embeddings and BQM for the lattice.
     """
-    sampler = DWaveSampler()  # As configured
+
+    if sampler_type == 'mock':
+        sampler = ShimmingMockSampler()
+    else:
+        sampler = DWaveSampler()  # As configured
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 
     for x in range(L):
@@ -51,7 +56,8 @@ def embed_square_lattice(L, try_to_load=True, **kwargs):
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{L:02d}_square_embeddings_cached.txt'
+    solver_name = sampler.properties['chip_id'] # sampler.solver.name
+    cache_filename = f'cached_embeddings/{solver_name}__L{L:02d}_square_embeddings_cached.txt'
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
