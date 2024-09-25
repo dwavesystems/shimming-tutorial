@@ -1,5 +1,10 @@
-from dimod import BinaryQuadraticModel, SampleSet
+from dimod import SampleSet
 from dwave.system.testing import MockDWaveSampler 
+import dimod
+from dwave.system.temperatures import fluxbias_to_h
+import numpy as np
+import warnings
+from uuid import uuid4
 
 class ShimmingMockSampler(MockDWaveSampler):
     def __init__(
@@ -12,8 +17,9 @@ class ShimmingMockSampler(MockDWaveSampler):
         topology_type='pegasus',
         topology_shape=[16],
         parameter_warnings=True,
-        exact_solver_cutoff=16,
-        **config
+        substitute_sampler=None,
+        substitute_kwargs=None,
+        exact_solver_cutoff=0,
     ):
         super().__init__(
             nodelist=nodelist,
@@ -24,14 +30,39 @@ class ShimmingMockSampler(MockDWaveSampler):
             topology_type=topology_type,
             topology_shape=topology_shape,
             parameter_warnings=parameter_warnings,
+            substitute_sampler=substitute_sampler,
+            substitute_kwargs=substitute_kwargs,
             exact_solver_cutoff=exact_solver_cutoff,
-            **config
         )
 
         self.sampler_type = 'mock'
-        #self.topology_type = 'pegasus'
-        #self.topology_shape = [16]
-    
+
+    def sample(self, bqm, **kwargs):
+
+        # Extract flux biases from kwargs (if provided)
+        flux_biases = kwargs.get('flux_biases', {})
+        if flux_biases:
+            # Remove flux_biases from kwargs to avoid passing it to substitute_sampler
+            kwargs = kwargs.copy()
+            del kwargs['flux_biases']
+
+        # Adjust the BQM to include flux biases
+        bqm_effective = bqm.change_vartype('SPIN', inplace=False) 
+
+        flux_to_h_factor = fluxbias_to_h()
+        for v in bqm_effective.variables:
+            if v in flux_biases:
+                bias = bqm_effective.get_linear(v)
+                bqm_effective.set_linear(v, bias + flux_to_h_factor * flux_biases[v])
+
+        ss = super().sample(bqm=bqm_effective, **kwargs)
+
+        ss.change_vartype(bqm.vartype)
+
+        ss = SampleSet.from_samples_bqm(ss, bqm)
+
+        return ss
+
     def get_sampler(self):
         """
         Return the sampler instance.

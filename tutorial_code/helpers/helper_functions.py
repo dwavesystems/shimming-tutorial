@@ -249,7 +249,7 @@ def load_experiment_data(prefix, data_dict):
         dict: dictionary of experiment data.
     """
     filename = 'savedata_' + prefix + '.pkl'
-    filepath = Path('cached_experiment_data').joinpath(''.join(filename))
+    filepath = Path('cached_experiment_data_GPU').joinpath(''.join(filename))
 
     if not os.path.exists(filepath):
         print(f'{filepath} not found.  Couldn''t load data.')
