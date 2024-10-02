@@ -1,10 +1,6 @@
 from dimod import SampleSet
 from dwave.system.testing import MockDWaveSampler 
-import dimod
 from dwave.system.temperatures import fluxbias_to_h
-import numpy as np
-import warnings
-from uuid import uuid4
 
 class ShimmingMockSampler(MockDWaveSampler):
     def __init__(
