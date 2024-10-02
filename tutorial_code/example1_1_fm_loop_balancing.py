@@ -74,8 +74,7 @@ def make_bqm(param, shim, embeddings):
     )
     for iemb, emb in enumerate(embeddings):
         for spin in range(param['L']):
-            if param['coupling'] != 0:
-                 bqm.add_quadratic(emb[spin], emb[(spin + 1) % param['L']],
+            bqm.add_quadratic(emb[spin], emb[(spin + 1) % param['L']],
                               shim['couplings'][iemb, spin])
 
     return bqm
@@ -169,7 +168,6 @@ def run_iteration(param, shim, stats, embeddings):
 
     for qubit, fbo in fbo_dict.items():
         flux_biases[qubit] = fbo
-
     result = param['sampler'].sample(
         bqm,
         annealing_time=1.0,
@@ -180,7 +178,6 @@ def run_iteration(param, shim, stats, embeddings):
         flux_biases=flux_biases,
         answer_mode="raw",
     )
-
     adjust_fbos(result, param, shim, stats, embeddings)
     adjust_couplings(result, param, shim, stats, embeddings)
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
@@ -204,7 +201,6 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
 
     data_dict = {'param': param, 'shim': shim, 'stats': stats}
     data_dict = load_experiment_data(prefix, data_dict)
-
     if data_dict is not None:
         param = data_dict['param']
         shim = data_dict['shim']
@@ -213,7 +209,7 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
     else:
         print("Running experiment")
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
-            if iteration < 10:
+            if iteration < param['num_iters_unshimmed']:
                shim['alpha_Phi'] = 0.
             else:
                shim['alpha_Phi'] = _alpha_Phi
@@ -265,13 +261,16 @@ def main(sampler_type='mock', model_type='independent_spins'):
     else:
         coupling = -0.2
         embeddings = embed_loops(param['L'], sampler.to_networkx_graph())  
-    
+
+    num_iters_unshimmed = 10
+    num_iters = 20
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L':16,
             'sampler': sampler,  # As configured
             'coupling': coupling,  # Coupling energy scale.
-            'num_iters': 100,
+            'num_iters': num_iters,
+            'num_iters_unshimmed': num_iters_unshimmed,
         }
 
         embeddings = embed_loops(param['L'], sampler = param['sampler'])
