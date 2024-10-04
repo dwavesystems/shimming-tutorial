@@ -180,11 +180,14 @@ def run_iteration(param, shim, embeddings, stats):
     """
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
-    fbo_list = [0] * param['sampler'].properties['num_qubits']
+    
+    # if 'fbos' in shim:
+    #   flux_biases = shim['fbos'] 
+    # else:
+    flux_biases = [0] * param['sampler'].properties['num_qubits']
+
     for qubit, fbo in fbo_dict.items():
-        # added contraint for index out of bounds
-        if qubit < len(fbo_list):  # Ensure qubit is within range
-            fbo_list[qubit] = fbo
+            flux_biases[qubit] = fbo
      
 
     result = param['sampler'].sample(
@@ -194,7 +197,7 @@ def run_iteration(param, shim, embeddings, stats):
         readout_thermalization=100.,
         auto_scale=False,
         flux_drift_compensation=True,
-        flux_biases=fbo_list,
+        flux_biases=flux_biases,
         answer_mode="raw",
     )
 
@@ -230,7 +233,7 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
 
     else:
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
-            if iteration < 100:
+            if iteration < param['num_iters_unshimmed']:
                 shim['alpha_Phi'] = 0.
             else:
                 shim['alpha_Phi'] = alpha_Phi
@@ -257,7 +260,7 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
                            frust=stats['frust'])
 
 
-def main(sampler_type='mock'):
+def main(sampler_type='mock', model_type=None ):
     """Main function to run example
 
     Args:
@@ -270,22 +273,35 @@ def main(sampler_type='mock'):
     else:
         sampler = DWaveSampler()
 
-    param = {
-        'L': 16,
-        'sampler': sampler,  # As configured
-        'coupling': -0.9,  # Coupling energy scale.
-        'num_iters': 300,
-    }
+    # Determine the number of qubits in the QPU
+    num_programmed_variables = len(sampler.nodelist)
 
-    embeddings = embed_loops(param['L'], sampler = param['sampler'])
-    print(f"Embeddings: {embeddings}")
+    # Each qubit is treated as an independent unit.  Embedding is a list of list,
+    # where each iner list contains a single qubit from the nodelist. 
+    if model_type == 'independent_spins':
+        coupling = 0  
+    else:
+        coupling = -0.2
+        
+    num_iters_unshimmed = 10
+    num_iters = 20
+    param = {
+            'L':16,
+            'sampler': sampler,  # As configured
+            'coupling': coupling,  # Coupling energy scale.
+            'num_iters': num_iters,
+            'num_iters_unshimmed': num_iters_unshimmed,
+        }
+ 
+    embeddings = embed_loops(sampler=sampler, L=param['L'], try_to_load=False) 
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-        'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
+        'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
+        #'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
         'coupler_orbits': [0] * param['L'],
     }
 
