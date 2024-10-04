@@ -181,9 +181,6 @@ def run_iteration(param, shim, embeddings, stats):
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
     
-    # if 'fbos' in shim:
-    #   flux_biases = shim['fbos'] 
-    # else:
     flux_biases = [0] * param['sampler'].properties['num_qubits']
 
     for qubit, fbo in fbo_dict.items():
@@ -233,11 +230,11 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
 
     else:
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
-            if iteration < param['num_iters_unshimmed']:
+            if iteration < param['num_iters_unshimmed_flux']:
                 shim['alpha_Phi'] = 0.
             else:
                 shim['alpha_Phi'] = alpha_Phi
-            if iteration < 200:
+            if iteration < param['num_iters_unshimmed_J']:
                 shim['alpha_J'] = 0.
             else:
                 shim['alpha_J'] = alpha_J
@@ -260,11 +257,16 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
                            frust=stats['frust'])
 
 
-def main(sampler_type='mock', model_type=None ):
-    """Main function to run example
+def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=200):
+    """
+    Main function to run example
 
     Args:
         sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
+        model_type (string): option to specify a model type. Defaults to independent spins.
+        num_iters (int): option to specify the number of iterations for the experiment. Defaults to 300.
+        num_iters_unshimmed_flux (int): option to specify the number of iteratrions that doesn't shim flux_biases. Defaults to 100.
+        num_iters_unshimmed_J (int): option to specify number of iterations that doesn't shim alpha_J. Defaults to 200.
     """
 
     if sampler_type == 'mock':
@@ -273,9 +275,6 @@ def main(sampler_type='mock', model_type=None ):
     else:
         sampler = DWaveSampler()
 
-    # Determine the number of qubits in the QPU
-    num_programmed_variables = len(sampler.nodelist)
-
     # Each qubit is treated as an independent unit.  Embedding is a list of list,
     # where each iner list contains a single qubit from the nodelist. 
     if model_type == 'independent_spins':
@@ -283,14 +282,13 @@ def main(sampler_type='mock', model_type=None ):
     else:
         coupling = -0.2
         
-    num_iters_unshimmed = 10
-    num_iters = 20
     param = {
             'L':16,
             'sampler': sampler,  # As configured
             'coupling': coupling,  # Coupling energy scale.
             'num_iters': num_iters,
-            'num_iters_unshimmed': num_iters_unshimmed,
+            'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
+            'num_iters_unshimmed_J': num_iters_unshimmed_J
         }
  
     embeddings = embed_loops(sampler=sampler, L=param['L'], try_to_load=False) 
