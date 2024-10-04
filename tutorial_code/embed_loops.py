@@ -18,7 +18,6 @@ import dimod
 import numpy as np
 
 from dwave.system.samplers import DWaveSampler
-from helpers.sampler_wrapper import ShimmingMockSampler
 
 class EmbeddingError(Exception):
     pass
@@ -26,16 +25,18 @@ class EmbeddingError(Exception):
 # from helpers.embedding_helpers import raster_embedding_search
 from minorminer.utils.raster_embedding import raster_embedding_search
 
-def embed_loops(L, try_to_load=True, raster_breadth=2, sampler = None):
-    """Embed loops of length L
+def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
+    """
+        Attempts to expand an independent set by replacing subsets of size 'greed' with larger independent sets.
+        The function iteratively tries to improve the given independent set by exploring the neighborhood of subsets.
 
-    Args:
-        L (int): chain length
-        try_to_load (bool, optional): Flag for loading from cached data. Defaults to True.
-        raster_breadth (int, optional): breadth parameter for raster embedding search. Defaults to 2.
+        Parameters:
+        G (networkx.Graph): The input graph.
+        independent_set (list or set): A list or set of nodes forming an independent set in G.
+        greed (int): The size of subsets to remove from the independent set in each iteration.
 
-    Returns:
-        numpy.ndarray: a matrix of embeddings
+        Returns:
+        list: An independent set at least as big as the original.
     """
     if not isinstance(L, int):
         raise EmbeddingError(f"'L' must be an integer. Received type {type(L).__name__}.")
@@ -49,9 +50,6 @@ def embed_loops(L, try_to_load=True, raster_breadth=2, sampler = None):
 
     if not isinstance(try_to_load, bool):
         raise EmbeddingError(f"'try_to_load' must be a boolean. Received type {type(try_to_load).__name__}.")
-    
-    if sampler is None :
-        sampler = DWaveSampler()  # As configured
 
     bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',
