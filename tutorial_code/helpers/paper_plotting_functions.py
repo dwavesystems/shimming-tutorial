@@ -44,122 +44,95 @@ def paper_plots_example1_1(*, alpha_phi, all_fbos, mags):
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_1
         mags (list[np.ndarray]): 'mags' in the stats dictionary from example1_1
     """
-    # Plot FBOs for first embedding
-    plt.clf()
+    # Create a figure with 1 row and 3 columns for side-by-side plots
+    fig, axs = plt.subplots(1, 3, figsize=(18, 5))  # Adjust figsize for width and height
 
-    plt.plot(
-        np.array([x[0] for x in all_fbos])
-    )
-    plt.title('Flux-bias offsets')
-    plt.xlabel('Iteration')
-    plt.ylabel(r'$\Phi_i$ ($\Phi_0$)')
-    plt.ylim(max(abs(np.array(plt.ylim()))) * np.array([-1, 1]))
+    # Plot 1: Flux-bias offsets
+    axs[0].plot(np.array([x[0] for x in all_fbos]))
+    axs[0].set_title('Flux-bias offsets')
+    axs[0].set_xlabel('Iteration')
+    axs[0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+    axs[0].set_ylim(max(abs(np.array(axs[0].get_ylim()))) * np.array([-1, 1]))
 
-    if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{alpha_phi:.6f}_fbos'
-        code = tikzplotlib.get_tikz_code(
-            standalone=True,
-            axis_width='5cm', axis_height='5cm',
-            float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,
-        )
-        code = code.replace('\\documentclass{standalone}',
-                            '\\documentclass{standalone}\n' + extra_code)
-
-        with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-            f.write(code)
-    else:
-        plt.show()
-
-    # Plot histograms of mags
-    plt.clf()
-
+    # Plot 2: Histograms of Magnetizations
     M = np.array(mags)
     Y = movmean(M, 10)
+    axs[1].hist(Y[10].ravel(), alpha=0.5, bins=np.arange(-.51, .5, 0.02),
+                label=f'first 10 iterations', density=True)
+    axs[1].hist(Y[-1].ravel(), alpha=0.5, bins=np.arange(-.51, .5, 0.02),
+                label=f'last 10 iterations', density=True)
+    axs[1].set_title('Magnetizations')
+    axs[1].set_xlabel(r'$\langle s_i \rangle$')
+    axs[1].set_ylabel('Prob. density')
+    axs[1].legend(frameon=False)
+    axs[1].set_xlim([-.5, .5])
+    axs[1].set_ylim((0, axs[1].get_ylim()[-1] * 1.4))
 
-    plt.hist(Y[10].ravel(), alpha=0.5, bins=np.arange(-.51, .5, 0.02),
-             label=f'first 10 iterations',
-             density=True)
-    plt.hist(Y[-1].ravel(), alpha=0.5, bins=np.arange(-.51, .5, 0.02),
-             label=f'last 10 iterations',
-             density=True)
+    # Plot 3: Standard deviation of Magnetizations
+    axs[2].plot(np.std(M, axis=(1, 2)))
+    axs[2].set_title(r'$\sigma$ of qubit magnetizations')
+    axs[2].set_xlabel('Iteration')
+    axs[2].set_ylabel(r'$\sigma$')
+    axs[2].set_ylim([0, .5])
 
-    plt.title('Magnetizations')
-    plt.xlabel(r'$\langle s_i \rangle$')
-    plt.ylabel('Prob. density')
-    plt.legend(frameon=False)
+    # Adjust layout to prevent overlapping of titles and labels
+    plt.tight_layout()
 
-    plt.xlim([-.5, .5])
-    plt.ylim((0, plt.ylim()[-1] * 1.4))
-
+    # Generate TikZ plots or show the canvas
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{alpha_phi:.6f}_mag_hist'
-        code = tikzplotlib.get_tikz_code(
-            standalone=True,
-            axis_width='5cm', axis_height='5cm',
-            float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,
-        )
-        code = code.replace('\\documentclass{standalone}',
-                            '\\documentclass{standalone}\n' + extra_code)
+        # Loop through each axis and save the corresponding TikZ code
+        plot_titles = ['Flux-bias offsets', 'Magnetizations', 'Mag std']
+        file_names = [f'ex11_aPhi{alpha_phi:.6f}_fbos', 
+                      f'ex11_aPhi{alpha_phi:.6f}_mag_hist', 
+                      f'ex11_aPhi{alpha_phi:.6f}_mag_std']
 
-        with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-            f.write(code)
+        for i, ax in enumerate(axs):
+            fn = file_names[i]
+            code = tikzplotlib.get_tikz_code(
+                figure=fig,  # Use the figure reference to export specific subplots
+                axis_width='5cm', axis_height='5cm',
+                float_format='.5g',
+                extra_axis_parameters=tikz_axis_parameters
+            )
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
+
+            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
+                f.write(code)
     else:
+        # Display the canvas with all three plots in one line
         plt.show()
 
-    # Plot mean abs difference of mags
-    plt.clf()
-
-    plt.plot(
-        # Plots the mean abs difference in magnetization from one call to the next...
-        np.std(np.abs(np.diff(M, axis=0)), axis=(1, 2))
-    )
-    plt.title(r'Mean jump in $\langle s_i\rangle$')
-    plt.xlabel('Iteration')
-    plt.ylabel(r'Mean absolute difference')
-    plt.ylim([0, .7])
-
-    if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{alpha_phi:.6f}_mag_diff'
-        code = tikzplotlib.get_tikz_code(
-            standalone=True,
-            axis_width='5cm', axis_height='5cm',
-            float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,
+    """
+        # Plot mean abs difference of mags
+        plt.clf()
+        
+        
+        plt.plot(
+            # Plots the mean abs difference in magnetization from one call to the next...
+            np.std(np.abs(np.diff(M, axis=0)), axis=(1, 2))
         )
-        code = code.replace('\\documentclass{standalone}',
-                            '\\documentclass{standalone}\n' + extra_code)
+        plt.title(r'Mean jump in $\langle s_i\rangle$')
+        plt.xlabel('Iteration')
+        plt.ylabel(r'Mean absolute difference')
+        plt.ylim([0, .7])
 
-        with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-            f.write(code)
-    else:
-        plt.show()
+        if MAKE_TIKZ_PLOTS:
+            fn = f'ex11_aPhi{alpha_phi:.6f}_mag_diff'
+            code = tikzplotlib.get_tikz_code(
+                standalone=True,
+                axis_width='5cm', axis_height='5cm',
+                float_format='.5g',
+                extra_axis_parameters=tikz_axis_parameters,
+            )
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
 
-    # Plot magstd
-    plt.clf()
-
-    plt.plot(np.std(M, axis=(1, 2)))
-    plt.title(r'$\sigma$ of qubit magnetizations')
-    plt.xlabel('Iteration')
-    plt.ylabel(r'$\sigma$')
-    plt.ylim([0, .5])
-
-    if MAKE_TIKZ_PLOTS:
-        fn = f'ex11_aPhi{alpha_phi:.6f}_mag_std'
-        code = tikzplotlib.get_tikz_code(
-            standalone=True,
-            axis_width='5cm', axis_height='5cm',
-            float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,
-        )
-        code = code.replace('\\documentclass{standalone}',
-                            '\\documentclass{standalone}\n' + extra_code)
-
-        with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-            f.write(code)
-    else:
-        plt.show()
+            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
+                f.write(code)
+        else:
+            plt.show()
+    """
 
 
 def paper_plots_example1_2(*, all_couplings, all_fbos):
@@ -258,7 +231,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
         mags (np.ndarray): 'mags' in the stats dictionary from example2_2
         frust (np.ndarray): 'frust' in the stats dictionary from example2_2
     """
-
+    """
     # Plot FBOs for first embedding
     plt.clf()
 
@@ -370,7 +343,64 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
     else:
         plt.show()
 
+    """
+     # Create a figure with 1 row and 4 columns for side-by-side plots
+    fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Adjust figsize for width and height
 
+    # Plot FBOs for first embedding in first axis
+    axs[0].plot(np.array([x[0] for x in all_fbos]))
+    axs[0].set_title('Flux-bias offsets')
+    axs[0].set_xlabel('Iteration')
+    axs[0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+    axs[0].set_ylim(max(abs(np.array(axs[0].get_ylim()))) * np.array([-1, 1]))
+
+    # Plot Js for first embedding in second axis
+    axs[1].plot(np.array([x[0] / nominal_couplings for x in all_couplings]))
+    axs[1].set_title('Couplings (relative to nominal)')
+    axs[1].set_xlabel('Iteration')
+    axs[1].set_ylabel(r'$J_{i,j}/J_{i,j}^{{\ nominal}}$')
+
+    # Plot std of magnitudes in third axis
+    M = np.array(mags)
+    Y = movmean(M, 10)
+    axs[2].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[2].set_title(r'$\sigma_m$ (10-iter M.M.)')
+    axs[2].set_xlabel('Iteration')
+    axs[2].set_ylabel(r'$\sigma_m$')
+
+    # Plot std of frustration in fourth axis
+    M = np.array(frust)
+    Y = movmean(M, 10)
+    axs[3].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[3].set_title(r'$\sigma_f$ (10-iter M.M.)')
+    axs[3].set_xlabel('Iteration')
+    axs[3].set_ylabel(r'$\sigma_f$')
+
+    # Adjust layout to prevent overlapping of titles and labels
+    plt.tight_layout()
+
+    # Generate TikZ plots or show the canvas
+    if MAKE_TIKZ_PLOTS:
+        plot_titles = ['FBOs', 'Couplings', 'Mag std', 'Frust std']
+        file_names = ['ex22_fbos', 'ex22_Js', 'ex22_mag_std', 'ex22_frust_std']
+
+        for i, ax in enumerate(axs):
+            fn = file_names[i]
+            code = tikzplotlib.get_tikz_code(
+                figure=fig,  # Use the figure reference to export specific subplots
+                axis_width='4cm', axis_height='5cm',
+                float_format='.5g',
+                extra_axis_parameters=tikz_axis_parameters + [
+                    r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=3,},']
+            )
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
+
+            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
+                f.write(code)
+    else:
+        # Display the canvas with all four plots in one line
+        plt.show()
 def paper_plots_example3_2(*, halve_boundary_couplers,
                            type_, nominal_couplings, coupler_orbits,
                            all_fbos, all_couplings, mags, frust, all_psi):
@@ -387,6 +417,7 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
         frust (np.ndarray): 'frust' in the stats dictionary from example3_2
         all_psi (list[np.ndarray]): 'all_psi' in the stats dictionary from example3_2
     """
+    
     plt.clf()
 
     plt.plot(
