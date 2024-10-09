@@ -77,9 +77,10 @@ def shim_parameter_rescaling(statistic, num_iters=20, ratio=1.1, tol=0.1):
 
 
 def plot_data(*, all_fbos, mags, all_couplings, frust, all_alpha_phi, all_alpha_j,
-              coupler_orbits, alpha_phi, alpha_j,
-              coupling, L):
-    """Plots diagnostics for the convergence of shims
+            coupler_orbits, alpha_phi, alpha_j,
+            coupling, L):
+    """
+    Plots diagnostics for the convergence of shims
 
     Args:
         all_fbos (list(np.ndarray)): 'all_fbos' in the experiment's stats dictionary
