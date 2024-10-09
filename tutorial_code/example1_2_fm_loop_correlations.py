@@ -147,9 +147,14 @@ def run_iteration(param, shim, stats, embeddings):
     """
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
-    fbo_list = [0] * param['sampler'].properties['num_qubits']
+    
+    # if flux_biases in shim:
+    #    flux_biases = shim['flux_biases'] 
+    # else:
+    flux_biases = [0] * param['sampler'].properties['num_qubits']
+
     for qubit, fbo in fbo_dict.items():
-        fbo_list[qubit] = fbo
+        flux_biases[qubit] = fbo
 
     result = param['sampler'].sample(
         bqm,
@@ -158,7 +163,7 @@ def run_iteration(param, shim, stats, embeddings):
         readout_thermalization=100.,
         auto_scale=False,
         flux_drift_compensation=True,
-        flux_biases=fbo_list,
+        flux_biases=flux_biases,
         answer_mode="raw",
     )
 
@@ -168,7 +173,7 @@ def run_iteration(param, shim, stats, embeddings):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
+def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
     """Run the full experiment
 
     Args:
@@ -181,7 +186,7 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
         _alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0..
         _alpha_J (float, optional): learning rate for coupling shims. Defaults to 0..
     """
-    prefix = f'example1_2_aPhi{alpha_Phi}_aJ{alpha_J}'
+    prefix = f'example1_2_aPhi{_alpha_Phi}_aJ{_alpha_J}'
 
     data_dict = {'param': param, 'shim': shim, 'stats': stats}
     data_dict = load_experiment_data(prefix, data_dict)
@@ -192,15 +197,14 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
         stats = data_dict['stats']
 
     else:
-        for iter in tqdm(range(param['num_iters']), total=param['num_iters']):
-            if iter < 100:
+        print("Running experiment")
+        for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
+            if iteration < param['num_iters_unshimmed_flux']:
                 shim['alpha_Phi'] = 0.
             else:
-                shim['alpha_Phi'] = alpha_Phi
-            if iter < 200:
-                shim['alpha_J'] = 0.
-            else:
-                shim['alpha_J'] = alpha_J
+                shim['alpha_Phi'] = _alpha_Phi
+            
+            shim['alpha_Phi'] = _alpha_Phi
             run_iteration(param, shim, stats, embeddings)
 
         save_experiment_data(
@@ -216,7 +220,7 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
     paper_plots_example1_2(all_couplings=stats['all_couplings'], all_fbos=stats['all_fbos'])
 
 
-def main(sampler_type='mock'):
+def main(sampler_type='mock', model_type='independent_spins', num_iters=100, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=200):
     """Main function to run example
 
     Args:
@@ -228,21 +232,34 @@ def main(sampler_type='mock'):
     else:
         sampler = DWaveSampler()
 
-    param = {
-        'L': 64,
-        'sampler': sampler,  # As configured
-        'coupling': -0.2,  # Coupling energy scale.
-        'num_iters': 300,
-    }
+    # Determine the number of qubits in the QPU
+    num_programmed_variables = len(sampler.nodelist)
 
-    embeddings = embed_loops(param['L'], sampler = param['sampler'])
+    # Each qubit is treated as an independent unit.  Embedding is a list of list,
+    # where each iner list contains a single qubit from the nodelist. 
+    if model_type == 'independent_spins':
+        coupling = 0  
+    else:
+        coupling = -0.2
+
+    param = {
+        'L': 16,
+        'sampler': sampler,  # As configured
+        'coupling': coupling,  # Coupling energy scale.
+        'num_iters': num_iters,
+        'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
+        'num_iters_unshimmed_J': num_iters_unshimmed_J,
+    }
+    
+    embeddings = embed_loops(sampler=sampler, L=param['L'], try_to_load=False)
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-        'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
+        'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
+        # 'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
         'coupler_orbits': [0] * param['L'],  # We manually set all couplers to the same orbit.
     }
 

@@ -20,7 +20,7 @@ from dwave.system.samplers import DWaveSampler
 from tqdm import tqdm
 
 from embed_loops import embed_loops
-from helpers.helper_functions import load_experiment_data, plot_data, save_experiment_data
+from helpers.helper_functions import load_experiment_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example2_2
 
 
@@ -245,11 +245,11 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
             {'param': param, 'shim': shim, 'stats': stats}
         )
 
-    plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
-              all_couplings=stats['all_couplings'], frust=stats['frust'],
-              all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
-              coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
-              coupling=param["coupling"], L=param["L"])
+    # plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
+    #         all_couplings=stats['all_couplings'], frust=stats['frust'],
+    #          all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
+    #          coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
+    #          coupling=param["coupling"], L=param["L"])
     paper_plots_example2_2(nominal_couplings=shim['nominal_couplings'],
                            all_fbos=stats['all_fbos'],
                            all_couplings=stats['all_couplings'],
@@ -263,7 +263,7 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
 
     Args:
         sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
-        model_type (string): option to specify a model type. Defaults to independent spins.
+        model_type (string): option to specify a model type. Defaults to None.
         num_iters (int): option to specify the number of iterations for the experiment. Defaults to 300.
         num_iters_unshimmed_flux (int): option to specify the number of iteratrions that doesn't shim flux_biases. Defaults to 100.
         num_iters_unshimmed_J (int): option to specify number of iterations that doesn't shim alpha_J. Defaults to 200.
@@ -291,7 +291,7 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
             'num_iters_unshimmed_J': num_iters_unshimmed_J
         }
  
-    embeddings = embed_loops(sampler=sampler, L=param['L'], try_to_load=False) 
+    embeddings = embed_loops(sampler=sampler, L=param['L']) 
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {

@@ -20,11 +20,10 @@ from dwave.system.samplers import DWaveSampler
 from tqdm import tqdm
 
 from embed_square_lattice import embed_square_lattice
-from helpers.helper_functions import (load_experiment_data, plot_data, save_experiment_data,
+from helpers.helper_functions import (load_experiment_data, save_experiment_data, plot_data,
                                       shim_parameter_rescaling)
 from helpers import orbits
 from helpers.paper_plotting_functions import paper_plots_example3_2
-
 
 def make_fbo_dict(embeddings, shim):
     """Makes the FBO dict from the matrix of FBOs.
@@ -282,9 +281,9 @@ def run_iteration(param, shim, stats, embeddings, logical_bqm):
     """
     bqm = make_bqm(shim, embeddings, logical_bqm)
     fbo_dict = make_fbo_dict(embeddings, shim)
-    fbo_list = [0] * param['sampler'].properties['num_qubits']
+    flux_biases = [0] * param['sampler'].properties['num_qubits']
     for qubit, fbo in fbo_dict.items():
-        fbo_list[qubit] = fbo
+        flux_biases[qubit] = fbo
 
     result = param['sampler'].sample(
         bqm,
@@ -293,7 +292,7 @@ def run_iteration(param, shim, stats, embeddings, logical_bqm):
         readout_thermalization=100.,
         auto_scale=False,
         flux_drift_compensation=True,
-        flux_biases=fbo_list,
+        flux_biases=flux_biases,
         answer_mode="raw",
     )
 
@@ -340,11 +339,11 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
             # Fixed step sizes
 
             for iteration in pbar:
-                if iteration < 100:
+                if iteration < param['num_iters_unshimmed_flux']:
                     shim['alpha_Phi'] = 0.
                 else:
                     shim['alpha_Phi'] = alpha_Phi
-                if iteration < 300:
+                if iteration < param['num_iters_unshimmed_J']:
                     shim['alpha_J'] = 0.
                 else:
                     shim['alpha_J'] = alpha_J
@@ -367,7 +366,7 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
             prefix,
             {'param': param, 'shim': shim, 'stats': stats}
         )
-
+    
     plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
               all_couplings=stats['all_couplings'], frust=stats['frust'],
               all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
@@ -380,7 +379,7 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
                            frust=stats['frust'], all_psi=stats['all_psi'])
 
 
-def main(sampler_type='mock'):
+def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=300):
     """Main function to run example
 
     Args:
@@ -398,32 +397,43 @@ def main(sampler_type='mock'):
     halve_boundary_couplers = False
     assert shimtype in ['embedded_finite', 'embedded_infinite', 'triangular_infinite']
 
+    # Each qubit is treated as an independent unit.  Embedding is a list of list,
+    # where each iner list contains a single qubit from the nodelist. 
+    if model_type == 'independent_spins':
+        coupling = 0  
+    else:
+        coupling = 0.9
+        
     param = {
         'L': 12,
         'sampler': sampler,  # As configured
         # Magnitude of coupling for FM chains, as a multiple of AFM coupling.
         'chain_strength': 2.0,
-        'coupling': 0.9,  # Coupling energy scale.  Should be positive.
-        'num_iters': 800,
+        'coupling': coupling,  # Coupling energy scale.  Should be positive.
+        'num_iters': num_iters,
+        'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
+        'num_iters_unshimmed_J': num_iters_unshimmed_J,
         # Option to divide J by two on the boundaries.
         'halve_boundary_couplers': halve_boundary_couplers,
         'adaptive_step_size': adaptive_step_size,  # Option to adaptively tune step sizes for shim.
     }
 
     # Make the logical BQM and a bunch of disjoint embeddings
-    embeddings, _ = embed_square_lattice(param['L'])
+    embeddings, _ = embed_square_lattice(sampler=sampler, L=param['L'])
 
     # Make the logical BQM to get orbits for a single embedding.
     # Doing it for all embeddings together is very slow with pynauty.
     logical_bqm = make_logical_bqm(param)
     unsigned_orbits = orbits.get_orbits(logical_bqm)
 
+    max_spin = max(len(emb) for emb in embeddings)
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': np.array([list(logical_bqm.quadratic.values())] * len(embeddings)),
-        'fbos': np.zeros_like(embeddings, dtype=float),
+        'fbos': -100e-6 * np.ones((len(embeddings), max_spin), dtype=float),  # offset here, then it should return to 0
+        # 'fbos': np.zeros_like(embeddings, dtype=float),
         'type': 'embedded_infinite',
         'coupler_damp': 0.0,
     }

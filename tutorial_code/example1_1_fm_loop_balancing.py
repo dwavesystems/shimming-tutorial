@@ -13,25 +13,18 @@
 # limitations under the License.
 #
 
-# working with binary quadratic models, essential for formulating Ising problems
 import dimod
-# for numerical operations 
 import numpy as np
 
 from helpers.sampler_wrapper import ShimmingMockSampler
 from dwave.system.samplers import DWaveSampler
-# display progress bar during iterations 
 from tqdm import tqdm
 
-# embedding the FM loop into the QPUs topology
 from embed_loops import embed_loops
-# functions to load, save, and plot experiment data
-from helpers.helper_functions import load_experiment_data, plot_data, save_experiment_data
+from helpers.helper_functions import load_experiment_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example1_1
 
-# constructs a dictionary mapping each qubit in the QPU to its corresponding flux bias offset value
-# iterates over each embedding and each spin withiin the loop
-# assign the corresponding FBO from the shim data to the specific qubit in QPU
+
 def make_fbo_dict(param, shim, embeddings):
     """Makes the FBO dict from the matrix of FBOs.
 
@@ -52,9 +45,7 @@ def make_fbo_dict(param, shim, embeddings):
 
     return fbo_dict
 
-# costructs a bqm representing the fm loop with updated couplings
-# prepares he bqm for the QPU to solve, incorporating the current shimming state to ensure 
-# uniform frustration probabilities across couplers
+
 def make_bqm(param, shim, embeddings):
     """Makes the BQM from the matrix of coupling values.
 
@@ -79,9 +70,7 @@ def make_bqm(param, shim, embeddings):
 
     return bqm
 
-# adjust the flux bias offsets to minimize the average magnetization of each qubit. 
-# Iterative gradient descen method described in the paper for balancing qubit magnetizations, 
-# ensuring that each qubit's average magnetization approaches zero
+
 def adjust_fbos(result, param, shim, stats, embeddings):
     """Adjust flux bias offsets in-place.
 
@@ -109,7 +98,6 @@ def adjust_fbos(result, param, shim, stats, embeddings):
     stats['mags'].append(mag_array)
     stats['all_fbos'].append(shim['fbos'].copy())
 
-# adjust the coupler strengths to ensure uniform frustration probabilities across all couplers 
 def adjust_couplings(result, param, shim, stats, embeddings):
     """Adjust couplings given a sample set.
 
@@ -145,7 +133,7 @@ def adjust_couplings(result, param, shim, stats, embeddings):
     stats['all_couplings'].append(shim['couplings'].copy())
     stats['frust'].append(frust_matrix)
 
-# encapsulates a single iteration of the calibration process, performing sampling, adjusting fbos and couplings
+
 def run_iteration(param, shim, stats, embeddings):
     """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
     bias offsets and couplings, and update statistics.
@@ -161,9 +149,6 @@ def run_iteration(param, shim, stats, embeddings):
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
 
-    # if 'fbos' in shim:
-    #   flux_biases = shim['fbos'] 
-    # else:
     flux_biases = [0] * param['sampler'].properties['num_qubits']
 
     for qubit, fbo in fbo_dict.items():
@@ -183,7 +168,7 @@ def run_iteration(param, shim, stats, embeddings):
     stats['all_alpha_Phi'].append(shim['alpha_Phi'])
     stats['all_alpha_J'].append(shim['alpha_J'])
 
-# executes the entire calibration experiment, managing data loading/saving and plotting 
+
 def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
     """Run the full experiment
 
@@ -209,16 +194,11 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
     else:
         print("Running experiment")
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
-            if iteration < param['num_iters_unshimmed']:
+            if iteration < param['num_iters_unshimmed_flux']:
                shim['alpha_Phi'] = 0.
             else:
                shim['alpha_Phi'] = _alpha_Phi
-            """
-            if iteration < 10:
-                shim['alpha_Phi'] = _alpha_Phi * 2
-            else:
-                shim['alpha_Phi'] = _alpha_Phi
-            """
+
             shim['alpha_J'] = _alpha_J
             run_iteration(param, shim, stats, embeddings)
 
@@ -226,22 +206,23 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
             prefix,
             {'param': param, 'shim': shim, 'stats': stats}
         )
-       
 
-    plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
-              all_couplings=stats['all_couplings'], frust=stats['frust'],
-              all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
-              coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
-              coupling=param["coupling"], L=param["L"])
+    
+
     paper_plots_example1_1(alpha_phi=shim['alpha_Phi'],
                            all_fbos=stats['all_fbos'], mags=stats['mags'])
 
 
-def main(sampler_type='mock', model_type='independent_spins'):
-    """Main function to run example
+def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimmed_flux=10):
+    """
+    Main function to run example
 
     Args:
         sampler_type (string, optional): option to specify sampler type. Defaults to MockDWaveSampler.
+        model_type (string): option to specify a model type. Defaults to independent spins.
+        num_iters (int): option to specify the number of iterations for the experiment. Defaults to 300.
+        num_iters_unshimmed_flux (int): option to specify the number of iteratrions that doesn't shim flux_biases. Defaults to 100.
+        num_iters_unshimmed_J (int): option to specify number of iterations that doesn't shim alpha_J. Defaults to 200.
     """
 
     if sampler_type == 'mock':
@@ -250,38 +231,29 @@ def main(sampler_type='mock', model_type='independent_spins'):
     else:
         sampler = DWaveSampler()
     
-    # Determine the number of qubits in the QPU
-    num_programmed_variables = len(sampler.nodelist)
-    
-    # Each qubit is treated as an independent unit.  Embedding is a list of list,
-    # where each iner list contains a single qubit from the nodelist. 
     if model_type == 'independent_spins':
-        embeddings = [[n for n in sampler.nodelist]]
         coupling = 0  
     else:
         coupling = -0.2
-        embeddings = embed_loops(param['L'], sampler.to_networkx_graph())  
 
-    num_iters_unshimmed = 10
-    num_iters = 20
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L':16,
             'sampler': sampler,  # As configured
             'coupling': coupling,  # Coupling energy scale.
             'num_iters': num_iters,
-            'num_iters_unshimmed': num_iters_unshimmed,
+            'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
         }
 
-        embeddings = embed_loops(param['L'], sampler = param['sampler'])
+        embeddings = embed_loops(sampler=sampler, L=param['L']) 
 
         # Where the shim data (parameters and Hamiltonian terms) are stored
         shim = {
             'alpha_Phi': 0.0,
             'alpha_J': 0.0,
+            # 'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float) + 0.02*np.random.normal(param['L']),
             'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
             'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
-            # 'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
             'coupler_orbits': [0] * param['L'],  # We manually set all couplers to the same orbit.
         }
         
@@ -295,7 +267,8 @@ def main(sampler_type='mock', model_type='independent_spins'):
             'all_alpha_J': [],
         }
 
-        run_experiment(param, shim, stats, embeddings, alpha_Phi, 0.)
+        # check original code
+        run_experiment(param, shim, stats, embeddings, alpha_Phi, .0)
 
 if __name__ == "__main__":
     main()
