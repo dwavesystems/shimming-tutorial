@@ -367,11 +367,6 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
             {'param': param, 'shim': shim, 'stats': stats}
         )
     
-    plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
-              all_couplings=stats['all_couplings'], frust=stats['frust'],
-              all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
-              coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
-              coupling=param["coupling"], L=param["L"])
     paper_plots_example3_2(halve_boundary_couplers=param['halve_boundary_couplers'],
                            type_=shim['type'], nominal_couplings=shim['nominal_couplings'],
                            coupler_orbits=shim['coupler_orbits'], all_fbos=stats['all_fbos'],
@@ -432,8 +427,8 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': np.array([list(logical_bqm.quadratic.values())] * len(embeddings)),
-        'fbos': -100e-6 * np.ones((len(embeddings), max_spin), dtype=float),  # offset here, then it should return to 0
-        # 'fbos': np.zeros_like(embeddings, dtype=float),
+        # 'fbos': -100e-6 * np.ones((len(embeddings), max_spin), dtype=float),  # offset here, then it should return to 0
+        'fbos': np.zeros_like(embeddings, dtype=float),
         'type': 'embedded_infinite',
         'coupler_damp': 0.0,
     }

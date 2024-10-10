@@ -280,7 +280,7 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
     if model_type == 'independent_spins':
         coupling = 0  
     else:
-        coupling = -0.2
+        coupling = -0.9
         
     param = {
             'L':16,
@@ -298,8 +298,8 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-        'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
-        #'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
+        # 'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
+        'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
         'coupler_orbits': [0] * param['L'],
     }
 
