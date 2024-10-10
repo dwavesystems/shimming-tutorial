@@ -207,10 +207,11 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
             {'param': param, 'shim': shim, 'stats': stats}
         )
 
-    
-
-    paper_plots_example1_1(alpha_phi=shim['alpha_Phi'],
-                           all_fbos=stats['all_fbos'], mags=stats['mags'])
+    return {
+        'alpha_Phi': _alpha_Phi,
+        'all_fbos': stats['all_fbos'],
+        'mags': stats['mags']
+    }
 
 
 def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimmed_flux=10):
@@ -236,6 +237,7 @@ def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimme
     else:
         coupling = -0.2
 
+    results = []  # To store results for each alpha_Phi
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L':16,
@@ -253,7 +255,8 @@ def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimme
             'alpha_J': 0.0,
             # 'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float) + 0.02*np.random.normal(param['L']),
             'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-            'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
+            # 'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
+            'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
             'coupler_orbits': [0] * param['L'],  # We manually set all couplers to the same orbit.
         }
         
@@ -267,8 +270,11 @@ def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimme
             'all_alpha_J': [],
         }
 
-        # check original code
-        run_experiment(param, shim, stats, embeddings, alpha_Phi, .0)
+        experiment_data = run_experiment(param, shim, stats, embeddings, alpha_Phi, .0)
+        results.append(experiment_data)
 
+    paper_plots_example1_1(
+         experiment_data_list=results
+    )
 if __name__ == "__main__":
     main()
