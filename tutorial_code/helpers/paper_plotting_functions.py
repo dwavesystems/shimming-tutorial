@@ -155,66 +155,57 @@ def paper_plots_example1_1(experiment_data_list):
 
 
 def paper_plots_example1_2(*, all_couplings, all_fbos):
-    """Plotting function for example1_2
-
+    """
+    Plotting function for example1_2, combining Flux-bias offsets and Couplings on a single canvas.
+    
     Args:
         all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example1_2
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_2
     """
-    # Plot FBOs for first embedding
-    plt.clf()
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))  # Create a figure with 2 subplots
 
-    plt.plot(
-        np.array([x[0] for x in all_fbos])
-    )
-    plt.title('Flux-bias offsets')
-    plt.xlabel('Iteration')
-    plt.ylabel(r'$\Phi_i$ ($\Phi_0$)')
-    plt.ylim(max(abs(np.array(plt.ylim()))) * np.array([-1, 1]))
+    # Plot 1: Flux-bias offsets
+    axs[0].plot(np.array([x[0] for x in all_fbos]))
+    axs[0].set_title('Flux-bias offsets')
+    axs[0].set_xlabel('Iteration')
+    axs[0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+    current_ylim = axs[0].get_ylim()
+    max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
+    axs[0].set_ylim(-max_ylim, max_ylim)
 
+    # Plot 2: Couplings
+    axs[1].plot(np.array([x[0] for x in all_couplings]))
+    axs[1].set_title('Couplings')
+    axs[1].set_xlabel('Iteration')
+    axs[1].set_ylabel(r'$J_{i,j}$')
+
+    # Adjust layout
+    plt.tight_layout()
+
+    # TikZ export or show
     if MAKE_TIKZ_PLOTS:
-        fn = f'ex12_fbos'
-        code = tikzplotlib.get_tikz_code(
-            standalone=True,
-            axis_width='5cm', axis_height='5cm',
-            float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters,
-        )
-        code = code.replace('\\documentclass{standalone}',
-                            '\\documentclass{standalone}\n' + extra_code)
+        file_names = ['ex12_fbos', 'ex12_Js']
+        for i, ax in enumerate(axs):
+            fn = file_names[i]
+            code = tikzplotlib.get_tikz_code(
+                figure=fig,
+                axis=ax,
+                standalone=True,
+                axis_width='5cm', axis_height='5cm',
+                float_format='.5g',
+                extra_axis_parameters=tikz_axis_parameters + ([
+                    r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=3,},']
+                    if fn == 'ex12_Js' else []
+                ),
+            )
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
 
-        with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-            f.write(code)
+            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
+                f.write(code)
     else:
         plt.show()
-
-    # Plot Js for first embedding
-    plt.clf()
-
-    plt.plot(
-        np.array([x[0] for x in all_couplings])
-    )
-    plt.title('Couplings')
-    plt.xlabel('Iteration')
-    plt.ylabel(r'$J_{i,j}$')
-
-    if MAKE_TIKZ_PLOTS:
-        fn = f'ex12_Js'
-        code = tikzplotlib.get_tikz_code(
-            standalone=True,
-            axis_width='5cm', axis_height='5cm',
-            float_format='.5g',
-            extra_axis_parameters=tikz_axis_parameters + [
-                r'yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=3,},'],
-        )
-        code = code.replace('\\documentclass{standalone}',
-                            '\\documentclass{standalone}\n' + extra_code)
-
-        with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-            f.write(code)
-    else:
-        plt.show()
-
+        
 
 def paper_plots_example2_1():
     """Plotting function for example1_1
