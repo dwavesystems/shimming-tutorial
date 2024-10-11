@@ -210,7 +210,10 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
             {'param': param, 'shim': shim, 'stats': stats}
         )
 
-    paper_plots_example1_2(all_couplings=stats['all_couplings'], all_fbos=stats['all_fbos'])
+    paper_plots_example1_2(all_couplings=stats['all_couplings'], 
+                           all_fbos=stats['all_fbos'],
+                           mags=stats['mags'],
+                           frust=stats['frust'])
 
 
 def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=200):
