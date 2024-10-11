@@ -55,9 +55,9 @@ def paper_plots_example1_1(experiment_data_list):
 
         # Plot 1: Flux-bias offsets
         axs[0, col].plot(np.array([x[0] for x in all_fbos]))
-        axs[0, col].set_title(f'Flux-bias Offsets\n(alpha_Phi={alpha_phi:.1e})')
+        axs[0, col].set_title(f'$\\alpha_\\phi$={alpha_phi:.1e}')
         axs[0, col].set_xlabel('Iteration')
-        axs[0, col].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+        axs[0, col].set_ylabel('Flux-bias Offsets')
         current_ylim = axs[0, col].get_ylim()
         max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
         axs[0, col].set_ylim(-max_ylim, max_ylim)
@@ -86,7 +86,7 @@ def paper_plots_example1_1(experiment_data_list):
         # Plot 3: Standard deviation of Magnetizations
         std_mags = np.std(M, axis=(1, 2))  # Adjust axes as needed
         axs[2, col].plot(std_mags)
-        axs[2, col].set_title(r'$\sigma$ of Qubit Magnetizations')
+        axs[2, col].set_title(r'Standard Deviation of Qubit Magnetizations')
         axs[2, col].set_xlabel('Iteration')
         axs[2, col].set_ylabel(r'$\sigma$')
         axs[2, col].set_ylim([0, 0.5])
@@ -154,7 +154,7 @@ def paper_plots_example1_1(experiment_data_list):
     """
 
 
-def paper_plots_example1_2(*, all_couplings, all_fbos):
+def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     """
     Plotting function for example1_2, combining Flux-bias offsets and Couplings on a single canvas.
     
@@ -162,30 +162,46 @@ def paper_plots_example1_2(*, all_couplings, all_fbos):
         all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example1_2
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_2
     """
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))  # Create a figure with 2 subplots
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10)) 
 
     # Plot 1: Flux-bias offsets
-    axs[0].plot(np.array([x[0] for x in all_fbos]))
-    axs[0].set_title('Flux-bias offsets')
-    axs[0].set_xlabel('Iteration')
-    axs[0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
-    current_ylim = axs[0].get_ylim()
+    axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
+    axs[0, 0].set_title('Flux-bias offsets')
+    axs[0, 0].set_xlabel('Iteration')
+    axs[0, 0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+    current_ylim = axs[0, 0].get_ylim()
     max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
-    axs[0].set_ylim(-max_ylim, max_ylim)
+    axs[0, 0].set_ylim(-max_ylim, max_ylim)
 
     # Plot 2: Couplings
-    axs[1].plot(np.array([x[0] for x in all_couplings]))
-    axs[1].set_title('Couplings')
-    axs[1].set_xlabel('Iteration')
-    axs[1].set_ylabel(r'$J_{i,j}$')
+    axs[0, 1].plot(np.array([x[0] for x in all_couplings]))
+    axs[0, 1].set_title('Couplings')
+    axs[0, 1].set_xlabel('Iteration')
+    axs[0, 1].set_ylabel(r'$J_{i,j}$')
 
-    # Adjust layout
+   # Plot 3: Standard deviation of magnetizations (10-iter moving mean)
+    M = np.array(mags)
+    Y = movmean(M, 10)
+    axs[1, 0].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[1, 0].set_title(r'Std Dev of Qubit Magnetizations (10-Iteration Moving Mean)')
+    axs[1, 0].set_xlabel('Iteration')
+    axs[1, 0].set_ylabel(r'$\sigma_m$')
+
+    # Plot 4: Standard deviation of frustration probability (10-iter moving mean)
+    M = np.array(frust)
+    Y = movmean(M, 10)
+    axs[1, 1].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[1, 1].set_title(r'Std Dev of Frustration Prob. (10-Iteration Moving Mean)')
+    axs[1, 1].set_xlabel('Iteration')
+    axs[1, 1].set_ylabel(r'$\sigma_f$')
+
+    # Adjust layout to prevent overlapping of titles and labels
     plt.tight_layout()
 
     # TikZ export or show
     if MAKE_TIKZ_PLOTS:
-        file_names = ['ex12_fbos', 'ex12_Js']
-        for i, ax in enumerate(axs):
+        file_names = ['ex12_fbos', 'ex12_Js', 'ex12_mag_std', 'ex12_frust_std']
+        for i, ax in enumerate(axs.flatten()):  # Flatten the 2x2 grid to iterate over all subplots
             fn = file_names[i]
             code = tikzplotlib.get_tikz_code(
                 figure=fig,
@@ -204,7 +220,9 @@ def paper_plots_example1_2(*, all_couplings, all_fbos):
             with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
                 f.write(code)
     else:
+        # Display the canvas with all four plots in a 2x2 grid
         plt.show()
+
         
 
 def paper_plots_example2_1():
@@ -232,7 +250,8 @@ def paper_plots_example2_1():
 
 
 def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, frust):
-    """Plotting function for example2_2.
+    """
+    Plotting function for example2_2.
 
     Args:
         nominal_couplings (np.ndarray): 'nominal_couplings' in the shim dict from example2_2
@@ -241,37 +260,37 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
         mags (np.ndarray): 'mags' in the stats dictionary from example2_2
         frust (np.ndarray): 'frust' in the stats dictionary from example2_2
     """
-     # Create a figure with 1 row and 4 columns for side-by-side plots
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Adjust figsize for width and height
+    # Create a figure with 2 rows and 2 columns for a 2x2 grid of plots
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))  # Adjust figsize for better spacing
 
-    # Plot FBOs for first embedding in first axis
-    axs[0].plot(np.array([x[0] for x in all_fbos]))
-    axs[0].set_title('Flux-bias offsets')
-    axs[0].set_xlabel('Iteration')
-    axs[0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
-    axs[0].set_ylim(max(abs(np.array(axs[0].get_ylim()))) * np.array([-1, 1]))
+    # Plot FBOs for first embedding in the first axis (top-left)
+    axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
+    axs[0, 0].set_title('Flux-bias offsets')
+    axs[0, 0].set_xlabel('Iteration')
+    axs[0, 0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+    axs[0, 0].set_ylim(max(abs(np.array(axs[0, 0].get_ylim()))) * np.array([-1, 1]))
 
-    # Plot Js for first embedding in second axis
-    axs[1].plot(np.array([x[0] / nominal_couplings for x in all_couplings]))
-    axs[1].set_title('Couplings (relative to nominal)')
-    axs[1].set_xlabel('Iteration')
-    axs[1].set_ylabel(r'$J_{i,j}/J_{i,j}^{{\ nominal}}$')
+    # Plot Js for first embedding in the second axis (top-right)
+    axs[0, 1].plot(np.array([x[0] / nominal_couplings for x in all_couplings]))
+    axs[0, 1].set_title('Couplings (relative to nominal)')
+    axs[0, 1].set_xlabel('Iteration')
+    axs[0, 1].set_ylabel('Normalized Couplings')
 
-    # Plot std of magnitudes in third axis
+    # Plot std of magnitudes in third axis (bottom-left)
     M = np.array(mags)
     Y = movmean(M, 10)
-    axs[2].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
-    axs[2].set_title(r'$\sigma_m$ (10-iter M.M.)')
-    axs[2].set_xlabel('Iteration')
-    axs[2].set_ylabel(r'$\sigma_m$')
+    axs[1, 0].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[1, 0].set_title(r'Std Dev of Qubit Magnetizations (10-Iteration Moving Mean)')
+    axs[1, 0].set_xlabel('Iteration')
+    axs[1, 0].set_ylabel(r'$\sigma_m$')
 
-    # Plot std of frustration in fourth axis
+    # Plot std of frustration in fourth axis (bottom-right)
     M = np.array(frust)
     Y = movmean(M, 10)
-    axs[3].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
-    axs[3].set_title(r'$\sigma_f$ (10-iter M.M.)')
-    axs[3].set_xlabel('Iteration')
-    axs[3].set_ylabel(r'$\sigma_f$')
+    axs[1, 1].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[1, 1].set_title(r'Std Dev of Frustration Prob. (10-Iteration Moving Mean)')
+    axs[1, 1].set_xlabel('Iteration')
+    axs[1, 1].set_ylabel(r'$\sigma_f$')
 
     # Adjust layout to prevent overlapping of titles and labels
     plt.tight_layout()
@@ -281,7 +300,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
         plot_titles = ['FBOs', 'Couplings', 'Mag std', 'Frust std']
         file_names = ['ex22_fbos', 'ex22_Js', 'ex22_mag_std', 'ex22_frust_std']
 
-        for i, ax in enumerate(axs):
+        for i, ax in enumerate(axs.flatten()):  # Flatten the 2x2 array of axes for iteration
             fn = file_names[i]
             code = tikzplotlib.get_tikz_code(
                 figure=fig,  # Use the figure reference to export specific subplots
@@ -296,8 +315,9 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
             with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
                 f.write(code)
     else:
-        # Display the canvas with all four plots in one line
+        # Display the canvas with all four plots in a 2x2 grid
         plt.show()
+
 def paper_plots_example3_2(*, halve_boundary_couplers,
                            type_, nominal_couplings, coupler_orbits,
                            all_fbos, all_couplings, mags, frust, all_psi):
