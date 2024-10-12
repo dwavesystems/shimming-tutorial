@@ -68,6 +68,7 @@ def main(sampler_type='mock', visualize=True):
         plt.rc('font', size=12)
 
         fig = plt.figure(figsize=(8, 8), dpi=80)
+        fig.canvas.manager.set_window_title('Figure 11: Buckyball Graph Structure')
 
         orbits_graph = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
         edge_color = [cm(norm(1)) if orbits_graph[u][v]['orbit'] else cm(norm(-1))
@@ -77,7 +78,7 @@ def main(sampler_type='mock', visualize=True):
         nx.draw_networkx(orbits_graph, pos=pos, with_labels=False, node_size=200, width=4,
                          edge_color=edge_color, node_color=node_color,)
         plt.axis("off")
-        fig.savefig("buckyball_orbits.pdf", format="pdf")
+        plt.show()
 
 
 if __name__ == "__main__":
