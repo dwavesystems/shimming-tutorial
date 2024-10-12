@@ -47,6 +47,7 @@ def paper_plots_example1_1(experiment_data_list):
     num_experiments = len(experiment_data_list)
     # Create a figure with 1 row and 3 columns for side-by-side plots
     fig, axs = plt.subplots(3, 3, figsize=(6 * num_experiments, 15))  # Adjust figsize for width and height
+    fig.canvas.manager.set_window_title('Figure 6: Balancing qubits in a FM chain with flux-bias offsets')
 
     for col, data in enumerate(experiment_data_list):
         alpha_phi = data['alpha_Phi']
@@ -122,37 +123,6 @@ def paper_plots_example1_1(experiment_data_list):
         # Display the canvas with all experiments' plots arranged vertically in columns
         plt.show()
 
-    """
-        # Plot mean abs difference of mags
-        plt.clf()
-        
-        
-        plt.plot(
-            # Plots the mean abs difference in magnetization from one call to the next...
-            np.std(np.abs(np.diff(M, axis=0)), axis=(1, 2))
-        )
-        plt.title(r'Mean jump in $\langle s_i\rangle$')
-        plt.xlabel('Iteration')
-        plt.ylabel(r'Mean absolute difference')
-        plt.ylim([0, .7])
-
-        if MAKE_TIKZ_PLOTS:
-            fn = f'ex11_aPhi{alpha_phi:.6f}_mag_diff'
-            code = tikzplotlib.get_tikz_code(
-                standalone=True,
-                axis_width='5cm', axis_height='5cm',
-                float_format='.5g',
-                extra_axis_parameters=tikz_axis_parameters,
-            )
-            code = code.replace('\\documentclass{standalone}',
-                                '\\documentclass{standalone}\n' + extra_code)
-
-            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
-                f.write(code)
-        else:
-            plt.show()
-    """
-
 
 def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     """
@@ -163,6 +133,7 @@ def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_2
     """
     fig, axs = plt.subplots(2, 2, figsize=(12, 10)) 
+    fig.canvas.manager.set_window_title('Figure 7: Balancing qubits and couplers in a FM chain with flux-bias offsets and coupler adjustments')
 
     # Plot 1: Flux-bias offsets
     axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
@@ -260,8 +231,8 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
         mags (np.ndarray): 'mags' in the stats dictionary from example2_2
         frust (np.ndarray): 'frust' in the stats dictionary from example2_2
     """
-    # Create a figure with 2 rows and 2 columns for a 2x2 grid of plots
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))  # Adjust figsize for better spacing
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))  
+    fig.canvas.manager.set_window_title('Figure 10: Shimming a frustrated loop')
 
     # Plot FBOs for first embedding in the first axis (top-left)
     axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
@@ -334,32 +305,38 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
         frust (np.ndarray): 'frust' in the stats dictionary from example3_2
         all_psi (list[np.ndarray]): 'all_psi' in the stats dictionary from example3_2
     """
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Create a figure with 4 plots horizontally
-    
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))  
+    if type_ == 'embedded_finite':
+        fig.canvas.manager.set_window_title('Figure 13: Shimming an embedded cylindrical triangular antiferromagnet')
+    elif type_ == 'embedded_infinite':
+        fig.canvas.manager.set_window_title('Figure 14: Shimming an isotropic, infinite triangular antiferromagnet')
+    else:
+        fig.canvas.manager.set_window_title('Figure 15: Shimming an isotropic, infinite triangular antiferromagnet (halved boundary couplers)')
+
     # Plot 1: Flux-bias offsets
-    axs[0].plot(np.array([x[0] for x in all_fbos])[:, :12], alpha=0.5)
-    axs[0].set_title('Flux-bias Offsets')
-    axs[0].set_xlabel('Iteration')
-    axs[0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
-    current_ylim = axs[0].get_ylim()
+    axs[0, 0].plot(np.array([x[0] for x in all_fbos])[:, :12], alpha=0.5)
+    axs[0, 0].set_title('Flux-bias Offsets')
+    axs[0, 0].set_xlabel('Iteration')
+    axs[0, 0].set_ylabel(r'$\Phi_i$ ($\Phi_0$)')
+    current_ylim = axs[0, 0].get_ylim()
     max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
-    axs[0].set_ylim(-max_ylim, max_ylim)
+    axs[0, 0].set_ylim(-max_ylim, max_ylim)
 
     # Plot 2: Couplings (relative to nominal)
     Jdata = np.array([x[0] / nominal_couplings for x in all_couplings])
     indices = np.arange(0, Jdata.shape[1], 5) if type_ != 'embedded_finite' else (np.array(coupler_orbits) == coupler_orbits[0])
-    axs[1].plot(Jdata[:, indices], alpha=0.5)
-    axs[1].set_title('Couplings (relative to nominal)')
-    axs[1].set_xlabel('Iteration')
-    axs[1].set_ylabel(r'$J_{i,j}/J_{i,j}^{{\ nominal}}$')
+    axs[0, 1].plot(Jdata[:, indices], alpha=0.5)
+    axs[0, 1].set_title('Couplings (relative to nominal)')
+    axs[0, 1].set_xlabel('Iteration')
+    axs[0, 1].set_ylabel(r'Normalized Couplings')
 
     # Plot 3: Standard deviation of m (10-iter moving mean)
     M = np.array(mags)
     Y = movmean(M, 10)
-    axs[2].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
-    axs[2].set_title(r'$\sigma_m$ (10-iter M.M.)')
-    axs[2].set_xlabel('Iteration')
-    axs[2].set_ylabel(r'$\sigma_m$')
+    axs[1, 0].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
+    axs[1, 0].set_title(r'Std Dev of Qubit Magnetizations (10-Iteration Moving Mean)')
+    axs[1, 0].set_xlabel('Iteration')
+    axs[1, 0].set_ylabel(r'$\sigma_m$')
 
     # Plot 4: Standard deviation of f (10-iter moving mean per orbit)
     M = np.array(frust)
@@ -371,10 +348,10 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
         mymat = Y[:, :, coupler_orbits == orbit]
         Y_orbit[:, iorbit] = np.std(mymat, axis=(1, 2))
     
-    axs[3].plot(range(10, len(Y)), np.mean(Y_orbit[10:], axis=1))
-    axs[3].set_title(r'$\sigma_f$ (10-iter M.M., per orbit)')
-    axs[3].set_xlabel('Iteration')
-    axs[3].set_ylabel(r'$\sigma_f$')
+    axs[1, 1].plot(range(10, len(Y)), np.mean(Y_orbit[10:], axis=1))
+    axs[1, 1].set_title(r'Std Dev of Frustration Prob. (10-Iteration Moving Mean)')
+    axs[1, 1].set_xlabel('Iteration')
+    axs[1, 1].set_ylabel(r'$\sigma_f$')
 
     # Adjust layout to prevent overlap
     plt.tight_layout()
