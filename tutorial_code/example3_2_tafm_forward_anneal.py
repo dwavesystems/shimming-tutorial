@@ -20,7 +20,7 @@ from dwave.system.samplers import DWaveSampler
 from tqdm import tqdm
 
 from embed_square_lattice import embed_square_lattice
-from helpers.helper_functions import (load_experiment_data, save_experiment_data, plot_data,
+from helpers.helper_functions import (load_experiment_data, save_experiment_data,
                                       shim_parameter_rescaling)
 from helpers import orbits
 from helpers.paper_plotting_functions import paper_plots_example3_2
@@ -249,7 +249,7 @@ def compute_psi(result, param, embeddings):
     """
     vars = result.variables
 
-    # Make a big array for the solutions, with zeros for unused qubits
+    # Make an array large enough for the solutions, with zeros for unused qubits
     bigarr = np.zeros(shape=(param['sampler'].properties['num_qubits'], len(result)), dtype=np.int8)
     bigarr[vars, :] = dimod.as_samples(result)[0].T
 
@@ -337,7 +337,6 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
 
         if not param['adaptive_step_size']:
             # Fixed step sizes
-
             for iteration in pbar:
                 if iteration < param['num_iters_unshimmed_flux']:
                     shim['alpha_Phi'] = 0.
@@ -352,7 +351,6 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
 
         else:
             # Adaptive step sizes
-
             shim['alpha_Phi'] = alpha_Phi
             shim['alpha_J'] = alpha_J
             for iteration in pbar:
@@ -401,16 +399,14 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
         
     param = {
         'L': 12,
-        'sampler': sampler,  # As configured
-        # Magnitude of coupling for FM chains, as a multiple of AFM coupling.
+        'sampler': sampler,  
         'chain_strength': 2.0,
-        'coupling': coupling,  # Coupling energy scale.  Should be positive.
+        'coupling': coupling,  
         'num_iters': num_iters,
         'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
         'num_iters_unshimmed_J': num_iters_unshimmed_J,
-        # Option to divide J by two on the boundaries.
         'halve_boundary_couplers': halve_boundary_couplers,
-        'adaptive_step_size': adaptive_step_size,  # Option to adaptively tune step sizes for shim.
+        'adaptive_step_size': adaptive_step_size
     }
 
     # Make the logical BQM and a bunch of disjoint embeddings
@@ -421,13 +417,11 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
     logical_bqm = make_logical_bqm(param)
     unsigned_orbits = orbits.get_orbits(logical_bqm)
 
-    max_spin = max(len(emb) for emb in embeddings)
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': np.array([list(logical_bqm.quadratic.values())] * len(embeddings)),
-        # 'fbos': -100e-6 * np.ones((len(embeddings), max_spin), dtype=float),  # offset here, then it should return to 0
         'fbos': np.zeros_like(embeddings, dtype=float),
         'type': 'embedded_infinite',
         'coupler_damp': 0.0,

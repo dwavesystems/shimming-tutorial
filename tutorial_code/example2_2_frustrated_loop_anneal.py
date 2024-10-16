@@ -104,7 +104,6 @@ def adjust_fbos(result, param, shim, embeddings, stats):
         embeddings (List[dict]): list of embeddings
         stats (dict): dict of sampled statistics
     """
-    # [0] * param['sampler'].properties['num_qubits']
     magnetizations = [0] * (max(result.variables) + 1)
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
@@ -140,7 +139,6 @@ def adjust_couplings(result, param, shim, embeddings, stats):
     # Make a big array for the solutions, with zeros for unused qubits
     bigarr = np.zeros(shape=(param['sampler'].properties['num_qubits'], len(result)), dtype=np.int8)
     for iv, v in enumerate(vars):
-        # Added constraint for index out of bounds 
         if v < bigarr.shape[0]:
             bigarr[v, :] = dimod.as_samples(result)[0].T[iv]
 
@@ -148,10 +146,8 @@ def adjust_couplings(result, param, shim, embeddings, stats):
 
     for iemb, emb in enumerate(embeddings):
         for spin in range(param['L']):
-            # changed the below portin of the code 
             qubit_1 = emb[spin]
             qubit_2 = emb[(spin + 1) % param['L']]
-            # Added constraint for index out of bounds 
             if qubit_1 < bigarr.shape[0] and qubit_2 < bigarr.shape[0]:
                 mean_correlation = np.mean(np.multiply(bigarr[qubit_1], bigarr[qubit_2]))
                 frust_matrix[iemb, spin] = (
@@ -245,11 +241,6 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
             {'param': param, 'shim': shim, 'stats': stats}
         )
 
-    # plot_data(all_fbos=stats['all_fbos'], mags=stats['mags'],
-    #         all_couplings=stats['all_couplings'], frust=stats['frust'],
-    #          all_alpha_phi=stats['all_alpha_Phi'], all_alpha_j=stats["all_alpha_J"],
-    #          coupler_orbits=shim['coupler_orbits'], alpha_phi=shim['alpha_Phi'], alpha_j=shim['alpha_J'],
-    #          coupling=param["coupling"], L=param["L"])
     paper_plots_example2_2(nominal_couplings=shim['nominal_couplings'],
                            all_fbos=stats['all_fbos'],
                            all_couplings=stats['all_couplings'],
@@ -284,8 +275,8 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
         
     param = {
             'L':16,
-            'sampler': sampler,  # As configured
-            'coupling': coupling,  # Coupling energy scale.
+            'sampler': sampler, 
+            'coupling': coupling,
             'num_iters': num_iters,
             'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
             'num_iters_unshimmed_J': num_iters_unshimmed_J
@@ -298,7 +289,6 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
         'alpha_Phi': 0.0,
         'alpha_J': 0.0,
         'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-        # 'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
         'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
         'coupler_orbits': [0] * param['L'],
     }

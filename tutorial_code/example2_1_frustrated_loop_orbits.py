@@ -77,10 +77,8 @@ def main():
         orbits.get_orbits(bqm)
 
     # Print some information about the orbits.
-    print('\nQubit orbits:')
-    print(qubit_orbits)
-    print('\nCoupler orbits:')
-    print(coupler_orbits)
+    print(f'\nQubit orbits: {qubit_orbits}')
+    print(f'\nCoupler orbits: {coupler_orbits}')
     print('')
     print('\nQubit orbits opposite:')
     for p, q in enumerate(qubit_orbits_opposite):

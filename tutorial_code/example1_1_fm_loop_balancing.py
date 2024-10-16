@@ -113,7 +113,7 @@ def adjust_couplings(result, param, shim, stats, embeddings):
     
     vars = result.variables
 
-    # Make a big array for the solutions, with zeros for unused qubits
+    # Make an array large enough for the solutions, with zeros for unused qubits
     bigarr = np.zeros(shape=(param['sampler'].properties['num_qubits'], len(result)), dtype=np.int8)
     bigarr[vars, :] = dimod.as_samples(result)[0].T
 
@@ -237,14 +237,14 @@ def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimme
     else:
         coupling = -0.2
 
-    results = []  # To store results for each alpha_Phi
+    results = []  
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
             'L':16,
-            'sampler': sampler,  # As configured
-            'coupling': coupling,  # Coupling energy scale.
+            'sampler': sampler,  
+            'coupling': coupling,  
             'num_iters': num_iters,
-            'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
+            'num_iters_unshimmed_flux': num_iters_unshimmed_flux
         }
 
         embeddings = embed_loops(sampler=sampler, L=param['L']) 
@@ -253,21 +253,18 @@ def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimme
         shim = {
             'alpha_Phi': 0.0,
             'alpha_J': 0.0,
-            # 'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float) + 0.02*np.random.normal(param['L']),
             'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-            # 'fbos': -100e-6 * np.ones((len(embeddings), param['L']), dtype=float),  # offset here, then it should return to 0
             'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
-            'coupler_orbits': [0] * param['L'],  # We manually set all couplers to the same orbit.
+            'coupler_orbits': [0] * param['L']
         }
         
-        # Data for plotting after the fact
         stats = {
             'mags': [],
             'frust': [],
             'all_fbos': [],
             'all_couplings': [],
             'all_alpha_Phi': [],
-            'all_alpha_J': [],
+            'all_alpha_J': []
         }
 
         experiment_data = run_experiment(param, shim, stats, embeddings, alpha_Phi, .0)
