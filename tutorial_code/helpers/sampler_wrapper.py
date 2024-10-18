@@ -1,6 +1,7 @@
 from dimod import SampleSet
-from dwave.system.testing import MockDWaveSampler
 from dwave.samplers import SimulatedAnnealingSampler
+from dwave.system.temperatures import fluxbias_to_h
+from dwave.system.testing import MockDWaveSampler
 
 class ShimmingMockSampler(MockDWaveSampler):
     def __init__(
@@ -52,9 +53,7 @@ class ShimmingMockSampler(MockDWaveSampler):
         # Adjust the BQM to include flux biases
         bqm_effective = bqm.change_vartype('SPIN', inplace=False)
 
-        # This magic number has since been implemented as a feature in Ocean tools at the following URL
-        # https://docs.ocean.dwavesys.com/en/latest/docs_system/reference/generated/dwave.system.temperatures.h_to_fluxbias.html
-        flux_to_h_factor = -2373.4777
+        flux_to_h_factor = fluxbias_to_h()
         for v in bqm_effective.variables:
             bias = bqm_effective.get_linear(v)
             bqm_effective.set_linear(v, bias + flux_to_h_factor * flux_biases[v])
