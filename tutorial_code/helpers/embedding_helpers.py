@@ -139,6 +139,8 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
                             verbose=True, topology='pegasus', gridsize=16, verify_embeddings=False, **kwargs):
     """Returns a matrix (n, L) of subgraph embeddings to _A.
 
+    This function is deprecated by newly released minorminer modules.
+
     Args:
         _A (nx.Graph): target graph to embed to
         subgraph (nx.Graph): A smaller graph to embed into _A
@@ -157,7 +159,7 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
     Returns:
         numpy.ndarray: a matrix of embeddings
     """
-
+    
     A = A_.copy()
 
     embs = []
