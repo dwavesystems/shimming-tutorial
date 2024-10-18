@@ -1,7 +1,7 @@
 from dimod import SampleSet
-from dwave.system.testing import MockDWaveSampler 
-from dwave.system.temperatures import fluxbias_to_h
 from dwave.samplers import SimulatedAnnealingSampler
+from dwave.system.temperatures import fluxbias_to_h
+from dwave.system.testing import MockDWaveSampler
 
 class ShimmingMockSampler(MockDWaveSampler):
     def __init__(
@@ -51,7 +51,7 @@ class ShimmingMockSampler(MockDWaveSampler):
             kwargs = kwargs.copy()
             del kwargs['flux_biases']
         # Adjust the BQM to include flux biases
-        bqm_effective = bqm.change_vartype('SPIN', inplace=False) 
+        bqm_effective = bqm.change_vartype('SPIN', inplace=False)
 
         flux_to_h_factor = fluxbias_to_h()
         for v in bqm_effective.variables:

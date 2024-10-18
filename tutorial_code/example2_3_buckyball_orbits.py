@@ -23,23 +23,15 @@ from dwave.system.samplers import DWaveSampler
 from matplotlib import pyplot as plt
 
 from helpers import orbits
-from helpers.embedding_helpers import raster_embedding_search
 from helpers.orbits import get_orbits
 
 
-def main(sampler_type='mock', visualize=True):
-    """Main function to run example
+def figure11():
+    """Figure 11 doi.org/10.3389/fcomp.2023.1238988 Bucky ball orbits
 
-    Args:
-        sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
-        visualize (bool, optional): flag for visualization. Defaults to True.
+    Demonstrates orbits for a bucky ball graph structure.
     """
     
-    if sampler_type == 'mock':
-        sampler_instance = ShimmingMockSampler()
-        sampler = sampler_instance.get_sampler()
-    else:
-        sampler = DWaveSampler()
 
     # Parse the BQM
     path_to_csv = "data/bucky_ball.csv"
@@ -53,33 +45,22 @@ def main(sampler_type='mock', visualize=True):
     (qubit_orbits, coupler_orbits,
         qubit_orbits_opposite, coupler_orbits_opposite) = get_orbits(bqm)
 
-    # Embed the BQM onto the QPU
-    qpu = sampler
-    graph_qpu = qpu.to_networkx_graph()
-    graph_bqm = dimod.to_networkx_graph(bqm)
-
-    embeddings = raster_embedding_search(graph_qpu, graph_bqm, raster_breadth=2)
-    print(embeddings)
-
-    if visualize:
-        # Plotting configurations
-        cm = plt.cm.get_cmap(name='coolwarm')
-        norm = plt.Normalize(vmin=-2, vmax=2)
-        plt.rc('font', size=12)
-
-        fig = plt.figure(figsize=(8, 8), dpi=80)
-        fig.canvas.manager.set_window_title('Figure 11: Buckyball Graph Structure')
-
-        orbits_graph = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
-        edge_color = [cm(norm(1)) if orbits_graph[u][v]['orbit'] else cm(norm(-1))
-                      for u, v in orbits_graph.edges]
-        node_color = [cm(norm(qubit_orbits[u])) for u in orbits_graph.nodes]
-        pos = nx.layout.spring_layout(orbits_graph, iterations=10000, seed=5)
-        nx.draw_networkx(orbits_graph, pos=pos, with_labels=False, node_size=200, width=4,
-                         edge_color=edge_color, node_color=node_color,)
-        plt.axis("off")
-        plt.show()
-
+    cm = plt.cm.get_cmap(name='coolwarm')
+    norm = plt.Normalize(vmin=-2, vmax=2)
+    plt.rc('font', size=12)
+    
+    fig = plt.figure(figsize=(8, 8), dpi=80)
+    fig.canvas.manager.set_window_title('Figure 11: Buckyball Graph Structure')
+    
+    orbits_graph = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
+    edge_color = [cm(norm(1)) if orbits_graph[u][v]['orbit'] else cm(norm(-1))
+                  for u, v in orbits_graph.edges]
+    node_color = [cm(norm(qubit_orbits[u])) for u in orbits_graph.nodes]
+    pos = nx.layout.spring_layout(orbits_graph, iterations=10000, seed=5)
+    nx.draw_networkx(orbits_graph, pos=pos, with_labels=False, node_size=200, width=4,
+                     edge_color=edge_color, node_color=node_color,)
+    plt.axis("off")
+    plt.show()
 
 if __name__ == "__main__":
-    main()
+    figure11()

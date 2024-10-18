@@ -23,7 +23,8 @@ class EmbeddingError(Exception):
     pass
 
 # from helpers.embedding_helpers import raster_embedding_search
-from minorminer.utils.raster_embedding import raster_embedding_search
+from minorminer.utils.raster_embedding import (raster_embedding_search,
+                                               embeddings_to_ndarray)
 
 def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
     """
@@ -79,8 +80,9 @@ def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
             f"which exceeds the target graph's {A.number_of_nodes()} nodes."
         )
     
-    embeddings = raster_embedding_search(A, G, raster_breadth=raster_breadth)
-
+    embeddings = embeddings_to_ndarray(
+        raster_embedding_search(G, A, raster_breadth=raster_breadth)
+        , node_order=sorted(G.nodes()))
     if embeddings.size == 0:
         raise ValueError("Embedding returned by raster_embedding_search is empty.")
     

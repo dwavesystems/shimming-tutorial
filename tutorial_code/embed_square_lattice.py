@@ -17,7 +17,8 @@ import os
 import dimod
 import numpy as np
 
-from minorminer.utils.raster_embedding import raster_embedding_search
+from minorminer.utils.raster_embedding import (raster_embedding_search,
+                                               embeddings_to_ndarray)
 
 
 def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
@@ -61,7 +62,8 @@ def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
             print(f"Failed to load {cache_filename} with `np.loadtxt`")
             print("Error:", e)
             print("Finding embedding via raster embedding search instead.")
-    embeddings = raster_embedding_search(A, G, **kwargs)
+        embeddings = embeddings_to_ndarray(raster_embedding_search(G, A, **kwargs),
+                                           node_order=sorted(G.nodes()))
 
     os.makedirs('cached_embeddings/', exist_ok=True)
     np.savetxt(cache_filename, embeddings, fmt='%d')
@@ -71,7 +73,7 @@ def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
 
 def main():
     L = 12  # Linear size of square lattice to embed (LxL cylinder)
-    embeddings, bqm = embed_square_lattice(L, raster_breadth=5, max_number_of_embeddings=1,
+    embeddings, bqm = embed_square_lattice(L, raster_breadth=5, max_num_emb=1,
                                            timeout=100)
 
 

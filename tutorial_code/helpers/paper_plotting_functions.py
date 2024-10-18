@@ -13,9 +13,7 @@
 # limitations under the License.
 #
 
-import matplotlib
 import numpy as np
-import tikzplotlib
 
 from matplotlib import pyplot as plt
 
@@ -34,6 +32,9 @@ tikz_axis_parameters = [
 
 PATH_TO_PAPER_DIR = "../paper_materials/"
 MAKE_TIKZ_PLOTS = False
+if MAKE_TIKZ_PLOTS:
+    raise NotImplementedError("Need to fix incompatibility of tikzplotlib")
+    import tikzplotlib
 
 
 def paper_plots_example1_1(experiment_data_list):
@@ -125,12 +126,12 @@ def paper_plots_example1_1(experiment_data_list):
 def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     """
     Plotting function for example1_2, combining Flux-bias offsets and Couplings on a single canvas.
-    
+
     Args:
         all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example1_2
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_2
     """
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10)) 
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     fig.canvas.manager.set_window_title('Figure 7: Balancing qubits and couplers in a FM chain with flux-bias offsets and coupler adjustments')
 
     # Plot 1: Flux-bias offsets
@@ -188,7 +189,7 @@ def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
         # Display the canvas with all four plots in a 2x2 grid
         plt.show()
 
-        
+
 
 def paper_plots_example2_1():
     """Plotting function for example1_1
@@ -225,7 +226,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
         mags (np.ndarray): 'mags' in the stats dictionary from example2_2
         frust (np.ndarray): 'frust' in the stats dictionary from example2_2
     """
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))  
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     fig.canvas.manager.set_window_title('Figure 10: Shimming a frustrated loop')
 
     # Plot FBOs for first embedding in the first axis (top-left)
@@ -295,7 +296,7 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
         frust (np.ndarray): 'frust' in the stats dictionary from example3_2
         all_psi (list[np.ndarray]): 'all_psi' in the stats dictionary from example3_2
     """
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))  
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     if type_ == 'embedded_finite':
         fig.canvas.manager.set_window_title('Figure 13: Shimming an embedded cylindrical triangular antiferromagnet')
     elif type_ == 'embedded_infinite':
@@ -333,11 +334,11 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
     Y = movmean(M, 10)
     orbits = np.unique(coupler_orbits)
     Y_orbit = np.zeros((Y.shape[0], len(orbits)))
-    
+
     for iorbit, orbit in enumerate(orbits):
         mymat = Y[:, :, coupler_orbits == orbit]
         Y_orbit[:, iorbit] = np.std(mymat, axis=(1, 2))
-    
+
     axs[1, 1].plot(range(10, len(Y)), np.mean(Y_orbit[10:], axis=1))
     axs[1, 1].set_xlabel('Iteration')
     axs[1, 1].set_ylabel(rf'Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$')
