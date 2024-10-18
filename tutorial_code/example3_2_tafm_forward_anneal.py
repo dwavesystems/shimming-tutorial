@@ -23,7 +23,7 @@ from embed_square_lattice import embed_square_lattice
 from helpers.helper_functions import (load_experiment_data, save_experiment_data,
                                       shim_parameter_rescaling)
 from helpers import orbits
-from helpers.paper_plotting_functions import paper_plots_example3_2
+from helpers.paper_plotting_functions import paper_plots_example3_2, paper_plots_example3_2_heatmaps
 
 def make_fbo_dict(embeddings, shim):
     """Makes the FBO dict from the matrix of FBOs.
@@ -369,8 +369,14 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
                            type_=shim['type'], nominal_couplings=shim['nominal_couplings'],
                            coupler_orbits=shim['coupler_orbits'], all_fbos=stats['all_fbos'],
                            all_couplings=stats['all_couplings'], mags=stats['mags'],
-                           frust=stats['frust'], all_psi=stats['all_psi'])
+                           frust=stats['frust'])
 
+    return {
+        'halve_boundary_couplers': param['halve_boundary_couplers'],
+        'type_': shim['type'],
+        'all_psi': stats['all_psi'],
+        'shim_type': shim['type']
+    }
 
 def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=300):
     """Main function to run example
@@ -385,10 +391,8 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
     else:
         sampler = DWaveSampler()
 
-    shimtype = 'embedded_finite'
     adaptive_step_size = False
     halve_boundary_couplers = False
-    assert shimtype in ['embedded_finite', 'embedded_infinite', 'triangular_infinite']
 
     # Each qubit is treated as an independent unit.  Embedding is a list of list,
     # where each iner list contains a single qubit from the nodelist. 
@@ -396,65 +400,69 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
         coupling = 0  
     else:
         coupling = 0.9
-        
-    param = {
-        'L': 12,
-        'sampler': sampler,  
-        'chain_strength': 2.0,
-        'coupling': coupling,  
-        'num_iters': num_iters,
-        'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
-        'num_iters_unshimmed_J': num_iters_unshimmed_J,
-        'halve_boundary_couplers': halve_boundary_couplers,
-        'adaptive_step_size': adaptive_step_size
-    }
+    
+    results = []
+    for shimtype in ['embedded_finite', 'embedded_infinite', 'triangular_infinite']:
+        param = {
+            'L': 12,
+            'sampler': sampler,  
+            'chain_strength': 2.0,
+            'coupling': coupling,  
+            'num_iters': num_iters,
+            'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
+            'num_iters_unshimmed_J': num_iters_unshimmed_J,
+            'halve_boundary_couplers': halve_boundary_couplers,
+            'adaptive_step_size': adaptive_step_size
+        }
 
-    # Make the logical BQM and a bunch of disjoint embeddings
-    embeddings, _ = embed_square_lattice(sampler=sampler, L=param['L'])
+        # Make the logical BQM and a bunch of disjoint embeddings
+        embeddings, _ = embed_square_lattice(sampler=sampler, L=param['L'])
 
-    # Make the logical BQM to get orbits for a single embedding.
-    # Doing it for all embeddings together is very slow with pynauty.
-    logical_bqm = make_logical_bqm(param)
-    unsigned_orbits = orbits.get_orbits(logical_bqm)
+        # Make the logical BQM to get orbits for a single embedding.
+        # Doing it for all embeddings together is very slow with pynauty.
+        logical_bqm = make_logical_bqm(param)
+        unsigned_orbits = orbits.get_orbits(logical_bqm)
 
-    # Where the shim data (parameters and Hamiltonian terms) are stored
-    shim = {
-        'alpha_Phi': 0.0,
-        'alpha_J': 0.0,
-        'couplings': np.array([list(logical_bqm.quadratic.values())] * len(embeddings)),
-        'fbos': np.zeros_like(embeddings, dtype=float),
-        'type': 'embedded_infinite',
-        'coupler_damp': 0.0,
-    }
+        # Where the shim data (parameters and Hamiltonian terms) are stored
+        shim = {
+            'alpha_Phi': 0.0,
+            'alpha_J': 0.0,
+            'couplings': np.array([list(logical_bqm.quadratic.values())] * len(embeddings)),
+            'fbos': np.zeros_like(embeddings, dtype=float),
+            'type': shimtype,
+            'coupler_damp': 0.0,
+        }
 
-    # Save the nominal couplings so we can refer to their sign later
-    shim['nominal_couplings'] = shim['couplings'][0].copy()
+        # Save the nominal couplings so we can refer to their sign later
+        shim['nominal_couplings'] = shim['couplings'][0].copy()
 
-    if shim['type'] == 'embedded_finite':
-        shim['coupler_orbits'] = list(unsigned_orbits[1].values())
-    if shim['type'] == 'embedded_infinite':
-        # Divide into three orbits: vertical FM, vertical AFM, and horizontal AFM.
-        index_diff = np.array([np.abs(u - v) for (u, v) in logical_bqm.quadratic.keys()])
-        shim['coupler_orbits'] = 0 * index_diff
-        shim['coupler_orbits'][shim['nominal_couplings'] > 0] = 1
-        shim['coupler_orbits'][index_diff == param['L']] = 2
-        shim['coupler_orbits'] = list(shim['coupler_orbits'])
-    if shim['type'] == 'triangular_infinite':
-        shim['coupler_orbits'] = [int((1 + np.sign(x)) / 2) for x in logical_bqm.quadratic.values()]
+        if shim['type'] == 'embedded_finite':
+            shim['coupler_orbits'] = list(unsigned_orbits[1].values())
+        if shim['type'] == 'embedded_infinite':
+            # Divide into three orbits: vertical FM, vertical AFM, and horizontal AFM.
+            index_diff = np.array([np.abs(u - v) for (u, v) in logical_bqm.quadratic.keys()])
+            shim['coupler_orbits'] = 0 * index_diff
+            shim['coupler_orbits'][shim['nominal_couplings'] > 0] = 1
+            shim['coupler_orbits'][index_diff == param['L']] = 2
+            shim['coupler_orbits'] = list(shim['coupler_orbits'])
+        if shim['type'] == 'triangular_infinite':
+            shim['coupler_orbits'] = [int((1 + np.sign(x)) / 2) for x in logical_bqm.quadratic.values()]
 
-    # Data for plotting after the fact
-    stats = {
-        'mags': [],
-        'frust': [],
-        'all_fbos': [shim['fbos'].copy()],
-        'all_couplings': [shim['couplings'].copy()],
-        'all_alpha_Phi': [],
-        'all_alpha_J': [],
-        'all_psi': [],
-    }
+        # Data for plotting after the fact
+        stats = {
+            'mags': [],
+            'frust': [],
+            'all_fbos': [shim['fbos'].copy()],
+            'all_couplings': [shim['couplings'].copy()],
+            'all_alpha_Phi': [],
+            'all_alpha_J': [],
+            'all_psi': [],
+        }
 
-    run_experiment(param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02)
+        experiment_data = run_experiment(param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02)
+        results.append(experiment_data)
 
+    paper_plots_example3_2_heatmaps(results)
 
 if __name__ == "__main__":
     main()

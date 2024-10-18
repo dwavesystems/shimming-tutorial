@@ -281,7 +281,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
 
 def paper_plots_example3_2(*, halve_boundary_couplers,
                            type_, nominal_couplings, coupler_orbits,
-                           all_fbos, all_couplings, mags, frust, all_psi):
+                           all_fbos, all_couplings, mags, frust):
     """Plotting function for example3_2.
 
     Args:
@@ -313,7 +313,10 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
 
     # Plot 2: Couplings (relative to nominal)
     Jdata = np.array([x[0] / nominal_couplings for x in all_couplings])
-    indices = np.arange(0, Jdata.shape[1], 5) if type_ != 'embedded_finite' else (np.array(coupler_orbits) == coupler_orbits[0])
+    if type_ == 'embedded_finite':
+        indices = np.array(coupler_orbits) == coupler_orbits[0]
+    else:
+        indices = np.arange(0, Jdata.shape[1], 5)
     axs[0, 1].plot(Jdata[:, indices], alpha=0.5)
     axs[0, 1].set_xlabel('Iteration')
     axs[0, 1].set_ylabel(r'Couplings (relative to nominal), $J_{ij}/|J_{ij}|$')
@@ -357,6 +360,89 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
             )
             code = code.replace('\\documentclass{standalone}',
                                 '\\documentclass{standalone}\n' + extra_code)
+            with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
+                f.write(code)
+    else:
+        plt.show()
+
+
+def paper_plots_example3_2_heatmaps(experiment_data_list):
+    num_experiments = len(experiment_data_list)
+
+    # Create a figure with controlled subplot layout
+    fig, axs = plt.subplots(
+        num_experiments, 3, figsize=(15, 5 * num_experiments),
+        gridspec_kw={'width_ratios': [1, 1, 1]}  # Ensure equal width for all columns
+    )
+    fig.canvas.manager.set_window_title('Figure 16: Complex Order Parameter Ψ')
+
+    # Loop over each experiment
+    for row, data in enumerate(experiment_data_list):
+       
+         
+        all_psi = data['all_psi']
+        type_ = data['type_']
+        halve_boundary_couplers = data['halve_boundary_couplers']
+
+        # Plot 1: Mean Magnitude Line Plot (First Column)
+        M = np.array([np.mean(np.abs(x)) for x in all_psi])
+        axs[row, 0].plot(M)
+        axs[row, 0].set_xlabel('Iteration')
+        axs[row, 0].set_ylabel(r'$\langle |\psi|\rangle$')
+        axs[row, 0].set_ylim([0.5, 0.8])
+        axs[row, 0].set_aspect(1.0 / axs[row, 0].get_data_ratio(), adjustable='box')  # Square aspect ratio
+
+        # Prepare data for the two heatmaps
+        psi_data = [
+            np.array([x[0] for x in all_psi[0:100]]),   # Before shimming
+            np.array([x[0] for x in all_psi[700:800]])  # After shimming
+        ]
+
+        # Plot 2 and 3: Heatmaps (Second and Third Columns)
+        for col, psi in enumerate(psi_data):
+            ax = axs[row, col + 1]  # Heatmaps in 2nd and 3rd columns
+            x = np.real(psi.ravel())
+            y = np.imag(psi.ravel())
+            extent = (-2, 2, -1.95, 1.95)
+            numbins = 42
+
+            hb = ax.hexbin(
+                x, y, gridsize=numbins, cmap='inferno', extent=extent,
+                norm=matplotlib.colors.Normalize(vmin=0, vmax=80)
+            )
+
+            cb = fig.colorbar(hb, ax=ax, shrink=0.8)  # Adjust colorbar size
+            cb.set_label('count')
+
+            # Add reference lines
+            ax.plot([-1 / np.sqrt(3), 1 / np.sqrt(3)], [-1, 1], color='w', linestyle='-')
+            ax.plot([-1 / np.sqrt(3), 1 / np.sqrt(3)], [1, -1], color='w', linestyle='-')
+            ax.plot([-2 / np.sqrt(3), 2 / np.sqrt(3)], [0, 0], color='w', linestyle='-')
+
+            ax.set_xlabel(r'Re$(\psi)$')
+            ax.set_ylabel(r'Im$(\psi)$')
+            ax.axis([-1.2, 1.2, -1.2, 1.2])
+            ax.set_aspect('equal', 'box')  # Square aspect ratio for heatmaps
+
+    # Adjust layout to prevent overlapping
+    plt.tight_layout()
+
+    # Display or save the plots
+    if MAKE_TIKZ_PLOTS:
+        for row, data in enumerate(experiment_data_list):
+            type_ = data['type_']
+            halve_boundary_couplers = data['halve_boundary_couplers']
+
+            fn = f'ex32_row{row}_{type_}{"_halved" * halve_boundary_couplers}'
+            code = tikzplotlib.get_tikz_code(
+                standalone=True,
+                axis_width='5cm', axis_height='5cm',
+                float_format='.5g',
+                extra_axis_parameters=tikz_axis_parameters,
+            )
+            code = code.replace('\\documentclass{standalone}',
+                                '\\documentclass{standalone}\n' + extra_code)
+
             with open(f'{PATH_TO_PAPER_DIR}/tex/{fn}.tex', "w") as f:
                 f.write(code)
     else:
