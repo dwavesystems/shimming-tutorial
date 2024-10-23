@@ -70,7 +70,7 @@ def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
 
         start_time = time.time() 
         # put a timer and print a time for the process, try raster_breath = 4, 5, 6
-        embeddings = embeddings_to_ndarray(raster_embedding_search(S=G, T=A, timeout=10, raster_breadth=5),
+        embeddings = embeddings_to_ndarray(raster_embedding_search(S=G, T=A, timeout=10, raster_breadth=6),
                                            node_order=sorted(G.nodes()))
         elapsed_time = time.time() - start_time  # Calculate elapsed time
         print(f"Execution Time: {elapsed_time:.6f} seconds")
