@@ -416,11 +416,17 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
         }
 
         # Make the logical BQM and a bunch of disjoint embeddings
+        # This may taks a long time to run (put estimate time), give user indication 
+        # of running time
         embeddings, _ = embed_square_lattice(sampler=sampler, L=param['L'])
+        print(f"Number of embeddings found: {len(embeddings)}")
+        print(f"Embeddings: {embeddings}")
 
         # Make the logical BQM to get orbits for a single embedding.
         # Doing it for all embeddings together is very slow with pynauty.
         logical_bqm = make_logical_bqm(param)
+        #print(f"Number of quadratic terms in logical BQM: {len(logical_bqm.quadratic)}")
+        #print(f"Quadratic terms: {logical_bqm.quadratic}")      
         unsigned_orbits = orbits.get_orbits(logical_bqm)
 
         # Where the shim data (parameters and Hamiltonian terms) are stored
@@ -458,7 +464,8 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
             'all_alpha_J': [],
             'all_psi': [],
         }
-
+        print(type(shim['couplings']))
+        print(shim['couplings'].shape)  # If it's a NumPy array or similar structure
         experiment_data = run_experiment(param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02)
         results.append(experiment_data)
 
