@@ -299,7 +299,11 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
 
     os.makedirs('cached_experiment_data', exist_ok=True)
     with lzma.open(filepath, 'wb') as f:
-        pickle.dump(data_dict, f)
+        try:
+            pickle.dump(data_dict, f)
+        except:
+            data_dict['param'].pop('sampler')
+            pickle.dump(data_dict, f)
 
     print(f'Saved {filepath}')
     return True
