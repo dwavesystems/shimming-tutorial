@@ -316,7 +316,7 @@ def paper_plots_example3_2(*, halve_boundary_couplers,
     # Plot 2: Couplings (relative to nominal)
     Jdata = np.array([x[0] / nominal_couplings for x in all_couplings])
     if type_ == 'embedded_finite':
-        indices = np.array(coupler_orbits) == coupler_orbits[0]
+        indices = np.array(coupler_orbits) == coupler_orbits[1]
     else:
         indices = np.arange(0, Jdata.shape[1], 5)
     axs[0, 1].plot(Jdata[:, indices], alpha=0.5)
@@ -380,8 +380,8 @@ def paper_plots_example3_2_heatmaps(experiment_data_list):
 
     # Loop over each experiment
     for row, data in enumerate(experiment_data_list):
-       
-         
+
+
         all_psi = data['all_psi']
         type_ = data['type_']
         halve_boundary_couplers = data['halve_boundary_couplers']
