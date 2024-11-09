@@ -17,7 +17,7 @@ import os
 import dimod
 import numpy as np
 
-from dwave.system.samplers import DWaveSampler
+from helpers.sampler_wrapper import ShimmingMockSampler
 
 class EmbeddingError(Exception):
     pass
@@ -94,8 +94,9 @@ def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
 
 def main():
     L = 8  # Length of chain to embed
+    sampler = ShimmingMockSampler()
     try:
-        embeddings = embed_loops(L, raster_breadth=2)
+        embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
         print("Embedding successful.")
     except ValueError as ve:
         print(f"Error: {ve}")
