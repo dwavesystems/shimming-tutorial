@@ -17,7 +17,7 @@ import os
 import dimod
 import numpy as np
 
-from helpers.sampler_wrapper import ShimmingMockSampler
+from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                embeddings_to_ndarray)
    
@@ -92,7 +92,7 @@ def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
 
 def main():
     L = 8  # Length of chain to embed
-    sampler = ShimmingMockSampler()
+    sampler = MockDWaveSampler()
     try:
         embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
         print("Embedding successful.")
