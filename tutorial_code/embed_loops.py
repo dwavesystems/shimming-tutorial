@@ -18,13 +18,11 @@ import dimod
 import numpy as np
 
 from helpers.sampler_wrapper import ShimmingMockSampler
-
-class EmbeddingError(Exception):
-    pass
-
-# from helpers.embedding_helpers import raster_embedding_search
 from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                embeddings_to_ndarray)
+   
+class EmbeddingError(Exception):
+    pass
 
 def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
     """
@@ -81,7 +79,7 @@ def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
         )
     
     embeddings = embeddings_to_ndarray(
-        raster_embedding_search(G, A, raster_breadth=raster_breadth)
+        raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth)
         , node_order=sorted(G.nodes()))
     if embeddings.size == 0:
         raise ValueError("Embedding returned by raster_embedding_search is empty.")
@@ -102,7 +100,6 @@ def main():
         print(f"Error: {ve}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
 
 if __name__ == "__main__":
     main()
