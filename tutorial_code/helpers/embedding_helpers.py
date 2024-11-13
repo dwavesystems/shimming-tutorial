@@ -19,7 +19,7 @@ import dwave_networkx as dnx
 import networkx as nx
 import numpy as np
 
-from helpers.sampler_wrapper import ShimmingMockSampler
+from sampler_wrapper import ShimmingMockSampler
 from dwave.system.samplers import DWaveSampler
 from dwave import embedding
 from minorminer import subgraph as glasgow
