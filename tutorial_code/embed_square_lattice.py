@@ -13,11 +13,10 @@
 # limitations under the License.
 #
 import os
-
 import dimod
 import numpy as np
-import time 
 
+from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                embeddings_to_ndarray,
                                                raster_breadth_subgraph_lower_bound)
@@ -65,16 +64,12 @@ def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
             print("Error:", e)
             print("Finding embedding via raster embedding search instead.")
 
-        lower_bound = raster_breadth_subgraph_lower_bound(S=G, T=A)
-        print(lower_bound)
-
-        start_time = time.time() 
-        # put a timer and print a time for the process, try raster_breath = 4, 5, 6
-        embeddings = embeddings_to_ndarray(raster_embedding_search(S=G, T=A, timeout=10, raster_breadth=6),
-                                           node_order=sorted(G.nodes()))
-        elapsed_time = time.time() - start_time  # Calculate elapsed time
-        print(f"Execution Time: {elapsed_time:.6f} seconds")
-
+            lower_bound = raster_breadth_subgraph_lower_bound(S=G, T=A)
+            embeddings = embeddings_to_ndarray(
+                raster_embedding_search(S=G, T=A, raster_breadth=lower_bound+1, max_num_emb=float('inf'), **kwargs),
+                node_order=sorted(G.nodes())
+            )
+    
     os.makedirs('cached_embeddings/', exist_ok=True)
     np.savetxt(cache_filename, embeddings, fmt='%d')
 
@@ -82,10 +77,16 @@ def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
 
 
 def main():
-    L = 12  # Linear size of square lattice to embed (LxL cylinder)
-    embeddings, bqm = embed_square_lattice(L, raster_breadth=5, max_num_emb=1,
-                                           timeout=100)
 
+    sampler = MockDWaveSampler()
+    try:
+        embeddings, bqm = embed_square_lattice(sampler=sampler, L=12, timeout=200, max_num_emb=1)
+        print(len(embeddings))
+        print("Embedding successful.")
+    except ValueError as ve:
+        print(f"Error: {ve}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()
