@@ -326,6 +326,7 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
 
     data_dict = {'param': param, 'shim': shim, 'stats': stats}
     data_dict = load_experiment_data(prefix, data_dict)
+    prev_execution_times = {'embedded_finite': 212.8416, 'embedded_infinite': 674.3778, 'triangular_infinite': 236.1368}
 
     if data_dict is not None:
         param = data_dict['param']
@@ -333,6 +334,8 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
         stats = data_dict['stats']
 
     else:
+        prev_execution_time = prev_execution_times[shim["type"]]
+        print(f"Warning: This experiment will take approximately {prev_execution_time:.2f} seconds.")
         pbar = tqdm(range(param['num_iters']), ncols=140, desc=f'PROGRESS ({prefix})')
 
         if not param['adaptive_step_size']:

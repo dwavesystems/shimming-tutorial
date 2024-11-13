@@ -225,6 +225,8 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
         stats = data_dict['stats']
 
     else:
+        prev_execution_time = 441.86028
+        print(f"Warning: This experiment will take approximately {prev_execution_time:.2f} seconds.")
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
             if iteration < param['num_iters_unshimmed_flux']:
                 shim['alpha_Phi'] = 0.
