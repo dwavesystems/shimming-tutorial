@@ -9,7 +9,7 @@ pip install -r requirements.txt
 ```
 
 
-## Orbit preliminaries
+## Orbit preliminaries (no cloud client)
 ```
 python -m example0_1_orbits
 ```

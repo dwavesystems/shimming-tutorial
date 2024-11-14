@@ -43,9 +43,10 @@ def make_bqm():
 
     return bqm
 
-def main():
-    """
-    Main function to run the example of creating a Binary Quadratic Model (BQM) 
+def make_figure4():
+    """Reproduces Figure 4 of the shimming tutorial DOI:10.3389/fcomp.2023.1238988
+
+    Example of creating a Binary Quadratic Model (BQM) 
     and computing its orbits (symmetries of spins and couplers).
     """
     # Make the four-qubit BQM and compute its orbits.
@@ -55,7 +56,8 @@ def main():
     qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = \
         orbits.get_orbits(bqm)
 
-    print(f'Signed qubit orbits: {signed_qubit_orbits}')
+    print('Creates figure 4 from DOI:10.3389/fcomp.2023.1238988')
+    print(f'\nSigned qubit orbits: {signed_qubit_orbits}')
     print(f'\nSigned coupler orbits: {signed_coupler_orbits}')
     print(f'\nQubit orbits: {qubit_orbits}')
     print(f'\nCoupler orbits: {coupler_orbits}')
@@ -113,10 +115,11 @@ def main():
     node_labels = {key: f'{val}' for key, val in nx.get_node_attributes(Gnx, "orbit").items()}
     nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
     edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
+    
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
 
     plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    make_figure4()
