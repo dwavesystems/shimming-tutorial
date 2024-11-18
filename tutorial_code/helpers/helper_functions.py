@@ -294,7 +294,6 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
 
     # Need to remove some sampler fields to make the data serializable.
     if 'param' in data_dict and 'sampler' in data_dict['param']:
-        data_dict['param']['sampler'].properties['chip_id'] = None
         data_dict['param']['sampler'].client = None
 
     os.makedirs('cached_experiment_data', exist_ok=True)
