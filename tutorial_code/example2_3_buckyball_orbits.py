@@ -26,10 +26,12 @@ from helpers import orbits
 from helpers.orbits import get_orbits
 
 
-def figure11():
-    """Figure 11 doi.org/10.3389/fcomp.2023.1238988 Bucky ball orbits
+def main():
+    """Reproduces Figure 11 of the shimming tutorial DOI:10.3389/fcomp.2023.1238988
 
-    Demonstrates orbits for a bucky ball graph structure.
+    Example of creating a Binary Quadratic Model (BQM) structured as a
+    buckyball (Buckminsterfullerene) and computing its orbits (symmetries of
+    spins and couplers).
     """
     
 
@@ -44,7 +46,6 @@ def figure11():
     # Compute the BQM's orbits
     (qubit_orbits, coupler_orbits,
         qubit_orbits_opposite, coupler_orbits_opposite) = get_orbits(bqm)
-
     cm = plt.cm.get_cmap(name='coolwarm')
     norm = plt.Normalize(vmin=-2, vmax=2)
     plt.rc('font', size=12)
@@ -63,4 +64,4 @@ def figure11():
     plt.show()
 
 if __name__ == "__main__":
-    figure11()
+    main()
