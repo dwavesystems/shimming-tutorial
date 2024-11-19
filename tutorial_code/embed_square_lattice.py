@@ -42,7 +42,8 @@ def make_square_bqm(L):
                 bqm.set_quadratic(x * L + y, (x + 1) * L + y, 1)
     return bqm
 
-def embed_square_lattice(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
+def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_breadth: int=None,
+                         **re_kwargs) -> tuple[np.ndarray, dimod.BinaryQuadraticModel]:
     """Embeds a square lattice of length L (LxL cylinder).
 
     Args:
