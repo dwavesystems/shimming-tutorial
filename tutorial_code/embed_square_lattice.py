@@ -14,25 +14,18 @@
 #
 import os
 import dimod
+import warnings
 import numpy as np
+import time  # temporary
 
 from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                embeddings_to_ndarray,
-                                               raster_breadth_subgraph_lower_bound)
+                                               raster_breadth_subgraph_lower_bound,
+                                               raster_breadth_subgraph_upper_bound,
+                                               subgraph_embedding_feasibility_filter)
 
-
-def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
-    """Embeds a square lattice of length `L` (LxL cylinder).
-
-    Args:
-        L (int): lattice length
-        try_to_load (bool, optional): Flag for whether to load from cached data. Defaults to True.
-
-    Returns:
-        Tuple[np.ndarray, dimod.BQM]: A matrix of embeddings and BQM for the lattice.
-    """
-
+def make_square_bqm(L):
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
 
     for x in range(L):
@@ -47,46 +40,78 @@ def embed_square_lattice(sampler, L, try_to_load=True, **kwargs):
                 bqm.set_quadratic(x * L + y, x * L + ((y + 1) % L), -1)
             if x < L - 1:
                 bqm.set_quadratic(x * L + y, (x + 1) * L + y, 1)
+    return bqm
 
-    G = dimod.to_networkx_graph(bqm)
-    A = sampler.to_networkx_graph()
+def embed_square_lattice(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
+    """Embeds a square lattice of length L (LxL cylinder).
+
+    Args:
+        sampler (int): DWaveSampler for which to embed
+        L (int): lattice length
+        use_cache (bool, default=True): When True, embeddings are 
+            saved to and loaded from a local directory whenever
+            possible. If writing to a directory is not possible 
+            a warning is thrown.
+    
+    Returns:
+        Tuple[np.ndarray, dimod.BQM]: A matrix of embeddings and BQM for the lattice.
+    """
+
+    bqm = make_square_bqm(L)
 
     solver_name = sampler.properties['chip_id'] # sampler.solver.name
-    cache_filename = f'cached_embeddings/{solver_name}__L{L:02d}_square_embeddings_cached.txt'
-    if try_to_load:
-        try:
-            print(f"Trying to load cache file from: {cache_filename}")
-            embeddings = np.loadtxt(cache_filename, dtype=int)
-            print(f'Loaded embedding from file {cache_filename}')
-            return embeddings, bqm
-        except (ValueError, FileNotFoundError) as e:
-            print(f"Failed to load {cache_filename} with `np.loadtxt`")
-            print("Error:", e)
-            print("Finding embedding via raster embedding search instead.")
-
-            lower_bound = raster_breadth_subgraph_lower_bound(S=G, T=A)
-            embeddings = embeddings_to_ndarray(
-                raster_embedding_search(S=G, T=A, raster_breadth=lower_bound+1, max_num_emb=float('inf'), **kwargs),
-                node_order=sorted(G.nodes())
-            )
+    cache_filename = f'cached_embeddings/{solver_name}_L{L:02d}_square_embeddings_cached.txt'
     
-    os.makedirs('cached_embeddings/', exist_ok=True)
-    np.savetxt(cache_filename, embeddings, fmt='%d')
+    if use_cache and os.path.exists(cache_filename):
+        embeddings = np.loadtxt(cache_filename, dtype=int)
+        if embeddings.ndim==1:
+            embeddings = embeddings[np.newaxis,:]
+        print(f'Loaded {cache_filename}')
+        return embeddings, bqm
+    else:
+        G = dimod.to_networkx_graph(bqm)
+        A = sampler.to_networkx_graph()
+        if not subgraph_embedding_feasibility_filter(S=G, T=A):
+            raise ValueError(f'Embedding {S} on {T} is infeasible')
+        if raster_breadth is None:
+            raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
+                                 raster_breadth_subgraph_upper_bound(T=A))
+        if not isinstance(raster_breadth, int) or raster_breadth <= 0:
+            raise EmbeddingError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
+
+        print('Creating embeddings may take several minutes.' 
+              '\nTo accelerate the process a smaller lattice (L) might be '
+              'considered and/or the search restricted to max_num_emb=1.')
+        prng = np.random.default_rng()
+        t0 = time.time()
+        embeddings = embeddings_to_ndarray(
+            raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth,
+                                    prng=prng,
+                                    **re_kwargs),
+            node_order=sorted(G.nodes())
+        )
+        print(time.time()-t0)
+        if embeddings.size == 0:
+            raise ValueError('No feasible embeddings found. '
+                             '\nModifying the source (lattice) and target '
+                             '(processor), or raster_embedding_search arguments '
+                             'such as timeout may resolve the issue.')
+        
+
+    if use_cache:
+        try:
+            os.makedirs('cached_embeddings/', exist_ok=True)
+            np.savetxt(cache_filename, embeddings, fmt='%d')
+        except:
+            warnings.warn('Embedding cache files could not be created')
 
     return embeddings, bqm
 
-
-def main():
-
-    sampler = MockDWaveSampler()
-    try:
-        embeddings, bqm = embed_square_lattice(sampler=sampler, L=12, timeout=200, max_num_emb=1)
-        print(len(embeddings))
-        print("Embedding successful.")
-    except ValueError as ve:
-        print(f"Error: {ve}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
 if __name__ == "__main__":
-    main()
+    L=3
+    sampler = MockDWaveSampler(topology_type='pegasus', topology_shape=[3])
+    embeddings, bqm = embed_square_lattice(sampler=sampler, L=L, max_num_emb=1)
+    if embeddings.shape == (1,L*L):
+        print(f'{L}x{L} embedding successfully found')
+    else:
+        print(f'Something is wrong, {L}x{L} embedding not found')
