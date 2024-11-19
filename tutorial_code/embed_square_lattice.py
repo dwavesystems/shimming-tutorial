@@ -78,7 +78,7 @@ def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True
             raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
                                  raster_breadth_subgraph_upper_bound(T=A))
         if not isinstance(raster_breadth, int) or raster_breadth <= 0:
-            raise EmbeddingError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
+            raise ValueError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
 
         print('Creating embeddings may take several minutes.' 
               '\nTo accelerate the process a smaller lattice (L) might be '
