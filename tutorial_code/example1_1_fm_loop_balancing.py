@@ -15,6 +15,7 @@
 
 import dimod
 import numpy as np
+from typing import List, Dict, Union
 
 from helpers.sampler_wrapper import ShimmingMockSampler
 from dwave.system.samplers import DWaveSampler
@@ -25,7 +26,8 @@ from helpers.helper_functions import load_experiment_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example1_1
 
 
-def make_fbo_dict(param, shim, embeddings):
+def make_fbo_dict(param: Dict[str, Union[int, float, dimod.Sampler]], shim: Dict[str, np.array],
+                   embeddings: List[Dict[int, int]]) -> Dict[int, float]:
     """Makes the FBO dict from the matrix of FBOs.
 
     Args:
@@ -43,7 +45,8 @@ def make_fbo_dict(param, shim, embeddings):
     return fbo_dict
 
 
-def make_bqm(param, shim, embeddings):
+def make_bqm(param: Dict[str, Union[int, float, dimod.Sampler]], shim: Dict[str, np.ndarray],
+              embeddings: List[Dict[int, int]]) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -68,7 +71,11 @@ def make_bqm(param, shim, embeddings):
     return bqm
 
 
-def adjust_fbos(result, param, shim, stats, embeddings):
+def adjust_fbos(result: dimod.SampleSet,
+                param: Dict[str, Union[int, float, dimod.Sampler]],
+                shim: Dict[str, np.ndarray],
+                stats: Dict[str, List[np.ndarray]],
+                embeddings: List[Dict[int, int]]) -> None:
     """Adjust flux bias offsets in-place.
 
     Args:
@@ -95,7 +102,11 @@ def adjust_fbos(result, param, shim, stats, embeddings):
     stats['mags'].append(mag_array)
     stats['all_fbos'].append(shim['fbos'].copy())
 
-def adjust_couplings(result, param, shim, stats, embeddings):
+def adjust_couplings(result: dimod.SampleSet,
+                     param: Dict[str, Union[int, float, dimod.Sampler]],
+                     shim: Dict[str, np.ndarray],
+                     stats: Dict[str, List[np.ndarray]],
+                     embeddings: List[Dict[int, int]]) -> None:
     """Adjust couplings given a sample set.
 
     Args:
@@ -131,7 +142,10 @@ def adjust_couplings(result, param, shim, stats, embeddings):
     stats['frust'].append(frust_matrix)
 
 
-def run_iteration(param, shim, stats, embeddings):
+def run_iteration(param: Dict[str, Union[int, float, dimod.Sampler]],
+                  shim: Dict[str, np.ndarray],
+                  stats: Dict[str, List[np.ndarray]],
+                  embeddings: List[Dict[int, int]]) -> None:
     """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
     bias offsets and couplings, and update statistics.
 
@@ -166,8 +180,13 @@ def run_iteration(param, shim, stats, embeddings):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
-                   use_cache=True):
+def run_experiment(param: Dict[str, Union[int, float, dimod.Sampler]],
+                   shim: Dict[str, np.ndarray],
+                   stats: Dict[str, List[np.ndarray]],
+                   embeddings: List[Dict[int, int]],
+                   alpha_Phi: float=0., 
+                   alpha_J: float=0.,
+                   use_cache: bool=True) -> Dict[str, Union[float, List[np.ndarray]]]:
     """Run the full experiment
 
     Args:
@@ -220,8 +239,8 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
     }
 
 
-def main(solver_name=None, coupling=-0.2, num_iters=100,
-         num_iters_unshimmed_flux=10, use_cache=True):
+def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=100,
+         num_iters_unshimmed_flux: int=10, use_cache: bool=True) -> None:
     """Main function to run example.
 
     Completes an experiment matched to Figure 6 of DOI10.3389/fcomp.2023.1238988,
