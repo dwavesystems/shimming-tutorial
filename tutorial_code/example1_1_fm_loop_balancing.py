@@ -169,7 +169,7 @@ def run_iteration(param, shim, stats, embeddings):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
+def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
     """Run the full experiment
 
     Args:
@@ -179,10 +179,11 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
         shim (dict): shimming data
         stats (dict): dict of sampled statistics
         embeddings (List[dict]): list of embeddings
-        _alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0..
-        _alpha_J (float, optional): learning rate for coupling shims. Defaults to 0..
+        alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0.
+        alpha_J (float, optional): learning rate for coupling shims. Defaults to 0.
     """
-    prefix = f'example1_1_aPhi{_alpha_Phi}_aJ{_alpha_J}'
+    solver_name = param['sampler'].properties['chip_id']
+    prefix = f'{solver_name}_example1_1_aPhi{alpha_Phi}_aJ{alpha_J}'
 
     data_dict = {'param': param, 'shim': shim, 'stats': stats}
     data_dict = load_experiment_data(prefix, data_dict)
@@ -190,17 +191,16 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
         param = data_dict['param']
         shim = data_dict['shim']
         stats = data_dict['stats']
-
     else:
-        prev_execution_time = 193.6231
-        print(f"Warning: This experiment will take approximately {prev_execution_time:.2f} seconds.")
+        # prev_execution_time = 193.6231 sec.
+        print(f"Collection of data typically requires several minutes")
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
             if iteration < param['num_iters_unshimmed_flux']:
                shim['alpha_Phi'] = 0.
             else:
-               shim['alpha_Phi'] = _alpha_Phi
+               shim['alpha_Phi'] = alpha_Phi
 
-            shim['alpha_J'] = _alpha_J
+            shim['alpha_J'] = alpha_J
             run_iteration(param, shim, stats, embeddings)
 
         save_experiment_data(
@@ -209,34 +209,32 @@ def run_experiment(param, shim, stats, embeddings, _alpha_Phi=0., _alpha_J=0.):
         )
 
     return {
-        'alpha_Phi': _alpha_Phi,
+        'alpha_Phi': alpha_Phi,
         'all_fbos': stats['all_fbos'],
         'mags': stats['mags']
     }
 
 
-def main(sampler_type='mock', model_type=None, num_iters=100, num_iters_unshimmed_flux=10):
-    """
-    Main function to run example
+def main(solver_name=None, coupling=-0.2, num_iters=100, num_iters_unshimmed_flux=10):
+    """Main function to run example.
+
+    Completes an experiment matched to Figure 6 of DOI10.3389/fcomp.2023.1238988,
+    plotting a corresponding figure.
 
     Args:
-        sampler_type (string, optional): option to specify sampler type. Defaults to MockDWaveSampler.
-        model_type (string): option to specify a model type. Defaults to independent spins.
-        num_iters (int): option to specify the number of iterations for the experiment. Defaults to 300.
-        num_iters_unshimmed_flux (int): option to specify the number of iteratrions that doesn't shim flux_biases. Defaults to 100.
-        num_iters_unshimmed_J (int): option to specify number of iterations that doesn't shim alpha_J. Defaults to 200.
+        solver_name (string, optional): option to specify sampler type. The default client QPU
+            is used by default other options are listed in Leap, to use a locally executed
+            classical placeholder for debugging select 'MockDWaveSampler'.
+        coupling (float): Strength of coupling, defaults to -0.2 (ferromagnetic).
+        num_iters (int): Total number of programmings (iterations). Defaults to 300.
+        num_iters_unshimmed_flux (int): Number of iterations without shimming of flux_biases. Defaults to 100.
+        num_iters_unshimmed_J (int): Number of iterations without shimming of couplings. Defaults to 200.
     """
-
-    if sampler_type == 'mock':
+    if solver_name == 'MockDWaveSampler':
         sampler_instance = ShimmingMockSampler()
         sampler = sampler_instance.get_sampler()
     else:
-        sampler = DWaveSampler()
-    
-    if model_type == 'independent_spins':
-        coupling = 0  
-    else:
-        coupling = -0.2
+        sampler = DWaveSampler(solver=solver_name)
 
     results = []  
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
