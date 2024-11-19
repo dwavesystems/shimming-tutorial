@@ -98,13 +98,11 @@ def embed_loops(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
 def main():
     L = 8  # Length of chain to embed
     sampler = MockDWaveSampler()
-    try:
-        embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
-        print("Embedding successful.")
-    except ValueError as ve:
-        print(f"Error: {ve}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+    embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
+    if embeddings.shape[0] >= 1 and embeddings.shape[1] == L:
+        print(f'{L}x{L} embedding successfully found')
+    else:
+        print(f'Something is wrong, {L}x{L} embedding not found')
 
 if __name__ == "__main__":
     main()

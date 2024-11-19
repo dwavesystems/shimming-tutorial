@@ -82,9 +82,12 @@ def embed_square_lattice(sampler, L, use_cache=True, raster_breadth=None, **re_k
         print('Creating embeddings may take several minutes.' 
               '\nTo accelerate the process a smaller lattice (L) might be '
               'considered and/or the search restricted to max_num_emb=1.')
+        prng = np.random.default_rng()
         t0 = time.time()
         embeddings = embeddings_to_ndarray(
-            raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth, **re_kwargs),
+            raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth,
+                                    prng=prng,
+                                    **re_kwargs),
             node_order=sorted(G.nodes())
         )
         print(time.time()-t0)
