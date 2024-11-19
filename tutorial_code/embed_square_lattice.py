@@ -73,7 +73,7 @@ def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True
         G = dimod.to_networkx_graph(bqm)
         A = sampler.to_networkx_graph()
         if not subgraph_embedding_feasibility_filter(S=G, T=A):
-            raise ValueError(f'Embedding {S} on {T} is infeasible')
+            raise ValueError(f'Embedding {G} on {A} is infeasible')
         if raster_breadth is None:
             raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
                                  raster_breadth_subgraph_upper_bound(T=A))
@@ -103,8 +103,8 @@ def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True
         try:
             os.makedirs('cached_embeddings/', exist_ok=True)
             np.savetxt(cache_filename, embeddings, fmt='%d')
-        except:
-            warnings.warn('Embedding cache files could not be created')
+        except OSError as e:
+            warnings.warn(f'Embedding cache files could not be created: {e}')
 
     return embeddings, bqm
 
