@@ -223,20 +223,25 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
     }
 
 
-def main(solver_name=None, coupling=-0.2, num_iters=100, num_iters_unshimmed_flux=10, use_cache=True):
+def main(solver_name=None, coupling=-0.2, num_iters=100,
+         num_iters_unshimmed_flux=10, use_cache=True):
     """Main function to run example.
 
     Completes an experiment matched to Figure 6 of DOI10.3389/fcomp.2023.1238988,
     plotting a corresponding figure.
 
     Args:
-        solver_name (string, optional): option to specify sampler type. The default client QPU
-            is used by default other options are listed in Leap, to use a locally executed
-            classical placeholder for debugging select 'MockDWaveSampler'.
+        solver_name (string, optional): option to specify sampler type. The
+            default client QPU is used by default other options are listed in
+            Leap, to use a locally executed classical placeholder for debugging
+            select 'MockDWaveSampler'.
         coupling (float): Strength of coupling, defaults to -0.2 (ferromagnetic).
-        num_iters (int): Total number of programmings (iterations). Defaults to 300.
-        num_iters_unshimmed_flux (int): Number of iterations without shimming of flux_biases. Defaults to 100.
-        num_iters_unshimmed_J (int): Number of iterations without shimming of couplings. Defaults to 200.
+        num_iters (int): Total number of programmings (iterations). Defaults to
+            300.
+        num_iters_unshimmed_flux (int): Number of iterations without shimming
+            of flux_biases. Defaults to 100.
+        num_iters_unshimmed_J (int): Number of iterations without shimming of
+            couplings. Defaults to 200.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse 
             collected data. When False embeddings and data are recalculated on
