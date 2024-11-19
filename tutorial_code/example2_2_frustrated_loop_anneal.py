@@ -176,12 +176,11 @@ def run_iteration(param, shim, embeddings, stats):
     """
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
-    
+
     flux_biases = [0] * param['sampler'].properties['num_qubits']
 
     for qubit, fbo in fbo_dict.items():
             flux_biases[qubit] = fbo
-     
 
     result = param['sampler'].sample(
         bqm,
@@ -200,7 +199,8 @@ def run_iteration(param, shim, embeddings, stats):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
+def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
+                   use_cache=True):
     """Run the full experiment
 
     Args:
@@ -210,23 +210,26 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
         shim (dict): shimming data
         stats (dict): dict of sampled statistics
         embeddings (List[dict]): list of embeddings
-        alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0..
-        alpha_J (float, optional): learning rate for coupling shims. Defaults to 0..
+        alpha_Phi (float): learning rate for linear shims. Defaults to 0.
+        alpha_J (float): learning rate for coupling shims. Defaults to 0.
+        use_cache (bool): When True an attempt is made to load (save) data from
+            (to) the directory cached_experimental_data.
     """
-
-    prefix = f'example2_2_aPhi{alpha_Phi}_aJ{alpha_J}'
-
-    data_dict = {'param': param, 'shim': shim, 'stats': stats}
-    data_dict = load_experiment_data(prefix, data_dict)
-
+    if use_cache:
+        solver_name = param['sampler'].properties['chip_id']
+        prefix = f'{solver_name}_example2_2_aPhi{alpha_Phi}_aJ{alpha_J}'
+        data_dict = {'param': param, 'shim': shim, 'stats': stats}
+        data_dict = load_experiment_data(prefix, data_dict)
+    else:
+        data_dict = None
     if data_dict is not None:
         param = data_dict['param']
         shim = data_dict['shim']
         stats = data_dict['stats']
 
     else:
-        prev_execution_time = 441.86028
-        print(f"Warning: This experiment will take approximately {prev_execution_time:.2f} seconds.")
+        # prev_execution_time = 441.86028
+        print(f"Collection of data typically requires several minutes")
         for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
             if iteration < param['num_iters_unshimmed_flux']:
                 shim['alpha_Phi'] = 0.
@@ -237,11 +240,11 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
             else:
                 shim['alpha_J'] = alpha_J
             run_iteration(param, shim, embeddings, stats)
-
-        save_experiment_data(
-            prefix,
-            {'param': param, 'shim': shim, 'stats': stats}
-        )
+        if use_cache:
+            save_experiment_data(
+                prefix,
+                {'param': param, 'shim': shim, 'stats': stats}
+            )
 
     paper_plots_example2_2(nominal_couplings=shim['nominal_couplings'],
                            all_fbos=stats['all_fbos'],
@@ -250,41 +253,48 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.):
                            frust=stats['frust'])
 
 
-def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=200):
-    """
-    Main function to run example
+def main(solver_name=None, coupling=-0.9, num_iters=300,
+         num_iters_unshimmed_flux=100, num_iters_unshimmed_J=200, use_cache=True):
+    """Main function to run example
+
+    Completes an experiment matched to Figure 10 of DOI:10.3389/fcomp.2023.1238988,
+    plotting a corresponding figure.
 
     Args:
-        sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
-        model_type (string): option to specify a model type. Defaults to None.
-        num_iters (int): option to specify the number of iterations for the experiment. Defaults to 300.
-        num_iters_unshimmed_flux (int): option to specify the number of iteratrions that doesn't shim flux_biases. Defaults to 100.
-        num_iters_unshimmed_J (int): option to specify number of iterations that doesn't shim alpha_J. Defaults to 200.
+        solver_name (string, optional): option to specify sampler type. The
+            default client QPU is used by default other options are listed in
+            Leap, to use a locally executed classical placeholder for debugging
+            select 'MockDWaveSampler'.
+        coupling (float): energy scale associated to couplings. Defaults to
+            -0.9 (ferromagnetic).
+        num_iters (int): option to specify the number of iterations for the
+            experiment. Defaults to 300.
+        num_iters_unshimmed_flux (int): option to specify the number of
+            iteratrions that doesn't shim flux_biases. Defaults to 100.
+        num_iters_unshimmed_J (int): option to specify number of iterations
+            that doesn't shim alpha_J. Defaults to 200.
+        use_cache (bool): When True embeddings and data are read from
+            (and saved to) local directories, repeated executions can reuse
+            collected data. When False embeddings and data are recalculated on
+            each call. Defaults to True
     """
 
-    if sampler_type == 'mock':
+    if solver_name == 'MockDWaveSampler':
         sampler_instance = ShimmingMockSampler()
         sampler = sampler_instance.get_sampler()
     else:
-        sampler = DWaveSampler()
+        sampler = DWaveSampler(solver=solver_name)
 
-    # Each qubit is treated as an independent unit.  Embedding is a list of list,
-    # where each iner list contains a single qubit from the nodelist. 
-    if model_type == 'independent_spins':
-        coupling = 0  
-    else:
-        coupling = -0.9
-        
     param = {
             'L':16,
-            'sampler': sampler, 
+            'sampler': sampler,
             'coupling': coupling,
             'num_iters': num_iters,
             'num_iters_unshimmed_flux': num_iters_unshimmed_flux,
             'num_iters_unshimmed_J': num_iters_unshimmed_J
         }
- 
-    embeddings = embed_loops(sampler=sampler, L=param['L']) 
+
+    embeddings = embed_loops(sampler=sampler, L=param['L'], use_cache=use_cache)
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
@@ -315,7 +325,7 @@ def main(sampler_type='mock', model_type=None, num_iters=300, num_iters_unshimme
         'all_alpha_J': [],
     }
 
-    run_experiment(param, shim, stats, embeddings, 0.5e-5, 5e-2)
+    run_experiment(param, shim, stats, embeddings, 0.5e-5, 5e-2, use_cache)
 
 
 if __name__ == "__main__":
