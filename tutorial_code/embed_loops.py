@@ -24,7 +24,8 @@ from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                raster_breadth_subgraph_upper_bound,
                                                subgraph_embedding_feasibility_filter)
 
-def embed_loops(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
+def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_breadth: int=None, 
+                **re_kwargs)-> np.ndarray:
     """Embeds a ring of length L.
 
     Args:
