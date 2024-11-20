@@ -39,8 +39,13 @@ def main():
     path_to_csv = "data/bucky_ball.csv"
     if not exists(path_to_csv):
         path_to_csv = f"tutorial_code/{path_to_csv}"
-    J = {(int(e[0]), int(e[1])): w
-         for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
+    if not exists(path_to_csv):
+        raise FileNotFoundError(f"CSV file not found in specified paths. Checked: 'data/bucky_ball.csv' and '{path_to_csv}'")
+    try:
+        J = {(int(e[0]), int(e[1])): w for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
+    except Exception as e:
+        raise ValueError(f"Failed to load or parse CSV file '{path_to_csv}': {e}")
+
     bqm = dimod.BQM.from_ising(h={}, J=J)
 
     # Compute the BQM's orbits
