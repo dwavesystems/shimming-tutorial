@@ -228,7 +228,8 @@ def main(solver_name: str=None, model_type: str=None, num_iters: int=300,
         solver_name (string): option to specify sampler type. The default client QPU
             is used by default other options are listed in Leap, to use a locally executed
             classical placeholder for debugging select 'MockDWaveSampler'.
-        model_type (string)
+        model_type (string): option to specify the model type to idependent spins. The 
+            default is None.
         coupling (float): coupling strength on chain.
         num_iters (int): Number of sequential programmings.
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
