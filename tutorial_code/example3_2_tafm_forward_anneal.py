@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 import dimod
-import time
 import numpy as np
 
 from tqdm import tqdm
