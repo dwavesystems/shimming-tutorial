@@ -16,7 +16,6 @@ import networkx as nx
 
 from matplotlib import pyplot as plt
 
-from helpers.sampler_wrapper import ShimmingMockSampler
 from embed_square_lattice import make_square_bqm
 from helpers import orbits
 from helpers.helper_functions import get_qubit_colors, get_coupler_colors
