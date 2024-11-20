@@ -24,7 +24,7 @@ from helpers.helper_functions import load_experiment_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example2_2
 
 
-def make_fbo_dict(param, shim, embeddings):
+def make_fbo_dict(param: dict, shim: dict, embeddings: list) -> dict:
     """Makes the FBO dict from the matrix of FBOs.
 
     Args:
@@ -42,7 +42,7 @@ def make_fbo_dict(param, shim, embeddings):
     return fbo_dict
 
 
-def make_bqm(param, shim, embeddings):
+def make_bqm(param: dict, shim: dict, embeddings: list) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -67,7 +67,7 @@ def make_bqm(param, shim, embeddings):
     return bqm
 
 
-def make_logical_bqm(param, shim):
+def make_logical_bqm(param: dict, shim: dict) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -89,7 +89,7 @@ def make_logical_bqm(param, shim):
     return _bqm
 
 
-def adjust_fbos(result, param, shim, embeddings, stats):
+def adjust_fbos(result: dimod.SampleSet, param: dict, shim: dict, embeddings: list, stats: dict) -> None:
     """Adjust flux bias offsets in-place.
 
     Args:
@@ -118,7 +118,7 @@ def adjust_fbos(result, param, shim, embeddings, stats):
     stats['all_fbos'].append(shim['fbos'].copy())
 
 
-def adjust_couplings(result, param, shim, embeddings, stats):
+def adjust_couplings(result: dimod.SampleSet, param: dict, shim: dict, embeddings: list, stats: dict) -> None:
     """Adjust couplings given a sample set.
 
     Args:
@@ -159,7 +159,7 @@ def adjust_couplings(result, param, shim, embeddings, stats):
     stats['frust'].append(frust_matrix)
 
 
-def run_iteration(param, shim, embeddings, stats):
+def run_iteration(param: dict, shim: dict, embeddings: list, stats: dict) -> None:
     """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
     bias offsets and couplings, and update statistics.
 
@@ -196,8 +196,8 @@ def run_iteration(param, shim, embeddings, stats):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
-                   use_cache=True):
+def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha_Phi: float=0., alpha_J: float=0.,
+                   use_cache: bool=True) -> dict:
     """Run the full experiment
 
     Args:
@@ -250,8 +250,8 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
                            frust=stats['frust'])
 
 
-def main(solver_name=None, coupling=-0.9, num_iters=300,
-         num_iters_unshimmed_flux=100, num_iters_unshimmed_J=200, use_cache=True):
+def main(solver_name: str=None, coupling: float=-0.9, num_iters: int=300,
+         num_iters_unshimmed_flux: int=100, num_iters_unshimmed_J: int=200, use_cache: bool=True) -> None:
     """Main function to run example
 
     Completes an experiment matched to Figure 10 of DOI:10.3389/fcomp.2023.1238988,
