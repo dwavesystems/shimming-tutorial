@@ -37,10 +37,7 @@ def make_fbo_dict(param, shim, embeddings):
     Returns:
         dict: flux bias offsets as a dict
     """
-    fbo_dict = {}
-    for iemb, emb in enumerate(embeddings):
-        for spin in range(param['L']):
-            fbo_dict[emb[spin]] = shim['fbos'][iemb, spin]
+    fbo_dict = {emb[spin]: shim['fbos'][iemb, spin] for iemb, emb in enumerate(embeddings) for spin in range(param['L'])}
 
     return fbo_dict
 
