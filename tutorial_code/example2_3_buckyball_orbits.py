@@ -18,8 +18,6 @@ import dimod
 import networkx as nx
 import numpy as np
 
-from helpers.sampler_wrapper import ShimmingMockSampler
-from dwave.system.samplers import DWaveSampler
 from matplotlib import pyplot as plt
 
 from helpers import orbits
