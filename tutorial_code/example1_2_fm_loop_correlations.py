@@ -216,7 +216,7 @@ def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha
                            frust=stats['frust'])
 
 
-def main(solver_name: str=None, model_type: str=None, num_iters: int=300,
+def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=300,
          num_iters_unshimmed_flux: int=100, num_iters_unshimmed_J: int=200,
          use_cache: bool=True) -> None:
     """Main function to run example.
@@ -228,8 +228,6 @@ def main(solver_name: str=None, model_type: str=None, num_iters: int=300,
         solver_name (string): option to specify sampler type. The default client QPU
             is used by default other options are listed in Leap, to use a locally executed
             classical placeholder for debugging select 'MockDWaveSampler'.
-        model_type (string): option to specify the model type to idependent spins. The 
-            default is None.
         coupling (float): coupling strength on chain.
         num_iters (int): Number of sequential programmings.
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
@@ -248,12 +246,6 @@ def main(solver_name: str=None, model_type: str=None, num_iters: int=300,
         sampler = sampler_instance.get_sampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
-    # Each qubit is treated as an independent unit.  Embedding is a list of list,
-    # where each iner list contains a single qubit from the nodelist.
-    if model_type == 'independent_spins':
-        coupling = 0 
-    else:
-        coupling = -0.2
 
     param = {
         'L': 16,
