@@ -16,7 +16,6 @@ import os
 import dimod
 import warnings
 import numpy as np
-import time  # temporary
 
 from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.raster_embedding import (raster_embedding_search,
@@ -84,14 +83,13 @@ def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True
               '\nTo accelerate the process a smaller lattice (L) might be '
               'considered and/or the search restricted to max_num_emb=1.')
         prng = np.random.default_rng()
-        t0 = time.time()
         embeddings = embeddings_to_ndarray(
             raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth,
                                     prng=prng,
                                     **re_kwargs),
             node_order=sorted(G.nodes())
         )
-        print(time.time()-t0)
+
         if embeddings.size == 0:
             raise ValueError('No feasible embeddings found. '
                              '\nModifying the source (lattice) and target '
