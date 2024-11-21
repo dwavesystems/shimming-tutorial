@@ -154,7 +154,7 @@ def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list) -> Non
         bqm,
         annealing_time=1.0,
         num_reads=100,
-        readout_thermalization=100,
+        readout_thermalization=100.,
         auto_scale=False,
         flux_drift_compensation=True,
         flux_biases=flux_biases,
