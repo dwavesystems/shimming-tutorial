@@ -376,6 +376,9 @@ def paper_plots_example3_2_heatmaps(experiment_data_list):
         num_experiments, 3, figsize=(15, 5 * num_experiments),
         gridspec_kw={'width_ratios': [1, 1, 1]}  # Ensure equal width for all columns
     )
+     # Add titles for the second and third columns
+    axs[0, 1].set_title('Before Shimming', fontsize=14, fontweight='bold')  
+    axs[0, 2].set_title('After Shimming', fontsize=14, fontweight='bold')  
     fig.canvas.manager.set_window_title('Figure 16: Complex Order Parameter Ψ')
 
     # Loop over each experiment
