@@ -41,7 +41,12 @@ class ShimmingMockSampler(MockDWaveSampler):
         )
 
         self.sampler_type = 'mock'
-
+        # Added to suppress warnings
+        self.mocked_parameters.add('flux_drift_compensation')
+        self.mocked_parameters.add('auto_scale')
+        self.mocked_parameters.add('readout_thermalization')
+        self.mocked_parameters.add('annealing_time')
+        
     def sample(self, bqm, **kwargs):
 
         # Extract flux biases from kwargs (if provided)

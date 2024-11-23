@@ -24,7 +24,8 @@ from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                raster_breadth_subgraph_upper_bound,
                                                subgraph_embedding_feasibility_filter)
 
-def embed_loops(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
+def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_breadth: int=None, 
+                **re_kwargs)-> np.ndarray:
     """Embeds a ring of length L.
 
     Args:
@@ -63,7 +64,7 @@ def embed_loops(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
     A = sampler.to_networkx_graph()
     # Check if the target graph has enough nodes
     if not subgraph_embedding_feasibility_filter(S=G, T=A):
-        raise ValueError(f'Embedding {S} on {T} is infeasible')
+        raise ValueError(f'Embedding {G} on {A} is infeasible')
 
     if raster_breadth is None:
         raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,

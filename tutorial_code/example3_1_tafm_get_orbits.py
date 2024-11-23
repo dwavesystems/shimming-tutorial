@@ -16,7 +16,6 @@ import networkx as nx
 
 from matplotlib import pyplot as plt
 
-from helpers.sampler_wrapper import ShimmingMockSampler
 from embed_square_lattice import make_square_bqm
 from helpers import orbits
 from helpers.helper_functions import get_qubit_colors, get_coupler_colors
@@ -66,6 +65,7 @@ def main(L=6, verbose=False):
         'node_size': 400,
         'width': 4,
     }
+    plt.gcf().canvas.manager.set_window_title("Orbit Visualization related to Figure 13 - 16")
     pos = nx.spring_layout(Gnx, iterations=500, dim=2)  # 2D spring layout
     nx.draw(Gnx, pos=pos,
             node_color=get_qubit_colors(Gnx, bqm),
@@ -74,7 +74,7 @@ def main(L=6, verbose=False):
     nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
     edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
-
+    
     # A printed comment is appropriate since there is no figure to refer to
     print('Visualizes an orbit calculation necessary for Figures 13-16 of DOI:10.3389/fcomp.2023.1238988'
           '\na figure showing orbits of a LxL cylindrical square lattice is plotted.'

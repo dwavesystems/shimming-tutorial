@@ -16,7 +16,6 @@ import os
 import dimod
 import warnings
 import numpy as np
-import time  # temporary
 
 from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.raster_embedding import (raster_embedding_search,
@@ -42,7 +41,8 @@ def make_square_bqm(L):
                 bqm.set_quadratic(x * L + y, (x + 1) * L + y, 1)
     return bqm
 
-def embed_square_lattice(sampler, L, use_cache=True, raster_breadth=None, **re_kwargs):
+def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_breadth: int=None,
+                         **re_kwargs) -> tuple[np.ndarray, dimod.BinaryQuadraticModel]:
     """Embeds a square lattice of length L (LxL cylinder).
 
     Args:
@@ -72,25 +72,24 @@ def embed_square_lattice(sampler, L, use_cache=True, raster_breadth=None, **re_k
         G = dimod.to_networkx_graph(bqm)
         A = sampler.to_networkx_graph()
         if not subgraph_embedding_feasibility_filter(S=G, T=A):
-            raise ValueError(f'Embedding {S} on {T} is infeasible')
+            raise ValueError(f'Embedding {G} on {A} is infeasible')
         if raster_breadth is None:
             raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
                                  raster_breadth_subgraph_upper_bound(T=A))
         if not isinstance(raster_breadth, int) or raster_breadth <= 0:
-            raise EmbeddingError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
+            raise ValueError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
 
         print('Creating embeddings may take several minutes.' 
               '\nTo accelerate the process a smaller lattice (L) might be '
               'considered and/or the search restricted to max_num_emb=1.')
         prng = np.random.default_rng()
-        t0 = time.time()
         embeddings = embeddings_to_ndarray(
             raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth,
                                     prng=prng,
                                     **re_kwargs),
             node_order=sorted(G.nodes())
         )
-        print(time.time()-t0)
+
         if embeddings.size == 0:
             raise ValueError('No feasible embeddings found. '
                              '\nModifying the source (lattice) and target '
@@ -102,8 +101,8 @@ def embed_square_lattice(sampler, L, use_cache=True, raster_breadth=None, **re_k
         try:
             os.makedirs('cached_embeddings/', exist_ok=True)
             np.savetxt(cache_filename, embeddings, fmt='%d')
-        except:
-            warnings.warn('Embedding cache files could not be created')
+        except OSError as e:
+            warnings.warn(f'Embedding cache files could not be created: {e}')
 
     return embeddings, bqm
 

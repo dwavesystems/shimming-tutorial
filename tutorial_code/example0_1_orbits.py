@@ -20,7 +20,17 @@ from matplotlib import pyplot as plt
 from helpers.helper_functions import get_coupler_colors, get_qubit_colors
 from helpers import orbits
 
-
+def plot_orbits(Gnx, pos,bqm):
+    options = {'node_size': 600, 'width': 4}
+    nx.draw(Gnx, pos=pos,
+            edge_color=get_coupler_colors(Gnx, bqm=bqm),
+            node_color=get_qubit_colors(Gnx, bqm=bqm),
+            **options)
+    node_labels = {key: f'{val}' for key, val in nx.get_node_attributes(Gnx, "orbit").items()}
+    nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
+    edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
+    nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
+    
 def make_bqm():
     """Creates a simple model of four connected spins (a Binary Quadratic Model)
 
@@ -43,7 +53,7 @@ def make_bqm():
 
     return bqm
 
-def main(verbose=False):
+def main(verbose: bool=False) -> None:
     """Reproduces Figure 4 of the shimming tutorial DOI:10.3389/fcomp.2023.1238988
 
     Example of creating a 4-variable Binary Quadratic Model (BQM) 
@@ -59,7 +69,7 @@ def main(verbose=False):
     qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = \
         orbits.get_orbits(bqm)
     if verbose:
-        print('Signed qubit orbits: {signed_qubit_orbits}')
+        print(f'Signed qubit orbits: {signed_qubit_orbits}')
         print(f'\nSigned coupler orbits: {signed_coupler_orbits}')
         print(f'\nQubit orbits: {qubit_orbits}')
         print(f'\nCoupler orbits: {coupler_orbits}')
@@ -91,37 +101,20 @@ def main(verbose=False):
     plt.rc('font', size=12)
     fig = plt.figure(figsize=(11, 5), dpi=80)
     fig.canvas.manager.set_window_title('Figure 4: Orbits of signed and original Ising model')
-    
-    options = {'node_size': 600, 'width': 4}  
 
     Gnx = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
     pos = {0: [-1 - 4, 1], 1: [1 - 4, 1], 2: [1 - 4, -1], 3: [-1 - 4, -1]}
-    nx.draw(Gnx, pos=pos,
-            edge_color=get_coupler_colors(Gnx, bqm),
-            node_color=get_qubit_colors(Gnx, bqm),
-            **options)
-    
-    node_labels = {key: f'{val}' for key, val in nx.get_node_attributes(Gnx, "orbit").items()}
-    nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
-    edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
-    nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
+
+    plot_orbits(Gnx=Gnx, pos=pos, bqm=bqm)
 
     Gnx = orbits.to_networkx_graph(signed_qubit_orbits, signed_coupler_orbits)
     pos = {
         'p0': [-1, 1], 'p1': [1, 1], 'p2': [1, -1], 'p3': [-1, -1],
         'm0': [-1.5, 1.5], 'm1': [1.5, 1.5], 'm2': [1.5, -1.5], 'm3': [-1.5, -1.5],
     } 
-    nx.draw(Gnx, pos=pos,
-            edge_color=get_coupler_colors(Gnx, signed_bqm),
-            node_color=get_qubit_colors(Gnx, signed_bqm),
-            **options)
-    
-    node_labels = {key: f'{val}' for key, val in nx.get_node_attributes(Gnx, "orbit").items()}
-    nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
-    edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
-    
-    nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
 
+    plot_orbits(Gnx=Gnx, pos=pos, bqm=signed_bqm)
+    
     plt.show()
 
 

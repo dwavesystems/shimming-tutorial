@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 import dimod
-import time
 import numpy as np
 
 from tqdm import tqdm
@@ -26,7 +25,7 @@ from helpers.helper_functions import (load_experiment_data, save_experiment_data
 from helpers import orbits
 from helpers.paper_plotting_functions import paper_plots_example3_2, paper_plots_example3_2_heatmaps
 
-def make_fbo_dict(embeddings, shim):
+def make_fbo_dict(embeddings: dict, shim: dict) -> dict:
     """Makes the FBO dict from the matrix of FBOs.
 
     Args:
@@ -51,7 +50,7 @@ def make_fbo_dict(embeddings, shim):
     return fbo_dict
 
 
-def make_bqm(shim, embeddings, logical_bqm):
+def make_bqm(shim: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -72,7 +71,7 @@ def make_bqm(shim, embeddings, logical_bqm):
     return _bqm
 
 
-def make_logical_bqm(param):
+def make_logical_bqm(param: dict) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -117,7 +116,7 @@ def make_logical_bqm(param):
     return _bqm
 
 
-def adjust_fbos(result, param, shim, stats, embeddings):
+def adjust_fbos(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list) -> None:
     """Adjust flux bias offsets in-place.
 
     Args:
@@ -144,7 +143,7 @@ def adjust_fbos(result, param, shim, stats, embeddings):
     stats['all_fbos'].append(shim['fbos'].copy())
 
 
-def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
+def adjust_couplings(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel) -> None:
     """Adjust couplings given a sample set.
 
     Args:
@@ -214,11 +213,11 @@ def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
     stats['frust'].append(frust_matrix)
 
 
-def get_sublattices(L):
-    """Get lattice of size _L x _L
+def get_sublattices(L: int) -> np.ndarray:
+    """Get lattice of size L x L
 
     Args:
-        _L (int): linear length of lattice
+        L (int): linear length of lattice
 
     Returns:
         np.ndarray: a matrix representing 
@@ -230,7 +229,7 @@ def get_sublattices(L):
     return sl
 
 
-def compute_psi(result, param, embeddings):
+def compute_psi(result: dimod.SampleSet, param: dict, embeddings: list) -> np.ndarray:
     """Compute psi
 
     Args:
@@ -263,7 +262,7 @@ def compute_psi(result, param, embeddings):
     return psi
 
 
-def run_iteration(param, shim, stats, embeddings, logical_bqm):
+def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel) -> None:
     """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
     bias offsets and couplings, and update statistics.
 
@@ -304,7 +303,8 @@ def run_iteration(param, shim, stats, embeddings, logical_bqm):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., alpha_J=0., use_cache=True):
+def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel, 
+                   alpha_Phi: float=0., alpha_J: float=0., use_cache: bool=True) -> dict:
     """Run the full experiment
 
     Args:
@@ -396,9 +396,9 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
         'shim_type': shim['type']
     }
 
-def main(solver_name=None, coupling=0.9, num_iters=800,
-         num_iters_unshimmed_flux=100, num_iters_unshimmed_J=300,
-         max_num_emb=1, use_cache=True):
+def main(solver_name: str=None, coupling: float=0.9, num_iters: int=800,
+         num_iters_unshimmed_flux: int=100, num_iters_unshimmed_J: int=300,
+         max_num_emb: int=1, use_cache: bool=True) -> None:
     """Main function to run example.
 
     Completes an experiment matched to Figure 13-16 of DOI:10.3389/fcomp.2023.1238988, 

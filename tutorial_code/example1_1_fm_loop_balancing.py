@@ -25,7 +25,7 @@ from helpers.helper_functions import load_experiment_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example1_1
 
 
-def make_fbo_dict(param, shim, embeddings):
+def make_fbo_dict(param: dict, shim: dict, embeddings: list) -> dict:
     """Makes the FBO dict from the matrix of FBOs.
 
     Args:
@@ -38,15 +38,12 @@ def make_fbo_dict(param, shim, embeddings):
     Returns:
         dict: flux bias offsets as a dict
     """
-    fbo_dict = {}
-    for iemb, emb in enumerate(embeddings):
-        for spin in range(param['L']):
-            fbo_dict[emb[spin]] = shim['fbos'][iemb, spin]
+    fbo_dict = {emb[spin]: shim['fbos'][iemb, spin] for iemb, emb in enumerate(embeddings) for spin in range(param['L'])}
 
     return fbo_dict
 
 
-def make_bqm(param, shim, embeddings):
+def make_bqm(param: dict, shim: dict, embeddings: list) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -71,7 +68,7 @@ def make_bqm(param, shim, embeddings):
     return bqm
 
 
-def adjust_fbos(result, param, shim, stats, embeddings):
+def adjust_fbos(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list) -> None:
     """Adjust flux bias offsets in-place.
 
     Args:
@@ -98,7 +95,7 @@ def adjust_fbos(result, param, shim, stats, embeddings):
     stats['mags'].append(mag_array)
     stats['all_fbos'].append(shim['fbos'].copy())
 
-def adjust_couplings(result, param, shim, stats, embeddings):
+def adjust_couplings(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list) -> None:
     """Adjust couplings given a sample set.
 
     Args:
@@ -134,7 +131,7 @@ def adjust_couplings(result, param, shim, stats, embeddings):
     stats['frust'].append(frust_matrix)
 
 
-def run_iteration(param, shim, stats, embeddings):
+def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list) -> None:
     """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
     bias offsets and couplings, and update statistics.
 
@@ -169,8 +166,8 @@ def run_iteration(param, shim, stats, embeddings):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
-                   use_cache=True):
+def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha_Phi: float=0., 
+                   alpha_J: float=0., use_cache: bool=True) -> dict:
     """Run the full experiment
 
     Args:
@@ -223,8 +220,8 @@ def run_experiment(param, shim, stats, embeddings, alpha_Phi=0., alpha_J=0.,
     }
 
 
-def main(solver_name=None, coupling=-0.2, num_iters=100,
-         num_iters_unshimmed_flux=10, use_cache=True):
+def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=100,
+         num_iters_unshimmed_flux: int=10, use_cache: bool=True) -> None:
     """Main function to run example.
 
     Completes an experiment matched to Figure 6 of DOI10.3389/fcomp.2023.1238988,

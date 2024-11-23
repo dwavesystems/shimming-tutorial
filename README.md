@@ -44,25 +44,30 @@ python -m example3_1_tafm_get_orbits
 ```
 
 ## Ferromagnetic loop example
-
+For generation of Figure 6: **Balancing qubits in a FM chain with flux-bias offsets**. <br>
 Requires 300 sequential QPU-job submissions.
 ```
 python -m example1_1_fm_loop_balancing
 ```
-
+For generation of **Balancing qubits and couplers in a FM chain with flux-bias offsets and coupler adjustments** related to Figure 7. <br>
 Requires 300 sequential QPU-job submissions.
 ```
 python -m example1_2_fm_loop_correlations
 ```
 
 ## Frustrated loop example
-
+For generation of Figure 10: **Shimming a frustrated loop**. <br>
 Requires 300 sequential QPU-job submissions.
 ```
 python -m example2_2_frustrated_loop_anneal
 ```
 
 ## Triangular antiferromagnet example
+For generation of the following figures:
+- Figure 13: **Shimming an embedded cylindrical triangular antiferromagnet**. <br>
+- Figure 14: **Shimming an isotropic, infinite triangular antiferromagnet**. <br>
+- Figure 15: **Shimming an isotropic, infinite triangular antiferromagnet, starting with halved boundary couplers**. <br>
+- Figure 16: **Complex order parameter ψ**. <br>
 
 Generation of embeddings may require several minutes.
 Data is collected in 3 blocks each requiring 800 sequential QPU-job submissions.
