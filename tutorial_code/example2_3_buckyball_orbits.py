@@ -18,18 +18,18 @@ import dimod
 import networkx as nx
 import numpy as np
 
-from helpers.sampler_wrapper import ShimmingMockSampler
-from dwave.system.samplers import DWaveSampler
 from matplotlib import pyplot as plt
 
 from helpers import orbits
 from helpers.orbits import get_orbits
 
 
-def figure11():
-    """Figure 11 doi.org/10.3389/fcomp.2023.1238988 Bucky ball orbits
+def main():
+    """Reproduces Figure 11 of the shimming tutorial DOI:10.3389/fcomp.2023.1238988
 
-    Demonstrates orbits for a bucky ball graph structure.
+    Example of creating a Binary Quadratic Model (BQM) structured as a
+    buckyball (Buckminsterfullerene) and computing its orbits (symmetries of
+    spins and couplers).
     """
     
 
@@ -37,14 +37,18 @@ def figure11():
     path_to_csv = "data/bucky_ball.csv"
     if not exists(path_to_csv):
         path_to_csv = f"tutorial_code/{path_to_csv}"
-    J = {(int(e[0]), int(e[1])): w
-         for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
+    if not exists(path_to_csv):
+        raise FileNotFoundError(f"CSV file not found in specified paths. Checked: 'data/bucky_ball.csv' and '{path_to_csv}'")
+    try:
+        J = {(int(e[0]), int(e[1])): w for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
+    except Exception as e:
+        raise ValueError(f"Failed to load or parse CSV file '{path_to_csv}': {e}")
+
     bqm = dimod.BQM.from_ising(h={}, J=J)
 
     # Compute the BQM's orbits
     (qubit_orbits, coupler_orbits,
         qubit_orbits_opposite, coupler_orbits_opposite) = get_orbits(bqm)
-
     cm = plt.cm.get_cmap(name='coolwarm')
     norm = plt.Normalize(vmin=-2, vmax=2)
     plt.rc('font', size=12)
@@ -63,4 +67,4 @@ def figure11():
     plt.show()
 
 if __name__ == "__main__":
-    figure11()
+    main()

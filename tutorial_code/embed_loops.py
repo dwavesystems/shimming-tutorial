@@ -13,42 +13,47 @@
 # limitations under the License.
 #
 import os
-
 import dimod
+import warnings
 import numpy as np
 
 from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.raster_embedding import (raster_embedding_search,
-                                               embeddings_to_ndarray)
-   
-class EmbeddingError(Exception):
-    pass
+                                               embeddings_to_ndarray,
+                                               raster_breadth_subgraph_lower_bound,
+                                               raster_breadth_subgraph_upper_bound,
+                                               subgraph_embedding_feasibility_filter)
 
-def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
-    """
-        Attempts to expand an independent set by replacing subsets of size 'greed' with larger independent sets.
-        The function iteratively tries to improve the given independent set by exploring the neighborhood of subsets.
+def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_breadth: int=None, 
+                **re_kwargs)-> np.ndarray:
+    """Embeds a ring of length L.
 
-        Parameters:
-        G (networkx.Graph): The input graph.
-        independent_set (list or set): A list or set of nodes forming an independent set in G.
-        greed (int): The size of subsets to remove from the independent set in each iteration.
+    Args:
+        sampler (int): DWaveSampler for which to embed
+        L (int): lattice length
+        use_cache (bool, default=True): When True, embeddings are 
+            saved to and loaded from a local directory whenever
+            possible. If writing to a directory is not possible 
+            a warning is thrown.
 
         Returns:
-        list: An independent set at least as big as the original.
+        np.ndarray: An matrix of embeddings
     """
     if not isinstance(L, int):
-        raise EmbeddingError(f"'L' must be an integer. Received type {type(L).__name__}.")
+        raise ValueError(f"'L' must be an integer. Received type {type(L).__name__}.")
     if L <= 0:
-        raise EmbeddingError(f"'L' must be a positive integer. Received {L}.")
+        raise ValueError(f"'L' must be a positive integer. Received {L}.")
+    
+    if not isinstance(use_cache, bool):
+        raise ValueError(f"'use_cache' must be a boolean. Received type {type(use_cache).__name__}.")
 
-    if not isinstance(raster_breadth, int):
-        raise EmbeddingError(f"'raster_breadth' must be an integer. Received type {type(raster_breadth).__name__}.")
-    if raster_breadth <= 0:
-        raise EmbeddingError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
-
-    if not isinstance(try_to_load, bool):
-        raise EmbeddingError(f"'try_to_load' must be a boolean. Received type {type(try_to_load).__name__}.")
+    solver_name = sampler.properties['chip_id'] # sampler.solver.name
+    cache_filename = f'cached_embeddings/{solver_name}_L{L:04d}_embeddings_cached.txt'
+    
+    if use_cache and os.path.exists(cache_filename):
+        embeddings = np.loadtxt(cache_filename, dtype=int)
+        print(f'Loaded {cache_filename}')
+        return embeddings
 
     bqm = dimod.BinaryQuadraticModel(
         vartype='SPIN',
@@ -57,35 +62,36 @@ def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
         bqm.add_quadratic(spin, (spin + 1) % L, -1)
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
-    
-    solver_name = sampler.properties['chip_id'] # sampler.solver.name
-    cache_filename = f'cached_embeddings/{solver_name}__L{L:04d}_embeddings_cached.txt'
-    
-    if try_to_load:
-        try:
-            embeddings = np.loadtxt(cache_filename, dtype=int)
-            print(f'Loaded embedding from file {cache_filename}')
-            return embeddings
-        except (ValueError, FileNotFoundError) as e:
-            print(f"Failed to load {cache_filename} with `np.loadtxt`")
-            print("Error:", e)
-            print("Finding embedding via raster embedding search instead.")
-
     # Check if the target graph has enough nodes
-    if G.number_of_nodes() > A.number_of_nodes():
-        raise EmbeddingError(
-            f"Source graph has {G.number_of_nodes()} nodes, "
-            f"which exceeds the target graph's {A.number_of_nodes()} nodes."
-        )
+    if not subgraph_embedding_feasibility_filter(S=G, T=A):
+        raise ValueError(f'Embedding {G} on {A} is infeasible')
+
+    if raster_breadth is None:
+        raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
+                             raster_breadth_subgraph_upper_bound(T=A))
     
+    if not isinstance(raster_breadth, int) or raster_breadth <= 0:
+        raise ValueError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
+
+    print('Creating embeddings may take several minutes.' 
+          '\nTo accelerate the process a smaller lattice (L) might be '
+          'considered and/or the search restricted to max_num_emb=1.')
     embeddings = embeddings_to_ndarray(
-        raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth)
+        raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth,
+                                max_num_emb=float('Inf'), **re_kwargs)
         , node_order=sorted(G.nodes()))
+
     if embeddings.size == 0:
-        raise ValueError("Embedding returned by raster_embedding_search is empty.")
-    
-    os.makedirs('cached_embeddings/', exist_ok=True)
-    np.savetxt(cache_filename, embeddings, fmt='%d')
+        raise ValueError('No feasible embeddings found. '
+                         '\nModifying the source (lattice) and target '
+                         '(processor), or raster_embedding_search arguments '
+                         'such as timeout may resolve the issue.')
+    if use_cache:
+        try:
+            os.makedirs('cached_embeddings/', exist_ok=True)
+            np.savetxt(cache_filename, embeddings, fmt='%d')
+        except:
+            warnings.warn('Embedding cache files could not be created')
 
     return embeddings
 
@@ -93,13 +99,11 @@ def embed_loops(sampler, L, try_to_load=True, raster_breadth=2):
 def main():
     L = 8  # Length of chain to embed
     sampler = MockDWaveSampler()
-    try:
-        embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
-        print("Embedding successful.")
-    except ValueError as ve:
-        print(f"Error: {ve}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+    embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
+    if embeddings.shape[0] >= 1 and embeddings.shape[1] == L:
+        print(f'{L}x{L} embedding successfully found')
+    else:
+        print(f'Something is wrong, {L}x{L} embedding not found')
 
 if __name__ == "__main__":
     main()

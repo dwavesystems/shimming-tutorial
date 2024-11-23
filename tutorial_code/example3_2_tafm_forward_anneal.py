@@ -15,17 +15,17 @@
 import dimod
 import numpy as np
 
-from helpers.sampler_wrapper import ShimmingMockSampler
-from dwave.system.samplers import DWaveSampler
 from tqdm import tqdm
 
+from helpers.sampler_wrapper import ShimmingMockSampler
+from dwave.system.samplers import DWaveSampler
 from embed_square_lattice import embed_square_lattice
 from helpers.helper_functions import (load_experiment_data, save_experiment_data,
                                       shim_parameter_rescaling)
 from helpers import orbits
 from helpers.paper_plotting_functions import paper_plots_example3_2, paper_plots_example3_2_heatmaps
 
-def make_fbo_dict(embeddings, shim):
+def make_fbo_dict(embeddings: dict, shim: dict) -> dict:
     """Makes the FBO dict from the matrix of FBOs.
 
     Args:
@@ -50,7 +50,7 @@ def make_fbo_dict(embeddings, shim):
     return fbo_dict
 
 
-def make_bqm(shim, embeddings, logical_bqm):
+def make_bqm(shim: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -71,7 +71,7 @@ def make_bqm(shim, embeddings, logical_bqm):
     return _bqm
 
 
-def make_logical_bqm(param):
+def make_logical_bqm(param: dict) -> dimod.BinaryQuadraticModel:
     """Makes the BQM from the matrix of coupling values.
 
     Args:
@@ -116,7 +116,7 @@ def make_logical_bqm(param):
     return _bqm
 
 
-def adjust_fbos(result, param, shim, stats, embeddings):
+def adjust_fbos(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list) -> None:
     """Adjust flux bias offsets in-place.
 
     Args:
@@ -143,7 +143,7 @@ def adjust_fbos(result, param, shim, stats, embeddings):
     stats['all_fbos'].append(shim['fbos'].copy())
 
 
-def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
+def adjust_couplings(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel) -> None:
     """Adjust couplings given a sample set.
 
     Args:
@@ -213,11 +213,11 @@ def adjust_couplings(result, param, shim, stats, embeddings, logical_bqm):
     stats['frust'].append(frust_matrix)
 
 
-def get_sublattices(L):
-    """Get lattice of size _L x _L
+def get_sublattices(L: int) -> np.ndarray:
+    """Get lattice of size L x L
 
     Args:
-        _L (int): linear length of lattice
+        L (int): linear length of lattice
 
     Returns:
         np.ndarray: a matrix representing 
@@ -229,7 +229,7 @@ def get_sublattices(L):
     return sl
 
 
-def compute_psi(result, param, embeddings):
+def compute_psi(result: dimod.SampleSet, param: dict, embeddings: list) -> np.ndarray:
     """Compute psi
 
     Args:
@@ -262,7 +262,7 @@ def compute_psi(result, param, embeddings):
     return psi
 
 
-def run_iteration(param, shim, stats, embeddings, logical_bqm):
+def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel) -> None:
     """Perform one iteration of the experiment, i.e., sample the BQM, adjust flux
     bias offsets and couplings, and update statistics.
 
@@ -303,7 +303,8 @@ def run_iteration(param, shim, stats, embeddings, logical_bqm):
     stats['all_alpha_J'].append(shim['alpha_J'])
 
 
-def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., alpha_J=0.):
+def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, logical_bqm: dimod.BinaryQuadraticModel, 
+                   alpha_Phi: float=0., alpha_J: float=0., use_cache: bool=True) -> dict:
     """Run the full experiment
 
     Args:
@@ -318,24 +319,38 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
         stats (dict): dict of sampled statistics
         embeddings (List[dict]): list of embeddings
         logical_bqm (dimod.BinaryQuadraticModel): a logical BQM
-        alpha_Phi (float, optional): learning rate for linear shims. Defaults to 0..
-        alpha_J (float, optional): learning rate for coupling shims. Defaults to 0..
+        alpha_Phi (float): learning rate for linear shims. Defaults to 0.
+        alpha_J (float): learning rate for coupling shims. Defaults to 0.
+        use_cache (bool): When True an attempt is made to load (save) data from
+            (to) the directory cached_experimental_data.
+    Returns:
+       dict: experiment statistics
     """
-    prefix = f'example3_2_{shim["type"]}{"_adaptive" * int(param["adaptive_step_size"])}' \
-             f'_halve{param["halve_boundary_couplers"]}_aPhi{alpha_Phi}_aJ{alpha_J}'
 
-    data_dict = {'param': param, 'shim': shim, 'stats': stats}
-    data_dict = load_experiment_data(prefix, data_dict)
-    prev_execution_times = {'embedded_finite': 212.8416, 'embedded_infinite': 674.3778, 'triangular_infinite': 236.1368}
+    if use_cache:
+        solver_name = param['sampler'].properties['chip_id']
+        prefix = f'{solver_name}_example3_2_{shim["type"]}{"_adaptive" * int(param["adaptive_step_size"])}' \
+                 f'_halve{param["halve_boundary_couplers"]}_aPhi{alpha_Phi}_aJ{alpha_J}'
+        data_dict = {'param': param, 'shim': shim, 'stats': stats}
+        data_dict = load_experiment_data(prefix, data_dict)
+    else:
+        data_dict = None
+
+    # prev_execution_times = {'embedded_finite': 212.8416, 'embedded_infinite': 674.3778, 'triangular_infinite': 236.1368}
 
     if data_dict is not None:
         param = data_dict['param']
         shim = data_dict['shim']
         stats = data_dict['stats']
-
     else:
-        prev_execution_time = prev_execution_times[shim["type"]]
-        print(f"Warning: This experiment will take approximately {prev_execution_time:.2f} seconds.")
+        if shim["type"] == 'embedded_finite':
+            stage_idx = 1
+        elif shim["type"] == 'embedded_infinite':
+            stage_idx = 2
+        elif shim["type"] == 'triangular_infinite':
+            stage_idx = 3
+        print(f"Collection of data (stage {stage_idx} of 3) typically requires several minutes")
+
         pbar = tqdm(range(param['num_iters']), ncols=140, desc=f'PROGRESS ({prefix})')
 
         if not param['adaptive_step_size']:
@@ -362,11 +377,11 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
                                                               ratio=1.1)
                 shim['alpha_J'] *= shim_parameter_rescaling(stats['all_couplings'], num_iters=20,
                                                             ratio=1.1)
-
-        save_experiment_data(
-            prefix,
-            {'param': param, 'shim': shim, 'stats': stats}
-        )
+        if use_cache:
+            save_experiment_data(
+                prefix,
+                {'param': param, 'shim': shim, 'stats': stats}
+            )
     
     paper_plots_example3_2(halve_boundary_couplers=param['halve_boundary_couplers'],
                            type_=shim['type'], nominal_couplings=shim['nominal_couplings'],
@@ -381,28 +396,41 @@ def run_experiment(param, shim, stats, embeddings, logical_bqm, alpha_Phi=0., al
         'shim_type': shim['type']
     }
 
-def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimmed_flux=100, num_iters_unshimmed_J=300):
-    """Main function to run example
+def main(solver_name: str=None, coupling: float=0.9, num_iters: int=800,
+         num_iters_unshimmed_flux: int=100, num_iters_unshimmed_J: int=300,
+         max_num_emb: int=1, use_cache: bool=True) -> None:
+    """Main function to run example.
+
+    Completes an experiment matched to Figure 13-16 of DOI:10.3389/fcomp.2023.1238988, 
+    plotting a corresponding figure. Note that data collection is interrupted between
+    each figure presentation.
 
     Args:
-        sampler_type (string): option to specify sampler type. Defaults to MockDWaveSampler.
+        solver_name (string): option to specify sampler type. The default client QPU
+            is used by default other options are listed in Leap, to use a locally executed 
+            classical placeholder for debugging select 'MockDWaveSampler'.
+        coupling (float): coupling strength on chain.
+        num_iters (int): Number of sequential programmings.
+        num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
+        num_iters_unshimmed_J (int): Number of sequential programmings without J shimming. 
+        max_num_emb (int): Maximum number of embeddings to use per programming. 
+            Published tutorial data uses several parallel embeddings, but this 
+            tutorial uses 1 (max_num_emb=1) by default to bypass the otherwise
+            slow search process. 
+        use_cache (bool): When True embeddings and data are read from
+            (and saved to) local directories, repeated executions can reuse 
+            collected data. When False embeddings and data are recalculated on
+            each call. Defaults to True
     """
-    
-    if sampler_type == 'mock':
+
+    if solver_name == 'MockDWaveSampler':
         sampler_instance = ShimmingMockSampler()
         sampler = sampler_instance.get_sampler()
     else:
-        sampler = DWaveSampler()
+        sampler = DWaveSampler(solver=solver_name)
 
     adaptive_step_size = False
     halve_boundary_couplers = False
-
-    # Each qubit is treated as an independent unit.  Embedding is a list of list,
-    # where each iner list contains a single qubit from the nodelist. 
-    if model_type == 'independent_spins':
-        coupling = 0  
-    else:
-        coupling = 0.9
     
     results = []
     for shimtype in ['embedded_finite', 'embedded_infinite', 'triangular_infinite']:
@@ -418,18 +446,13 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
             'adaptive_step_size': adaptive_step_size
         }
 
-        # Make the logical BQM and a bunch of disjoint embeddings
-        # This may taks a long time to run (put estimate time), give user indication 
-        # of running time
-        embeddings, _ = embed_square_lattice(sampler=sampler, L=param['L'])
-        print(f"Number of embeddings found: {len(embeddings)}")
-        print(f"Embeddings: {embeddings}")
+        # Make the logical BQM and disjoint embeddings
+        embeddings, _ = embed_square_lattice(
+            sampler=sampler, L=param['L'], max_num_emb=max_num_emb, use_cache=use_cache)
 
         # Make the logical BQM to get orbits for a single embedding.
         # Doing it for all embeddings together is very slow with pynauty.
         logical_bqm = make_logical_bqm(param)
-        #print(f"Number of quadratic terms in logical BQM: {len(logical_bqm.quadratic)}")
-        #print(f"Quadratic terms: {logical_bqm.quadratic}")      
         unsigned_orbits = orbits.get_orbits(logical_bqm)
 
         # Where the shim data (parameters and Hamiltonian terms) are stored
@@ -467,9 +490,7 @@ def main(sampler_type='mock', model_type=None,  num_iters=800, num_iters_unshimm
             'all_alpha_J': [],
             'all_psi': [],
         }
-        print(type(shim['couplings']))
-        print(shim['couplings'].shape)  # If it's a NumPy array or similar structure
-        experiment_data = run_experiment(param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02)
+        experiment_data = run_experiment(param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02, use_cache)
         results.append(experiment_data)
 
     paper_plots_example3_2_heatmaps(results)
