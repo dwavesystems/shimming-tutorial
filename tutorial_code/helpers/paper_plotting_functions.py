@@ -377,17 +377,35 @@ def paper_plots_example3_2_heatmaps(experiment_data_list):
         gridspec_kw={'width_ratios': [1, 1, 1]}  # Ensure equal width for all columns
     )
      # Add titles for the second and third columns
-    axs[0, 1].set_title('Before Shimming', fontsize=14, fontweight='bold')  
-    axs[0, 2].set_title('After Shimming', fontsize=14, fontweight='bold')  
+    axs[0, 1].set_title('Before Shimming', fontsize=12, fontweight='bold')  
+    axs[0, 2].set_title('After Shimming', fontsize=12, fontweight='bold')
+
     fig.canvas.manager.set_window_title('Figure 16: Complex Order Parameter Ψ')
 
-    # Loop over each experiment
     for row, data in enumerate(experiment_data_list):
-
-
         all_psi = data['all_psi']
         type_ = data['type_']
         halve_boundary_couplers = data['halve_boundary_couplers']
+
+        # Add side titles with a boundary
+        side_titles = [
+            'Embedded finite',
+            'Triangular infinite',
+            'Triangular infinite (halved boundary)'
+        ]
+        side_title = side_titles[row]
+        
+        # Add a rectangle behind the text for boundary
+        axs[row, 0].annotate(
+            side_title,
+            xy=(-0.2, 0.5),  # Adjust position as needed
+            xycoords='axes fraction',
+            fontsize=12,
+            fontweight='bold',
+            ha='center',
+            va='center',
+            rotation=90  # Rotate for side alignment
+        )
 
         # Plot 1: Mean Magnitude Line Plot (First Column)
         M = np.array([np.mean(np.abs(x)) for x in all_psi])
