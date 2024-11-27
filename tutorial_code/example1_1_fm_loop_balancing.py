@@ -287,4 +287,4 @@ def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=100,
          experiment_data_list=results
     )
 if __name__ == "__main__":
-    main(solver_name='MockDWaveSampler')
+    main()
