@@ -203,14 +203,13 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
     return embmat
 
 
-def main(sampler_type='mock'):
+def main(solver_name='MockDWaveSampler'):
     L = 32  # Length of chain to embed
     
-    if sampler_type == 'mock':
-        sampler_instance = ShimmingMockSampler()
-        sampler = sampler_instance.get_sampler()
+    if solver_name == 'MockDWaveSampler':
+        sampler = ShimmingMockSampler()
     else:
-        sampler = DWaveSampler()
+        sampler = DWaveSampler(solver=solver_name)
     
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
     for spin in range(L):
