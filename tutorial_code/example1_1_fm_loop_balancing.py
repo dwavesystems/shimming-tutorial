@@ -245,7 +245,7 @@ def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=100,
             each call. Defaults to True
     """
     if solver_name == 'MockDWaveSampler':
-        sampler = ShimmingMockSampler(flux_biases_baseline=[1e-5]*5760)
+        sampler = ShimmingMockSampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
 
