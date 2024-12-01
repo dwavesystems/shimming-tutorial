@@ -216,7 +216,7 @@ def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha
                            frust=stats['frust'])
 
 
-def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=300,
+def main(solver_name: str='MockDWaveSampler', coupling: float=-0.2, num_iters: int=300,
          num_iters_unshimmed_flux: int=100, num_iters_unshimmed_J: int=200,
          use_cache: bool=True) -> None:
     """Main function to run example.
@@ -280,4 +280,4 @@ def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=300,
 
 
 if __name__ == "__main__":
-    main()
+    main(use_cache=False)

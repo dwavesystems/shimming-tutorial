@@ -220,7 +220,7 @@ def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha
     }
 
 
-def main(solver_name: str=None, coupling: float=-0.2, num_iters: int=100,
+def main(solver_name: str="MockDWaveSampler", coupling: float=-0.2, num_iters: int=100,
          num_iters_unshimmed_flux: int=10, use_cache: bool=True) -> None:
     """Main function to run example.
 

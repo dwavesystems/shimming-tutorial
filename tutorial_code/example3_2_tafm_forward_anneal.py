@@ -396,7 +396,7 @@ def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, logic
         'shim_type': shim['type']
     }
 
-def main(solver_name: str=None, coupling: float=0.9, num_iters: int=800,
+def main(solver_name: str='MockDWaveSampler', coupling: float=0.9, num_iters: int=800,
          num_iters_unshimmed_flux: int=100, num_iters_unshimmed_J: int=300,
          max_num_emb: int=1, use_cache: bool=True) -> None:
     """Main function to run example.

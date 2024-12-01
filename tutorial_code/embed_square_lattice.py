@@ -89,6 +89,7 @@ def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True
                                     **re_kwargs),
             node_order=sorted(G.nodes())
         )
+
         if embeddings.size == 0:
             raise ValueError('No feasible embeddings found. '
                              '\nModifying the source (lattice) and target '
