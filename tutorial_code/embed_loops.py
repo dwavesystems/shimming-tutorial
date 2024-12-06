@@ -18,14 +18,14 @@ import warnings
 import numpy as np
 
 from dwave.system.testing import MockDWaveSampler
-from minorminer.utils.raster_embedding import (raster_embedding_search,
-                                               embeddings_to_ndarray,
-                                               raster_breadth_subgraph_lower_bound,
-                                               raster_breadth_subgraph_upper_bound,
-                                               embedding_feasibility_filter)
+from minorminer.utils.disjoint_embeddings import (find_sublattice_embeddings,
+                                                  embeddings_to_ndarray,
+                                                  lattice_size_lower_bound,
+                                                  lattice_size_upper_bound,
+                                                  embedding_feasibility_filter)
 
-def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_breadth: int=None, 
-                **re_kwargs)-> np.ndarray:
+def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True,
+                **kwargs)-> np.ndarray:
     """Embeds a ring of length L.
 
     Args:
@@ -66,25 +66,27 @@ def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_
     if not embedding_feasibility_filter(S=G, T=A, one_to_one=False):
         raise ValueError(f'Embedding {G} on {A} is infeasible')
 
-    if raster_breadth is None:
-        raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
-                             raster_breadth_subgraph_upper_bound(T=A))
-    
-    if not isinstance(raster_breadth, int) or raster_breadth <= 0:
-        raise ValueError(f"'raster_breadth' must be a positive integer. Received {raster_breadth}.")
+    sublattice_size = kwargs.pop('sublattice_size', min(lattice_size_lower_bound(S=G, T=A) + 1,
+                                                        lattice_size_upper_bound(T=A)))
+    if not isinstance(sublattice_size, int) or sublattice_size <= 0:
+        raise ValueError(f"'sublattice_size' must be a positive integer. Received {sublattice_size}.")
 
     print('Creating embeddings may take several minutes.' 
           '\nTo accelerate the process a smaller lattice (L) might be '
           'considered and/or the search restricted to max_num_emb=1.')
+    max_num_emb = kwargs.pop('max_num_emb', float('Inf'))
+    embedder_kwargs = {'timeout': kwargs.pop('timeout', 10)}
     embeddings = embeddings_to_ndarray(
-        raster_embedding_search(S=G, T=A, raster_breadth=raster_breadth,
-                                max_num_emb=float('Inf'), **re_kwargs)
+        find_sublattice_embeddings(S=G, T=A, sublattice_size=sublattice_size,
+                                   max_num_emb=max_num_emb,
+                                   embedder_kwargs=embedder_kwargs,
+                                   **kwargs)
         , node_order=sorted(G.nodes()))
 
     if embeddings.size == 0:
         raise ValueError('No feasible embeddings found. '
                          '\nModifying the source (lattice) and target '
-                         '(processor), or raster_embedding_search arguments '
+                         '(processor), or find_sublattice_embeddings arguments '
                          'such as timeout may resolve the issue.')
     if use_cache:
         try:
@@ -97,13 +99,17 @@ def embed_loops(sampler: MockDWaveSampler, L: int, use_cache: bool=True, raster_
 
 
 def main():
-    L = 8  # Length of chain to embed
-    sampler = MockDWaveSampler()
-    embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
-    if embeddings.shape[0] >= 1 and embeddings.shape[1] == L:
-        print(f'{L}x{L} embedding successfully found')
+    from time import perf_counter
+    L = 2048  # L=2048 anticipate ~ 2.5 seconds on i7
+    sampler = MockDWaveSampler(topology_type='pegasus', topology_shape=[16])
+    t0 = perf_counter()
+    embeddings = embed_loops(
+        sampler=sampler, L=L, max_num_emb=1, use_cache=False)
+    t1 = perf_counter() - t0
+    if embeddings.size >= 1:
+        print(f'Loop {L} embedding successfully found in {t1} seconds')
     else:
-        print(f'Something is wrong, {L}x{L} embedding not found')
+        print(f'Something is wrong, {L} embedding not found')
 
 if __name__ == "__main__":
     main()
