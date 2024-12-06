@@ -22,7 +22,7 @@ from minorminer.utils.raster_embedding import (raster_embedding_search,
                                                embeddings_to_ndarray,
                                                raster_breadth_subgraph_lower_bound,
                                                raster_breadth_subgraph_upper_bound,
-                                               subgraph_embedding_feasibility_filter)
+                                               embedding_feasibility_filter)
 
 def make_square_bqm(L):
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
@@ -71,7 +71,7 @@ def embed_square_lattice(sampler: MockDWaveSampler, L: int, use_cache: bool=True
     else:
         G = dimod.to_networkx_graph(bqm)
         A = sampler.to_networkx_graph()
-        if not subgraph_embedding_feasibility_filter(S=G, T=A):
+        if not embedding_feasibility_filter(S=G, T=A, one_to_one=True):
             raise ValueError(f'Embedding {G} on {A} is infeasible')
         if raster_breadth is None:
             raster_breadth = min(raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
