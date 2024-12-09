@@ -95,7 +95,7 @@ def embed_loops(
         find_sublattice_embeddings(
             S=G,
             T=A,
-            raster_breadth=raster_breadth,
+            sublattice_size=raster_breadth,
             max_num_emb=float("Inf"),
             **re_kwargs,
         ),
