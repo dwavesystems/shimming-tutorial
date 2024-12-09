@@ -18,12 +18,14 @@ import warnings
 import numpy as np
 
 from dwave.system.testing import MockDWaveSampler
-from minorminer.utils.raster_embedding import (
-    raster_embedding_search,
-    embeddings_to_ndarray,
-    raster_breadth_subgraph_lower_bound,
-    raster_breadth_subgraph_upper_bound,
-    subgraph_embedding_feasibility_filter,
+from minorminer.utils.parallel_embeddings import (
+    find_sublattice_embeddings,
+    embeddings_to_array,
+)
+
+from minorminer.utils.feasibility import (
+    lattice_size_upper_bound,
+    lattice_size_lower_bound,
 )
 
 
@@ -72,14 +74,11 @@ def embed_loops(
         bqm.add_quadratic(spin, (spin + 1) % L, -1)
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
-    # Check if the target graph has enough nodes
-    if not subgraph_embedding_feasibility_filter(S=G, T=A):
-        raise ValueError(f"Embedding {G} on {A} is infeasible")
 
     if raster_breadth is None:
         raster_breadth = min(
-            raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
-            raster_breadth_subgraph_upper_bound(T=A),
+            lattice_size_lower_bound(S=G, T=A) + 1,
+            lattice_size_upper_bound(T=A),
         )
 
     if not isinstance(raster_breadth, int) or raster_breadth <= 0:
@@ -92,8 +91,8 @@ def embed_loops(
         "\nTo accelerate the process a smaller lattice (L) might be "
         "considered and/or the search restricted to max_num_emb=1."
     )
-    embeddings = embeddings_to_ndarray(
-        raster_embedding_search(
+    embeddings = embeddings_to_array(
+        find_sublattice_embeddings(
             S=G,
             T=A,
             raster_breadth=raster_breadth,
@@ -107,7 +106,7 @@ def embed_loops(
         raise ValueError(
             "No feasible embeddings found. "
             "\nModifying the source (lattice) and target "
-            "(processor), or raster_embedding_search arguments "
+            "(processor), or find_sublattice_embeddings arguments "
             "such as timeout may resolve the issue."
         )
     if use_cache:
