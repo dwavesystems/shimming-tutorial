@@ -35,18 +35,20 @@ def embed_loops(L, try_to_load=True, raster_breadth=2):
     """
     sampler = DWaveSampler()  # As configured
     bqm = dimod.BinaryQuadraticModel(
-        vartype='SPIN',
+        vartype="SPIN",
     )
     for spin in range(L):
         bqm.add_quadratic(spin, (spin + 1) % L, -1)
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{L:04d}_embeddings_cached.txt'
+    cache_filename = (
+        f"cached_embeddings/{sampler.solver.name}__L{L:04d}_embeddings_cached.txt"
+    )
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
-            print(f'Loaded embedding from file {cache_filename}')
+            print(f"Loaded embedding from file {cache_filename}")
             return embeddings
         except (ValueError, FileNotFoundError) as e:
             print(f"Failed to load {cache_filename} with `np.loadtxt`")
@@ -54,8 +56,8 @@ def embed_loops(L, try_to_load=True, raster_breadth=2):
             print("Finding embedding via raster embedding search instead.")
     embeddings = raster_embedding_search(A, G, raster_breadth=raster_breadth)
 
-    os.makedirs('cached_embeddings/', exist_ok=True)
-    np.savetxt(cache_filename, embeddings, fmt='%d')
+    os.makedirs("cached_embeddings/", exist_ok=True)
+    np.savetxt(cache_filename, embeddings, fmt="%d")
 
     return embeddings
 

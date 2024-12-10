@@ -22,45 +22,53 @@ from helpers.helper_functions import get_qubit_colors, get_coupler_colors
 
 
 def main():
-    """Main function to run example
-    """
+    """Main function to run example"""
     L = 6  # Length of square lattice to embed
 
     # Make the logical BQM and a bunch of disjoint embeddings
     embeddings, bqm = embed_square_lattice(L)
 
     # Get the orbits and opposite orbits for the BQM
-    qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = \
+    qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = (
         orbits.get_orbits(bqm)
+    )
 
     # Print some information about the orbits.
-    print('\nQubit orbits:')
+    print("\nQubit orbits:")
     print(qubit_orbits)
-    print('\nCoupler orbits:')
+    print("\nCoupler orbits:")
     print(coupler_orbits)
-    print('')
-    print('\nQubit orbits opposite:')
+    print("")
+    print("\nQubit orbits opposite:")
     for p, q in enumerate(qubit_orbits_opposite):
-        print(f'QubitOrbit{p} = -QubitOrbit{q}')
-    print('')
-    print('\nCoupler orbits opposite:')
+        print(f"QubitOrbit{p} = -QubitOrbit{q}")
+    print("")
+    print("\nCoupler orbits opposite:")
     for p, q in enumerate(coupler_orbits_opposite):
-        print(f'CouplerOrbit{p} = -CouplerOrbit{q}')
-    print('')
+        print(f"CouplerOrbit{p} = -CouplerOrbit{q}")
+    print("")
 
     Gnx = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
     plt.figure(figsize=(15, 8), dpi=80)
     options = {
-        'node_size': 400,
-        'width': 4,
+        "node_size": 400,
+        "width": 4,
     }
     pos = nx.spring_layout(Gnx, iterations=500, dim=2)  # 2D spring layout
-    nx.draw(Gnx, pos=pos,
-            node_color=get_qubit_colors(Gnx, bqm),
-            edge_color=get_coupler_colors(Gnx, bqm), **options)
-    node_labels = {key: f'{val}' for key, val in nx.get_node_attributes(Gnx, "orbit").items()}
+    nx.draw(
+        Gnx,
+        pos=pos,
+        node_color=get_qubit_colors(Gnx, bqm),
+        edge_color=get_coupler_colors(Gnx, bqm),
+        **options,
+    )
+    node_labels = {
+        key: f"{val}" for key, val in nx.get_node_attributes(Gnx, "orbit").items()
+    }
     nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
-    edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
+    edge_labels = {
+        key: f"{val}" for key, val in nx.get_edge_attributes(Gnx, "orbit").items()
+    }
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
     plt.show()
 

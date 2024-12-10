@@ -83,22 +83,22 @@ def make_signed_bqm(bqm):
         dimod.BQM: a BQM representing a signed BQM
     """
 
-    ret = dimod.BinaryQuadraticModel(vartype='SPIN')
+    ret = dimod.BinaryQuadraticModel(vartype="SPIN")
 
     # Nodes and edges added in a seemingly ugly way in order to get the order right.
     for var in bqm.variables:
-        ret.add_variable(f'p{var}', bqm.linear[var])
+        ret.add_variable(f"p{var}", bqm.linear[var])
     for var in bqm.variables:
-        ret.add_variable(f'm{var}', -bqm.linear[var])
+        ret.add_variable(f"m{var}", -bqm.linear[var])
 
-    for (u, v) in bqm.quadratic:
-        ret.add_quadratic(f'p{u}', f'p{v}', bqm.quadratic[(u, v)])
-    for (u, v) in bqm.quadratic:
-        ret.add_quadratic(f'm{u}', f'm{v}', bqm.quadratic[(u, v)])
-    for (u, v) in bqm.quadratic:
-        ret.add_quadratic(f'p{u}', f'm{v}', -bqm.quadratic[(u, v)])
-    for (u, v) in bqm.quadratic:
-        ret.add_quadratic(f'm{u}', f'p{v}', -bqm.quadratic[(u, v)])
+    for u, v in bqm.quadratic:
+        ret.add_quadratic(f"p{u}", f"p{v}", bqm.quadratic[(u, v)])
+    for u, v in bqm.quadratic:
+        ret.add_quadratic(f"m{u}", f"m{v}", bqm.quadratic[(u, v)])
+    for u, v in bqm.quadratic:
+        ret.add_quadratic(f"p{u}", f"m{v}", -bqm.quadratic[(u, v)])
+    for u, v in bqm.quadratic:
+        ret.add_quadratic(f"m{u}", f"p{v}", -bqm.quadratic[(u, v)])
 
     return ret
 
@@ -124,43 +124,39 @@ def get_bqm_orbits(bqm):
     Gnx = nx.Graph()
 
     for v in bqm.variables:
-        Gnx.add_node(f'hnode_{v}')
+        Gnx.add_node(f"hnode_{v}")
     for v in bqm.variables:
         Gnx.add_node(v)
-        Gnx.add_edge(v, f'hnode_{v}')
+        Gnx.add_edge(v, f"hnode_{v}")
 
-    for (u, v) in bqm.quadratic:
+    for u, v in bqm.quadratic:
         Gnx.add_edge(u, v)
-        Gnx.add_node(f'Jnode_{u}_{v}')
-        Gnx.add_edge(u, f'Jnode_{u}_{v}')
-        Gnx.add_edge(v, f'Jnode_{u}_{v}')
+        Gnx.add_node(f"Jnode_{u}_{v}")
+        Gnx.add_edge(u, f"Jnode_{u}_{v}")
+        Gnx.add_edge(v, f"Jnode_{u}_{v}")
 
     node_labels = list(Gnx.nodes)  # List of strings
     node_index_dict = {node_labels[i]: i for i in range(len(node_labels))}
     Gpn = pynauty.Graph(len(Gnx.nodes))
 
-    for (u, v) in Gnx.edges:
+    for u, v in Gnx.edges:
         Gpn.connect_vertex(node_index_dict[u], node_index_dict[v])
 
     h_mapping = {h: [] for h in set(bqm.linear.values())}
     J_mapping = {J: [] for J in set(bqm.quadratic.values())}
 
     for p, q in bqm.linear.items():
-        h_mapping[q].append(f'hnode_{p}')
+        h_mapping[q].append(f"hnode_{p}")
 
     for p, q in bqm.quadratic.items():
-        J_mapping[q].append(f'Jnode_{p[0]}_{p[1]}')
+        J_mapping[q].append(f"Jnode_{p[0]}_{p[1]}")
 
     # Make color classes
     coloring = []
     for V in h_mapping.values():
-        coloring.append(
-            set([node_index_dict[v] for v in V])
-        )
+        coloring.append(set([node_index_dict[v] for v in V]))
     for E in J_mapping.values():
-        coloring.append(
-            set([node_index_dict[e] for e in E])
-        )
+        coloring.append(set([node_index_dict[e] for e in E]))
 
     Gpn.set_vertex_coloring(coloring)
 
@@ -168,8 +164,12 @@ def get_bqm_orbits(bqm):
     ag = pynauty.autgrp(Gpn)[3]
     orbits = [int(x) for x in ag]
 
-    qubit_orbits = {spin: orbits[node_index_dict[f'hnode_{spin}']] for spin in bqm.variables}
-    coupler_orbits = {(u, v): orbits[node_index_dict[f'Jnode_{u}_{v}']] for u, v in bqm.quadratic}
+    qubit_orbits = {
+        spin: orbits[node_index_dict[f"hnode_{spin}"]] for spin in bqm.variables
+    }
+    coupler_orbits = {
+        (u, v): orbits[node_index_dict[f"Jnode_{u}_{v}"]] for u, v in bqm.quadratic
+    }
 
     qubit_orbits = map_to_consecutive_integers(qubit_orbits)
     coupler_orbits = map_to_consecutive_integers(coupler_orbits)
@@ -191,18 +191,22 @@ def get_unsigned_bqm_orbits(signed_qubit_orbits, signed_coupler_orbits, bqm):
     """
 
     # Combine coupler orbits so that O(p1p2)=O(m1m2) and O(p1m2)=O(m1p2)
-    for (u, v) in bqm.quadratic:
-        signed_coupler_orbits[(f'p{u}', f'p{v}')] = min(
-            signed_coupler_orbits[(f'p{u}', f'p{v}')],
-            signed_coupler_orbits[(f'm{u}', f'm{v}')],
+    for u, v in bqm.quadratic:
+        signed_coupler_orbits[(f"p{u}", f"p{v}")] = min(
+            signed_coupler_orbits[(f"p{u}", f"p{v}")],
+            signed_coupler_orbits[(f"m{u}", f"m{v}")],
         )
-        signed_coupler_orbits[(f'm{u}', f'm{v}')] = signed_coupler_orbits[(f'p{u}', f'p{v}')]
+        signed_coupler_orbits[(f"m{u}", f"m{v}")] = signed_coupler_orbits[
+            (f"p{u}", f"p{v}")
+        ]
 
-        signed_coupler_orbits[(f'm{v}', f'p{u}')] = min(
-            signed_coupler_orbits[(f'm{v}', f'p{u}')],
-            signed_coupler_orbits[(f'm{u}', f'p{v}')],
+        signed_coupler_orbits[(f"m{v}", f"p{u}")] = min(
+            signed_coupler_orbits[(f"m{v}", f"p{u}")],
+            signed_coupler_orbits[(f"m{u}", f"p{v}")],
         )
-        signed_coupler_orbits[(f'm{u}', f'p{v}')] = signed_coupler_orbits[(f'm{v}', f'p{u}')]
+        signed_coupler_orbits[(f"m{u}", f"p{v}")] = signed_coupler_orbits[
+            (f"m{v}", f"p{u}")
+        ]
 
     signed_coupler_orbits = map_to_consecutive_integers(signed_coupler_orbits)
 
@@ -210,27 +214,39 @@ def get_unsigned_bqm_orbits(signed_qubit_orbits, signed_coupler_orbits, bqm):
     coupler_orbits = {}
 
     # Get opposites
-    qubit_orbits_opposite = [np.nan] * (1 + round(max(list(signed_qubit_orbits.values()))))
-    coupler_orbits_opposite = [np.nan] * (1 + round(max(list(signed_coupler_orbits.values()))))
+    qubit_orbits_opposite = [np.nan] * (
+        1 + round(max(list(signed_qubit_orbits.values())))
+    )
+    coupler_orbits_opposite = [np.nan] * (
+        1 + round(max(list(signed_coupler_orbits.values())))
+    )
 
     for v in bqm.linear:
-        qubit_orbits_opposite[signed_qubit_orbits[(f'p{v}')]] = signed_qubit_orbits[(f'm{v}')]
-        qubit_orbits_opposite[signed_qubit_orbits[(f'm{v}')]] = signed_qubit_orbits[(f'p{v}')]
-        qubit_orbits[v] = signed_qubit_orbits[(f'p{v}')]
+        qubit_orbits_opposite[signed_qubit_orbits[(f"p{v}")]] = signed_qubit_orbits[
+            (f"m{v}")
+        ]
+        qubit_orbits_opposite[signed_qubit_orbits[(f"m{v}")]] = signed_qubit_orbits[
+            (f"p{v}")
+        ]
+        qubit_orbits[v] = signed_qubit_orbits[(f"p{v}")]
 
-    for (u, v) in bqm.quadratic:
-        coupler_orbits_opposite[signed_coupler_orbits[(f'p{u}', f'p{v}')]] = (
-            signed_coupler_orbits[(f'm{u}', f'p{v}')]
+    for u, v in bqm.quadratic:
+        coupler_orbits_opposite[signed_coupler_orbits[(f"p{u}", f"p{v}")]] = (
+            signed_coupler_orbits[(f"m{u}", f"p{v}")]
         )
-        coupler_orbits_opposite[signed_coupler_orbits[(f'm{u}', f'p{v}')]] = (
-            signed_coupler_orbits[(f'p{u}', f'p{v}')]
+        coupler_orbits_opposite[signed_coupler_orbits[(f"m{u}", f"p{v}")]] = (
+            signed_coupler_orbits[(f"p{u}", f"p{v}")]
         )
-        coupler_orbits[(u, v)] = signed_coupler_orbits[(f'p{u}', f'p{v}')]
+        coupler_orbits[(u, v)] = signed_coupler_orbits[(f"p{u}", f"p{v}")]
 
     qubit_orbits, qubit_orbits_opposite = map_to_consecutive_integers_with_opposites(
-        qubit_orbits, qubit_orbits_opposite)
-    coupler_orbits, coupler_orbits_opposite = map_to_consecutive_integers_with_opposites(
-        coupler_orbits, coupler_orbits_opposite)
+        qubit_orbits, qubit_orbits_opposite
+    )
+    coupler_orbits, coupler_orbits_opposite = (
+        map_to_consecutive_integers_with_opposites(
+            coupler_orbits, coupler_orbits_opposite
+        )
+    )
 
     return qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite
 
@@ -245,10 +261,10 @@ def get_orbits(bqm):
         Tuple[dict, dict, dict, dict]: (qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite)
     """
 
-    bqm_ = dimod.BinaryQuadraticModel(vartype='SPIN')
+    bqm_ = dimod.BinaryQuadraticModel(vartype="SPIN")
     for var in bqm.variables:
         bqm_.add_variable(var, bqm.linear[var])
-    for (u, v) in bqm.quadratic:
+    for u, v in bqm.quadratic:
         bqm_.add_quadratic(u, v, bqm.quadratic[(u, v)])
 
     bqm = bqm_
@@ -271,8 +287,8 @@ def to_networkx_graph(qubit_orbits, coupler_orbits):
 
     Gnx = nx.Graph()
     Gnx.add_nodes_from(qubit_orbits)
-    nx.set_node_attributes(Gnx, qubit_orbits, 'orbit')
+    nx.set_node_attributes(Gnx, qubit_orbits, "orbit")
     Gnx.add_edges_from(coupler_orbits)
-    nx.set_edge_attributes(Gnx, coupler_orbits, 'orbit')
+    nx.set_edge_attributes(Gnx, coupler_orbits, "orbit")
 
     return Gnx
