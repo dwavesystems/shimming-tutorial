@@ -104,7 +104,7 @@ def embed_square_lattice(
         prng = np.random.default_rng()
         embeddings = embeddings_to_array(
             find_sublattice_embeddings(
-                S=G, T=A, sublattice_size=sublattice_size, prng=prng, **re_kwargs
+                S=G, T=A, sublattice_size=sublattice_size, seed=prng, **re_kwargs
             ),
             node_order=sorted(G.nodes()),
             to_ndarray=True,
