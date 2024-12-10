@@ -100,6 +100,7 @@ def embed_loops(
             **re_kwargs,
         ),
         node_order=sorted(G.nodes()),
+        as_ndarray=True,
     )
 
     if embeddings.size == 0:
