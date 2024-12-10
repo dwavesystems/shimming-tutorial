@@ -18,14 +18,16 @@ import warnings
 import numpy as np
 
 from dwave.system.testing import MockDWaveSampler
-from minorminer.utils.raster_embedding import (
-    raster_embedding_search,
-    embeddings_to_ndarray,
-    raster_breadth_subgraph_lower_bound,
-    raster_breadth_subgraph_upper_bound,
-    subgraph_embedding_feasibility_filter,
+from minorminer.utils.parallel_embeddings import (
+    find_sublattice_embeddings,
+    embeddings_to_array,
 )
 
+from minorminer.utils.feasibility import (
+    embedding_feasibility_filter,
+    lattice_size_upper_bound,
+    lattice_size_lower_bound,
+)
 
 def make_square_bqm(L):
     bqm = dimod.BinaryQuadraticModel(vartype="SPIN")
@@ -82,12 +84,12 @@ def embed_square_lattice(
     else:
         G = dimod.to_networkx_graph(bqm)
         A = sampler.to_networkx_graph()
-        if not subgraph_embedding_feasibility_filter(S=G, T=A):
+        if not embedding_feasibility_filter(S=G, T=A):
             raise ValueError(f"Embedding {G} on {A} is infeasible")
         if raster_breadth is None:
             raster_breadth = min(
-                raster_breadth_subgraph_lower_bound(S=G, T=A) + 1,
-                raster_breadth_subgraph_upper_bound(T=A),
+                lattice_size_lower_bound(S=G, T=A) + 1,
+                lattice_size_upper_bound(T=A),
             )
         if not isinstance(raster_breadth, int) or raster_breadth <= 0:
             raise ValueError(
@@ -100,9 +102,9 @@ def embed_square_lattice(
             "considered and/or the search restricted to max_num_emb=1."
         )
         prng = np.random.default_rng()
-        embeddings = embeddings_to_ndarray(
-            raster_embedding_search(
-                S=G, T=A, raster_breadth=raster_breadth, prng=prng, **re_kwargs
+        embeddings = embeddings_to_array(
+            find_sublattice_embeddings(
+                S=G, T=A, sublattice_size=raster_breadth, prng=prng, **re_kwargs
             ),
             node_order=sorted(G.nodes()),
         )
