@@ -33,7 +33,7 @@ def embed_loops(
     sampler: MockDWaveSampler,
     L: int,
     use_cache: bool = True,
-    raster_breadth: int = None,
+    sublattice_size: int = None,
     **re_kwargs,
 ) -> np.ndarray:
     """Embeds a ring of length L.
@@ -75,15 +75,15 @@ def embed_loops(
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    if raster_breadth is None:
-        raster_breadth = min(
+    if sublattice_size is None:
+        sublattice_size = min(
             lattice_size_lower_bound(S=G, T=A) + 1,
             lattice_size_upper_bound(T=A),
         )
 
-    if not isinstance(raster_breadth, int) or raster_breadth <= 0:
+    if not isinstance(sublattice_size, int) or sublattice_size <= 0:
         raise ValueError(
-            f"'raster_breadth' must be a positive integer. Received {raster_breadth}."
+            f"'sublattice_size' must be a positive integer. Received {sublattice_size}."
         )
 
     print(
@@ -95,7 +95,7 @@ def embed_loops(
         find_sublattice_embeddings(
             S=G,
             T=A,
-            sublattice_size=raster_breadth,
+            sublattice_size=sublattice_size,
             max_num_emb=float("Inf"),
             **re_kwargs,
         ),
@@ -123,7 +123,7 @@ def embed_loops(
 def main():
     L = 8  # Length of chain to embed
     sampler = MockDWaveSampler()
-    embeddings = embed_loops(sampler=sampler, L=L, raster_breadth=2)
+    embeddings = embed_loops(sampler=sampler, L=L, sublattice_size=2)
     if embeddings.shape[0] >= 1 and embeddings.shape[1] == L:
         print(f"{L}x{L} embedding successfully found")
     else:
