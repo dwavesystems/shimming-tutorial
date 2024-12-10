@@ -51,7 +51,7 @@ def embed_square_lattice(
     sampler: MockDWaveSampler,
     L: int,
     use_cache: bool = True,
-    raster_breadth: int = None,
+    sublattice_size: int = None,
     **re_kwargs,
 ) -> tuple[np.ndarray, dimod.BinaryQuadraticModel]:
     """Embeds a square lattice of length L (LxL cylinder).
@@ -86,14 +86,14 @@ def embed_square_lattice(
         A = sampler.to_networkx_graph()
         if not embedding_feasibility_filter(S=G, T=A):
             raise ValueError(f"Embedding {G} on {A} is infeasible")
-        if raster_breadth is None:
-            raster_breadth = min(
+        if sublattice_size is None:
+            sublattice_size = min(
                 lattice_size_lower_bound(S=G, T=A) + 1,
                 lattice_size_upper_bound(T=A),
             )
-        if not isinstance(raster_breadth, int) or raster_breadth <= 0:
+        if not isinstance(sublattice_size, int) or sublattice_size <= 0:
             raise ValueError(
-                f"'raster_breadth' must be a positive integer. Received {raster_breadth}."
+                f"'sublattice_size' must be a positive integer. Received {sublattice_size}."
             )
 
         print(
@@ -104,7 +104,7 @@ def embed_square_lattice(
         prng = np.random.default_rng()
         embeddings = embeddings_to_array(
             find_sublattice_embeddings(
-                S=G, T=A, sublattice_size=raster_breadth, prng=prng, **re_kwargs
+                S=G, T=A, sublattice_size=sublattice_size, prng=prng, **re_kwargs
             ),
             node_order=sorted(G.nodes()),
             to_ndarray=True,
@@ -114,7 +114,7 @@ def embed_square_lattice(
             raise ValueError(
                 "No feasible embeddings found. "
                 "\nModifying the source (lattice) and target "
-                "(processor), or raster_embedding_search arguments "
+                "(processor), or find_sublattice_search arguments "
                 "such as timeout may resolve the issue."
             )
 
