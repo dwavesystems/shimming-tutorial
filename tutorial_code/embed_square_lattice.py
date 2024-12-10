@@ -18,6 +18,7 @@ import warnings
 import numpy as np
 
 from dwave.system.testing import MockDWaveSampler
+
 from minorminer.utils.parallel_embeddings import (
     find_sublattice_embeddings,
     embeddings_to_array,
@@ -46,7 +47,6 @@ def make_square_bqm(L):
                 bqm.set_quadratic(x * L + y, (x + 1) * L + y, 1)
     return bqm
 
-
 def embed_square_lattice(
     sampler: MockDWaveSampler,
     L: int,
@@ -54,6 +54,7 @@ def embed_square_lattice(
     sublattice_size: int = None,
     **re_kwargs,
 ) -> tuple[np.ndarray, dimod.BinaryQuadraticModel]:
+
     """Embeds a square lattice of length L (LxL cylinder).
 
     Args:
@@ -84,6 +85,7 @@ def embed_square_lattice(
     else:
         G = dimod.to_networkx_graph(bqm)
         A = sampler.to_networkx_graph()
+
         if not embedding_feasibility_filter(S=G, T=A):
             raise ValueError(f"Embedding {G} on {A} is infeasible")
         if sublattice_size is None:
@@ -129,10 +131,12 @@ def embed_square_lattice(
 
 
 if __name__ == "__main__":
+  
     L = 3
     sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[3])
     embeddings, bqm = embed_square_lattice(sampler=sampler, L=L, max_num_emb=1)
     if embeddings.shape == (1, L * L):
         print(f"{L}x{L} embedding successfully found")
+
     else:
         print(f"Something is wrong, {L}x{L} embedding not found")

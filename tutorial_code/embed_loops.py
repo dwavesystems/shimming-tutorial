@@ -18,6 +18,7 @@ import warnings
 import numpy as np
 
 from dwave.system.testing import MockDWaveSampler
+
 from minorminer.utils.parallel_embeddings import (
     find_sublattice_embeddings,
     embeddings_to_array,
@@ -110,6 +111,7 @@ def embed_loops(
             "(processor), or find_sublattice_embeddings arguments "
             "such as timeout may resolve the issue."
         )
+
     if use_cache:
         try:
             os.makedirs("cached_embeddings/", exist_ok=True)
@@ -121,6 +123,7 @@ def embed_loops(
 
 
 def main():
+
     L = 8  # Length of chain to embed
     sampler = MockDWaveSampler()
     embeddings = embed_loops(sampler=sampler, L=L, sublattice_size=2)
@@ -128,7 +131,6 @@ def main():
         print(f"{L}x{L} embedding successfully found")
     else:
         print(f"Something is wrong, {L}x{L} embedding not found")
-
 
 if __name__ == "__main__":
     main()
