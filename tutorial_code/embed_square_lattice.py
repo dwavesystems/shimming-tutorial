@@ -107,7 +107,7 @@ def embed_square_lattice(
                 S=G, T=A, sublattice_size=sublattice_size, seed=prng, **re_kwargs
             ),
             node_order=sorted(G.nodes()),
-            to_ndarray=True,
+            as_ndarray=True,
         )
 
         if embeddings.size == 0:
