@@ -38,7 +38,11 @@ def make_fbo_dict(param: dict, shim: dict, embeddings: list) -> dict:
     Returns:
         dict: flux bias offsets as a dict
     """
-    fbo_dict = {emb[spin]: shim['fbos'][iemb, spin] for iemb, emb in enumerate(embeddings) for spin in range(param['L'])}
+    fbo_dict = {
+        emb[spin]: shim["fbos"][iemb, spin]
+        for iemb, emb in enumerate(embeddings)
+        for spin in range(param["L"])
+    }
 
     return fbo_dict
 
@@ -58,17 +62,20 @@ def make_bqm(param: dict, shim: dict, embeddings: list) -> dimod.BinaryQuadratic
     """
 
     bqm = dimod.BinaryQuadraticModel(
-        vartype='SPIN',
+        vartype="SPIN",
     )
     for iemb, emb in enumerate(embeddings):
-        for spin in range(param['L']):
-            bqm.add_quadratic(emb[spin], emb[(spin + 1) % param['L']],
-                              shim['couplings'][iemb, spin])
+        for spin in range(param["L"]):
+            bqm.add_quadratic(
+                emb[spin], emb[(spin + 1) % param["L"]], shim["couplings"][iemb, spin]
+            )
 
     return bqm
 
 
-def adjust_fbos(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list) -> None:
+def adjust_fbos(
+    result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list
+) -> None:
     """Adjust flux bias offsets in-place.
 
     Args:
@@ -80,22 +87,25 @@ def adjust_fbos(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, e
         stats (dict): dict of sampled statistics
         embeddings (List[dict]): list of embeddings
     """
-    magnetizations = [0] * param['sampler'].properties['num_qubits']
+    magnetizations = [0] * param["sampler"].properties["num_qubits"]
     used_qubit_magnetizations = result.record.sample.sum(axis=0) / len(result.record)
     for iv, v in enumerate(result.variables):
         magnetizations[v] = used_qubit_magnetizations[iv]
 
-    mag_array = np.zeros_like(shim['fbos'])
+    mag_array = np.zeros_like(shim["fbos"])
     for iemb in range(len(embeddings)):
-        for iqubit in range(param['L']):
+        for iqubit in range(param["L"]):
             mag_array[iemb, iqubit] = magnetizations[embeddings[iemb][iqubit]]
 
-    shim['fbos'] -= shim['alpha_Phi'] * mag_array
+    shim["fbos"] -= shim["alpha_Phi"] * mag_array
 
-    stats['mags'].append(mag_array)
-    stats['all_fbos'].append(shim['fbos'].copy())
+    stats["mags"].append(mag_array)
+    stats["all_fbos"].append(shim["fbos"].copy())
 
-def adjust_couplings(result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list) -> None:
+
+def adjust_couplings(
+    result: dimod.SampleSet, param: dict, shim: dict, stats: dict, embeddings: list
+) -> None:
     """Adjust couplings given a sample set.
 
     Args:
@@ -107,28 +117,33 @@ def adjust_couplings(result: dimod.SampleSet, param: dict, shim: dict, stats: di
         stats (dict): dict of sampled statistics
         embeddings (List[dict]): list of embeddings
     """
-    
+
     vars = result.variables
 
     # Make an array large enough for the solutions, with zeros for unused qubits
-    bigarr = np.zeros(shape=(param['sampler'].properties['num_qubits'], len(result)), dtype=np.int8)
+    bigarr = np.zeros(
+        shape=(param["sampler"].properties["num_qubits"], len(result)), dtype=np.int8
+    )
     bigarr[vars, :] = dimod.as_samples(result)[0].T
 
-    frust_matrix = np.zeros_like(shim['couplings'])
+    frust_matrix = np.zeros_like(shim["couplings"])
 
     for iemb, emb in enumerate(embeddings):
-        for spin in range(param['L']):
-            mean_correlation = np.mean(np.multiply(
-                bigarr[emb[spin]],
-                bigarr[emb[(spin + 1) % param['L']]]
-            ))
-            frust_matrix[iemb, spin] = (mean_correlation * np.sign(param['coupling']) + 1) / 2
+        for spin in range(param["L"]):
+            mean_correlation = np.mean(
+                np.multiply(bigarr[emb[spin]], bigarr[emb[(spin + 1) % param["L"]]])
+            )
+            frust_matrix[iemb, spin] = (
+                mean_correlation * np.sign(param["coupling"]) + 1
+            ) / 2
 
-    shim['couplings'] += (np.sign(param['coupling'])
-                          * shim['alpha_J']
-                          * (frust_matrix - np.mean(frust_matrix)))
-    stats['all_couplings'].append(shim['couplings'].copy())
-    stats['frust'].append(frust_matrix)
+    shim["couplings"] += (
+        np.sign(param["coupling"])
+        * shim["alpha_J"]
+        * (frust_matrix - np.mean(frust_matrix))
+    )
+    stats["all_couplings"].append(shim["couplings"].copy())
+    stats["frust"].append(frust_matrix)
 
 
 def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list) -> None:
@@ -146,15 +161,15 @@ def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list) -> Non
     bqm = make_bqm(param, shim, embeddings)
     fbo_dict = make_fbo_dict(param, shim, embeddings)
 
-    flux_biases = [0] * param['sampler'].properties['num_qubits']
+    flux_biases = [0] * param["sampler"].properties["num_qubits"]
 
     for qubit, fbo in fbo_dict.items():
         flux_biases[qubit] = fbo
-    result = param['sampler'].sample(
+    result = param["sampler"].sample(
         bqm,
         annealing_time=1.0,
         num_reads=100,
-        readout_thermalization=100.,
+        readout_thermalization=100.0,
         auto_scale=False,
         flux_drift_compensation=True,
         flux_biases=flux_biases,
@@ -162,12 +177,19 @@ def run_iteration(param: dict, shim: dict, stats: dict, embeddings: list) -> Non
     )
     adjust_fbos(result, param, shim, stats, embeddings)
     adjust_couplings(result, param, shim, stats, embeddings)
-    stats['all_alpha_Phi'].append(shim['alpha_Phi'])
-    stats['all_alpha_J'].append(shim['alpha_J'])
+    stats["all_alpha_Phi"].append(shim["alpha_Phi"])
+    stats["all_alpha_J"].append(shim["alpha_J"])
 
 
-def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha_Phi: float=0., 
-                   alpha_J: float=0., use_cache: bool=True) -> dict:
+def run_experiment(
+    param: dict,
+    shim: dict,
+    stats: dict,
+    embeddings: list,
+    alpha_Phi: float = 0.0,
+    alpha_J: float = 0.0,
+    use_cache: bool = True,
+) -> dict:
     """Run the full experiment
 
     Args:
@@ -185,43 +207,45 @@ def run_experiment(param: dict, shim: dict, stats: dict, embeddings: list, alpha
        dict: experiment statistics
     """
     if use_cache:
-        solver_name = param['sampler'].properties['chip_id']
-        prefix = f'{solver_name}_example1_1_aPhi{alpha_Phi}_aJ{alpha_J}'
-        data_dict = {'param': param, 'shim': shim, 'stats': stats}
+        solver_name = param["sampler"].properties["chip_id"]
+        prefix = f"{solver_name}_example1_1_aPhi{alpha_Phi}_aJ{alpha_J}"
+        data_dict = {"param": param, "shim": shim, "stats": stats}
         data_dict = load_experiment_data(prefix, data_dict)
     else:
         data_dict = None
 
     if data_dict is not None:
-        param = data_dict['param']
-        shim = data_dict['shim']
-        stats = data_dict['stats']
+        param = data_dict["param"]
+        shim = data_dict["shim"]
+        stats = data_dict["stats"]
     else:
         # prev_execution_time = 193.6231 sec.
-        print(f"Collection of data typically requires several minutes")
-        for iteration in tqdm(range(param['num_iters']), total=param['num_iters']):
-            if iteration < param['num_iters_unshimmed_flux']:
-               shim['alpha_Phi'] = 0.
+        print("Collection of data typically requires several minutes")
+        for iteration in tqdm(range(param["num_iters"]), total=param["num_iters"]):
+            if iteration < param["num_iters_unshimmed_flux"]:
+                shim["alpha_Phi"] = 0.0
             else:
-               shim['alpha_Phi'] = alpha_Phi
+                shim["alpha_Phi"] = alpha_Phi
 
-            shim['alpha_J'] = alpha_J
+            shim["alpha_J"] = alpha_J
             run_iteration(param, shim, stats, embeddings)
         if use_cache:
-            save_experiment_data(
-                prefix,
-                {'param': param, 'shim': shim, 'stats': stats}
-            )
+            save_experiment_data(prefix, {"param": param, "shim": shim, "stats": stats})
 
     return {
-        'alpha_Phi': alpha_Phi,
-        'all_fbos': stats['all_fbos'],
-        'mags': stats['mags']
+        "alpha_Phi": alpha_Phi,
+        "all_fbos": stats["all_fbos"],
+        "mags": stats["mags"],
     }
 
 
-def main(solver_name: str="MockDWaveSampler", coupling: float=-0.2, num_iters: int=100,
-         num_iters_unshimmed_flux: int=10, use_cache: bool=True) -> None:
+def main(
+    solver_name: str = None,
+    coupling: float = -0.2,
+    num_iters: int = 100,
+    num_iters_unshimmed_flux: int = 10,
+    use_cache: bool = True,
+) -> None:
     """Main function to run example.
 
     Completes an experiment matched to Figure 6 of DOI10.3389/fcomp.2023.1238988,
@@ -240,51 +264,53 @@ def main(solver_name: str="MockDWaveSampler", coupling: float=-0.2, num_iters: i
         num_iters_unshimmed_J (int): Number of iterations without shimming of
             couplings. Defaults to 200.
         use_cache (bool): When True embeddings and data are read from
-            (and saved to) local directories, repeated executions can reuse 
+            (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
             each call. Defaults to True
     """
-    if solver_name == 'MockDWaveSampler':
+    if solver_name == "MockDWaveSampler":
         sampler = ShimmingMockSampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
 
-    results = []  
+    results = []
     for alpha_Phi in [1e-4, 1e-5, 1e-6]:
         param = {
-            'L':16,
-            'sampler': sampler,  
-            'coupling': coupling,  
-            'num_iters': num_iters,
-            'num_iters_unshimmed_flux': num_iters_unshimmed_flux
+            "L": 16,
+            "sampler": sampler,
+            "coupling": coupling,
+            "num_iters": num_iters,
+            "num_iters_unshimmed_flux": num_iters_unshimmed_flux,
         }
 
-        embeddings = embed_loops(sampler=sampler, L=param['L'], use_cache=use_cache) 
+        embeddings = embed_loops(sampler=sampler, L=param["L"], use_cache=use_cache)
 
         # Where the shim data (parameters and Hamiltonian terms) are stored
         shim = {
-            'alpha_Phi': 0.0,
-            'alpha_J': 0.0,
-            'couplings': param['coupling'] * np.ones((len(embeddings), param['L']), dtype=float),
-            'fbos': np.zeros((len(embeddings), param['L']), dtype=float),
-            'coupler_orbits': [0] * param['L']
-        }
-        
-        stats = {
-            'mags': [],
-            'frust': [],
-            'all_fbos': [],
-            'all_couplings': [],
-            'all_alpha_Phi': [],
-            'all_alpha_J': []
+            "alpha_Phi": 0.0,
+            "alpha_J": 0.0,
+            "couplings": param["coupling"]
+            * np.ones((len(embeddings), param["L"]), dtype=float),
+            "fbos": np.zeros((len(embeddings), param["L"]), dtype=float),
+            "coupler_orbits": [0] * param["L"],
         }
 
-        experiment_data = run_experiment(param, shim, stats, embeddings,
-                                         alpha_Phi, .0, use_cache)
+        stats = {
+            "mags": [],
+            "frust": [],
+            "all_fbos": [],
+            "all_couplings": [],
+            "all_alpha_Phi": [],
+            "all_alpha_J": [],
+        }
+
+        experiment_data = run_experiment(
+            param, shim, stats, embeddings, alpha_Phi, 0.0, use_cache
+        )
         results.append(experiment_data)
 
-    paper_plots_example1_1(
-         experiment_data_list=results
-    )
+    paper_plots_example1_1(experiment_data_list=results)
+
+
 if __name__ == "__main__":
     main()

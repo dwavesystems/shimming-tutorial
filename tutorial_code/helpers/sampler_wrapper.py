@@ -26,51 +26,52 @@ class ShimmingMockSampler(MockDWaveSampler):
     """
 
     def __init__(
-        self,
-        topology_type='pegasus',
-        topology_shape=[16],
-        flux_biases_baseline=None
+        self, topology_type="pegasus", topology_shape=[16], flux_biases_baseline=None
     ):
         substitute_sampler = SimulatedAnnealingSampler()
-        substitute_kwargs = {'beta_range': [0, 3],
-                             'beta_schedule_type': 'linear',
-                             'num_sweeps': 100,
-                             'randomize_order': True,
-                             'proposal_acceptance_criteria': 'Gibbs'}
+        substitute_kwargs = {
+            "beta_range": [0, 3],
+            "beta_schedule_type": "linear",
+            "num_sweeps": 100,
+            "randomize_order": True,
+            "proposal_acceptance_criteria": "Gibbs",
+        }
         super().__init__(
             topology_type=topology_type,
             topology_shape=topology_shape,
             substitute_sampler=substitute_sampler,
             substitute_kwargs=substitute_kwargs,
         )
+        num_qubits = self.properties["num_qubits"]
         if flux_biases_baseline is None:
-            self.flux_biases_baseline = None
+            self.flux_biases_baseline = [1e-5] * num_qubits
         else:
             self.flux_biases_baseline = flux_biases_baseline
-        self.sampler_type = 'mock'
+        self.sampler_type = "mock"
         # Added to suppress warnings (not mocked, but irrelevant to tutorial)
-        self.mocked_parameters.add('flux_drift_compensation')
-        self.mocked_parameters.add('auto_scale')
-        self.mocked_parameters.add('readout_thermalization')
-        self.mocked_parameters.add('annealing_time')
+        self.mocked_parameters.add("flux_drift_compensation")
+        self.mocked_parameters.add("auto_scale")
+        self.mocked_parameters.add("readout_thermalization")
+        self.mocked_parameters.add("annealing_time")
 
     def sample(self, bqm, **kwargs):
         """Sample with flux_biases transformed to Ising model linear biases."""
 
         # Extract flux biases from kwargs (if provided)
-        flux_biases = kwargs.pop('flux_biases', None)
+        flux_biases = kwargs.pop("flux_biases", None)
         if self.flux_biases_baseline is not None:
             if flux_biases is None:
                 flux_biases = self.flux_biases_baseline
             else:
-                flux_biases = [sum(fbs) for fbs in
-                               zip(flux_biases, self.flux_biases_baseline)]
+                flux_biases = [
+                    sum(fbs) for fbs in zip(flux_biases, self.flux_biases_baseline)
+                ]
 
         # Adjust the BQM to include flux biases
         if flux_biases is None:
             ss = super().sample(bqm=bqm, **kwargs)
         else:
-            _bqm = bqm.change_vartype('SPIN', inplace=False)
+            _bqm = bqm.change_vartype("SPIN", inplace=False)
             flux_to_h_factor = fluxbias_to_h()
 
             for v in _bqm.variables:

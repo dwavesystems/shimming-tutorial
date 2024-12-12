@@ -38,52 +38,65 @@ def main(L=6, verbose=False):
         verbose (bool): Print addition information on orbits to terminal. Defaults to False.
     """
     if L <= 2:
-        raise ValueError('L>2 is required')
+        raise ValueError("L>2 is required")
     bqm = make_square_bqm(L)
     # Get the orbits and opposite orbits for the BQM
-    qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = \
+    qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = (
         orbits.get_orbits(bqm)
+    )
     if verbose:
         # Print some information about the orbits.
-        print('\nQubit orbits:')
+        print("\nQubit orbits:")
         print(qubit_orbits)
-        print('\nCoupler orbits:')
+        print("\nCoupler orbits:")
         print(coupler_orbits)
-        print('')
-        print('\nQubit orbits opposite:')
+        print("")
+        print("\nQubit orbits opposite:")
         for p, q in enumerate(qubit_orbits_opposite):
-            print(f'QubitOrbit{p} = -QubitOrbit{q}')
-        print('')
-        print('\nCoupler orbits opposite:')
+            print(f"QubitOrbit{p} = -QubitOrbit{q}")
+        print("")
+        print("\nCoupler orbits opposite:")
         for p, q in enumerate(coupler_orbits_opposite):
-            print(f'CouplerOrbit{p} = -CouplerOrbit{q}')
-        print('')
+            print(f"CouplerOrbit{p} = -CouplerOrbit{q}")
+        print("")
 
     Gnx = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
     plt.figure(figsize=(15, 8), dpi=80)
     options = {
-        'node_size': 400,
-        'width': 4,
+        "node_size": 400,
+        "width": 4,
     }
-    plt.gcf().canvas.manager.set_window_title("Orbit Visualization related to Figure 13 - 16")
+    plt.gcf().canvas.manager.set_window_title(
+        "Orbit Visualization related to Figure 13 - 16"
+    )
     pos = nx.spring_layout(Gnx, iterations=500, dim=2)  # 2D spring layout
-    nx.draw(Gnx, pos=pos,
-            node_color=get_qubit_colors(Gnx, bqm),
-            edge_color=get_coupler_colors(Gnx, bqm), **options)
-    node_labels = {key: f'{val}' for key, val in nx.get_node_attributes(Gnx, "orbit").items()}
+    nx.draw(
+        Gnx,
+        pos=pos,
+        node_color=get_qubit_colors(Gnx, bqm),
+        edge_color=get_coupler_colors(Gnx, bqm),
+        **options,
+    )
+    node_labels = {
+        key: f"{val}" for key, val in nx.get_node_attributes(Gnx, "orbit").items()
+    }
     nx.draw_networkx_labels(Gnx, pos=pos, labels=node_labels, font_size=14)
-    edge_labels = {key: f'{val}' for key, val in nx.get_edge_attributes(Gnx, "orbit").items()}
+    edge_labels = {
+        key: f"{val}" for key, val in nx.get_edge_attributes(Gnx, "orbit").items()
+    }
     nx.draw_networkx_edge_labels(Gnx, pos=pos, edge_labels=edge_labels, font_size=14)
-    
+
     # A printed comment is appropriate since there is no figure to refer to
-    print('Visualizes an orbit calculation necessary for Figures 13-16 of DOI:10.3389/fcomp.2023.1238988'
-          '\na figure showing orbits of a LxL cylindrical square lattice is plotted.'
-          '\nNote that vertex orbits are determined uniquely by distance from the cylinder'
-          '\ntop or bottom; reflecting the intuitive rotational and reflective'
-          '\nsymmetries. Edge orbits are similarly split by distance from the boundary'
-          '\nand orientation relative to the boundary, but with additional splitting due'
-          '\nto non-uniform coupling values. Edges and vertex in the same orbits have'
-          '\nequivalent marginal statistics and can be shimmed to this effect.')
+    print(
+        "Visualizes an orbit calculation necessary for Figures 13-16 of DOI:10.3389/fcomp.2023.1238988"
+        "\na figure showing orbits of a LxL cylindrical square lattice is plotted."
+        "\nNote that vertex orbits are determined uniquely by distance from the cylinder"
+        "\ntop or bottom; reflecting the intuitive rotational and reflective"
+        "\nsymmetries. Edge orbits are similarly split by distance from the boundary"
+        "\nand orientation relative to the boundary, but with additional splitting due"
+        "\nto non-uniform coupling values. Edges and vertex in the same orbits have"
+        "\nequivalent marginal statistics and can be shimmed to this effect."
+    )
 
     plt.show()
 
