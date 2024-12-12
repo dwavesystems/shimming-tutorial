@@ -33,7 +33,7 @@ def embed_square_lattice(L, try_to_load=True, **kwargs):
         Tuple[np.ndarray, dimod.BQM]: A matrix of embeddings and BQM for the lattice.
     """
     sampler = DWaveSampler()  # As configured
-    bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
+    bqm = dimod.BinaryQuadraticModel(vartype="SPIN")
 
     for x in range(L):
         for y in range(L):
@@ -51,11 +51,11 @@ def embed_square_lattice(L, try_to_load=True, **kwargs):
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = f'cached_embeddings/{sampler.solver.name}__L{L:02d}_square_embeddings_cached.txt'
+    cache_filename = f"cached_embeddings/{sampler.solver.name}__L{L:02d}_square_embeddings_cached.txt"
     if try_to_load:
         try:
             embeddings = np.loadtxt(cache_filename, dtype=int)
-            print(f'Loaded embedding from file {cache_filename}')
+            print(f"Loaded embedding from file {cache_filename}")
             return embeddings, bqm
         except (ValueError, FileNotFoundError) as e:
             print(f"Failed to load {cache_filename} with `np.loadtxt`")
@@ -63,16 +63,17 @@ def embed_square_lattice(L, try_to_load=True, **kwargs):
             print("Finding embedding via raster embedding search instead.")
     embeddings = raster_embedding_search(A, G, **kwargs)
 
-    os.makedirs('cached_embeddings/', exist_ok=True)
-    np.savetxt(cache_filename, embeddings, fmt='%d')
+    os.makedirs("cached_embeddings/", exist_ok=True)
+    np.savetxt(cache_filename, embeddings, fmt="%d")
 
     return embeddings, bqm
 
 
 def main():
     L = 12  # Linear size of square lattice to embed (LxL cylinder)
-    embeddings, bqm = embed_square_lattice(L, raster_breadth=5, max_number_of_embeddings=1,
-                                           timeout=100)
+    embeddings, bqm = embed_square_lattice(
+        L, raster_breadth=5, max_number_of_embeddings=1, timeout=100
+    )
 
 
 if __name__ == "__main__":

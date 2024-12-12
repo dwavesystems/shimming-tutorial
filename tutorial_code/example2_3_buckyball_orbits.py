@@ -36,13 +36,13 @@ def main(visualize=True):
     path_to_csv = "data/bucky_ball.csv"
     if not exists(path_to_csv):
         path_to_csv = f"tutorial_code/{path_to_csv}"
-    J = {(int(e[0]), int(e[1])): w
-         for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
+    J = {(int(e[0]), int(e[1])): w for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
     bqm = dimod.BQM.from_ising(h={}, J=J)
 
     # Compute the BQM's orbits
-    (qubit_orbits, coupler_orbits,
-        qubit_orbits_opposite, coupler_orbits_opposite) = get_orbits(bqm)
+    (qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite) = (
+        get_orbits(bqm)
+    )
 
     # Embed the BQM onto the QPU
     qpu = DWaveSampler(solver="Advantage_system4.1")
@@ -54,19 +54,28 @@ def main(visualize=True):
 
     if visualize:
         # Plotting configurations
-        cm = plt.cm.get_cmap(name='coolwarm')
+        cm = plt.cm.get_cmap(name="coolwarm")
         norm = plt.Normalize(vmin=-2, vmax=2)
-        plt.rc('font', size=12)
+        plt.rc("font", size=12)
 
         fig = plt.figure(figsize=(8, 8), dpi=80)
 
         orbits_graph = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
-        edge_color = [cm(norm(1)) if orbits_graph[u][v]['orbit'] else cm(norm(-1))
-                      for u, v in orbits_graph.edges]
+        edge_color = [
+            cm(norm(1)) if orbits_graph[u][v]["orbit"] else cm(norm(-1))
+            for u, v in orbits_graph.edges
+        ]
         node_color = [cm(norm(qubit_orbits[u])) for u in orbits_graph.nodes]
         pos = nx.layout.spring_layout(orbits_graph, iterations=10000, seed=5)
-        nx.draw_networkx(orbits_graph, pos=pos, with_labels=False, node_size=200, width=4,
-                         edge_color=edge_color, node_color=node_color,)
+        nx.draw_networkx(
+            orbits_graph,
+            pos=pos,
+            with_labels=False,
+            node_size=200,
+            width=4,
+            edge_color=edge_color,
+            node_color=node_color,
+        )
         plt.axis("off")
         fig.savefig("buckyball_orbits.pdf", format="pdf")
 

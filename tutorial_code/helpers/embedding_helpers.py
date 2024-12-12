@@ -38,7 +38,9 @@ def get_pegasus_subgrid(A, rows, cols, gridsize=16):
     coords = [dnx.pegasus_coordinates(gridsize).linear_to_nice(v) for v in A.nodes]
     used_coords = [c for c in coords if c[1] in cols and c[2] in rows]
 
-    return A.subgraph([dnx.pegasus_coordinates(gridsize).nice_to_linear(c) for c in used_coords]).copy()
+    return A.subgraph(
+        [dnx.pegasus_coordinates(gridsize).nice_to_linear(c) for c in used_coords]
+    ).copy()
 
 
 def get_zephyr_subgrid(A, rows, cols, gridsize=4):
@@ -55,13 +57,27 @@ def get_zephyr_subgrid(A, rows, cols, gridsize=4):
 
     coords = [dnx.zephyr_coordinates(gridsize).linear_to_zephyr(v) for v in A.nodes]
     c = np.asarray(coords)
-    used_coords = [c for c in coords if
-                   (c[0] == 0 and c[4] in cols and c[1] >= 2*min(rows) and c[1] <= 2*max(rows)+2) or
-                   (c[0] == 1 and c[4] in rows and c[1] >= 2*min(cols) and c[1] <= 2*max(cols)+2)]
+    used_coords = [
+        c
+        for c in coords
+        if (
+            c[0] == 0
+            and c[4] in cols
+            and c[1] >= 2 * min(rows)
+            and c[1] <= 2 * max(rows) + 2
+        )
+        or (
+            c[0] == 1
+            and c[4] in rows
+            and c[1] >= 2 * min(cols)
+            and c[1] <= 2 * max(cols) + 2
+        )
+    ]
     # (u, w, k, z) -> (u, w, k / 2, k % 2, z)
 
-    subgraph = A.subgraph([dnx.zephyr_coordinates(gridsize).zephyr_to_linear(c)
-                          for c in used_coords]).copy()
+    subgraph = A.subgraph(
+        [dnx.zephyr_coordinates(gridsize).zephyr_to_linear(c) for c in used_coords]
+    ).copy()
 
     return subgraph
 
@@ -86,7 +102,7 @@ def get_independent_embeddings(embs):
             V2 = set(emb2.values())
             if not V1.isdisjoint(V2):
                 Gemb.add_edge(i, j)
-    print(f'Built graph.  Took {time.process_time()-start} seconds')
+    print(f"Built graph.  Took {time.process_time()-start} seconds")
     start = time.process_time()
 
     Sbest = None
@@ -100,12 +116,14 @@ def get_independent_embeddings(embs):
             Sbest = S
             max_size = len(S)
 
-    print(f'Built 100,000 greedy MIS.  Took {time.process_time()-start} seconds')
-    print(f'Found {len(Sbest)} disjoint embeddings.')
+    print(f"Built 100,000 greedy MIS.  Took {time.process_time()-start} seconds")
+    print(f"Found {len(Sbest)} disjoint embeddings.")
     return [embs[x] for x in Sbest]
 
 
-def search_for_subgraphs_in_subgrid(B, subgraph, timeout=20, max_number_of_embeddings=np.inf, verbose=True):
+def search_for_subgraphs_in_subgrid(
+    B, subgraph, timeout=20, max_number_of_embeddings=np.inf, verbose=True
+):
     """Find a list of subgraph (embeddings) in a subgrid.
 
     Args:
@@ -120,22 +138,33 @@ def search_for_subgraphs_in_subgrid(B, subgraph, timeout=20, max_number_of_embed
     """
     embs = []
     while True and len(embs) < max_number_of_embeddings:
-        temp = glasgow.find_subgraph(subgraph, B, timeout=timeout, triggered_restarts=True)
+        temp = glasgow.find_subgraph(
+            subgraph, B, timeout=timeout, triggered_restarts=True
+        )
         if len(temp) == 0:
             break
         else:
             B.remove_nodes_from(temp.values())
             embs.append(temp)
             if verbose:
-                print(f'{len(B)} vertices remain...')
+                print(f"{len(B)} vertices remain...")
 
     if verbose:
-        print(f'Found {len(embs)} embeddings.')
+        print(f"Found {len(embs)} embeddings.")
     return embs
 
 
-def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
-                            verbose=True, topology='pegasus', gridsize=16, verify_embeddings=False, **kwargs):
+def raster_embedding_search(
+    A_,
+    subgraph,
+    raster_breadth=5,
+    delete_used=False,
+    verbose=True,
+    topology="pegasus",
+    gridsize=16,
+    verify_embeddings=False,
+    **kwargs,
+):
     """Returns a matrix (n, L) of subgraph embeddings to _A.
 
     Args:
@@ -163,30 +192,44 @@ def raster_embedding_search(A_, subgraph, raster_breadth=5, delete_used=False,
     for row_offset in range(gridsize - raster_breadth + 1):
 
         for col_offset in range(gridsize - raster_breadth + 1):
-            if topology == 'pegasus':
+            if topology == "pegasus":
                 B = get_pegasus_subgrid(
-                    A, range(row_offset, row_offset + raster_breadth),
-                    range(col_offset, col_offset + raster_breadth), gridsize
+                    A,
+                    range(row_offset, row_offset + raster_breadth),
+                    range(col_offset, col_offset + raster_breadth),
+                    gridsize,
                 )
-            elif topology == 'zephyr':
+            elif topology == "zephyr":
                 B = get_zephyr_subgrid(
-                    A, range(row_offset, row_offset + raster_breadth),
-                    range(col_offset, col_offset + raster_breadth), gridsize
+                    A,
+                    range(row_offset, row_offset + raster_breadth),
+                    range(col_offset, col_offset + raster_breadth),
+                    gridsize,
                 )
             else:
-                raise ValueError("Supported topologies are currently pegasus and zephyr.")
+                raise ValueError(
+                    "Supported topologies are currently pegasus and zephyr."
+                )
 
             if verbose:
-                print(f'row,col=({row_offset},{col_offset}) starting with {len(B)} vertices')
+                print(
+                    f"row,col=({row_offset},{col_offset}) starting with {len(B)} vertices"
+                )
 
-            sub_embs = search_for_subgraphs_in_subgrid(B, subgraph, verbose=verbose, **kwargs)
+            sub_embs = search_for_subgraphs_in_subgrid(
+                B, subgraph, verbose=verbose, **kwargs
+            )
             if delete_used:
                 for sub_emb in sub_embs:
                     A.remove_nodes_from(sub_emb.values())
 
             if verify_embeddings:
                 for emb in sub_embs:
-                    X = list(embedding.diagnose_embedding({p: [emb[p]] for p in emb}, subgraph, A_))
+                    X = list(
+                        embedding.diagnose_embedding(
+                            {p: [emb[p]] for p in emb}, subgraph, A_
+                        )
+                    )
                     if len(X):
                         print(X[0])
                         raise Exception
@@ -204,7 +247,7 @@ def main():
     L = 64  # Length of chain to embed
 
     sampler = DWaveSampler()  # As configured
-    bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
+    bqm = dimod.BinaryQuadraticModel(vartype="SPIN")
     for spin in range(L):
         bqm.add_quadratic(spin, (spin + 1) % L, -1)
     G = dimod.to_networkx_graph(bqm)
