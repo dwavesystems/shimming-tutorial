@@ -123,8 +123,11 @@ def embed_loops(
     return embeddings
 
 
-def main():
+def main(max_num_emb=None):
     from time import perf_counter
+
+    if max_num_emb is not None:
+        max_num_emb = max_num_emb
 
     L = 2048  # L=2048 anticipate ~ 2.5 seconds on i7
     sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
@@ -138,4 +141,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(max_num_emb=None)

@@ -135,9 +135,11 @@ def embed_square_lattice(
     return embeddings, bqm
 
 
-if __name__ == "__main__":
+def main(max_num_emb=None):
     from time import perf_counter
 
+    if max_num_emb is not None:
+        max_num_emb = max_num_emb
     L = 10  # L=2048 anticipate ~ 14 seconds on i7
     sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
     t0 = perf_counter()
@@ -149,3 +151,7 @@ if __name__ == "__main__":
         print(f"{L}x{L} embedding successfully found in {t1} seconds")
     else:
         print(f"Something is wrong, {L}x{L} embedding not found")
+
+
+if __name__ == "__main__":
+    main(max_num_emb=None)
