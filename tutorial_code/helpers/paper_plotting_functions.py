@@ -64,7 +64,7 @@ def paper_plots_example1_1(experiment_data_list):
         axs[0, col].plot(np.array([x[0] for x in all_fbos]))
         axs[0, col].set_title(rf"$\alpha_\phi$={alpha_phi:.1e}")
         axs[0, col].set_xlabel("Iteration")
-        axs[0, col].set_ylabel(rf"Flux-bias offsets, $\phi_f$")
+        axs[0, col].set_ylabel(r"Flux-bias offsets, $\phi_f$")
         current_ylim = axs[0, col].get_ylim()
         max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
         axs[0, col].set_ylim(-max_ylim, max_ylim)
@@ -92,7 +92,7 @@ def paper_plots_example1_1(experiment_data_list):
             label="Last 10 Iterations",
             density=True,
         )
-        axs[1, col].set_xlabel(rf"Magnetizations, $\langle s_i \rangle$")
+        axs[1, col].set_xlabel(r"Magnetizations, $\langle s_i \rangle$")
         axs[1, col].set_ylabel("Prob. density")
         axs[1, col].legend(frameon=False)
         axs[1, col].set_xlim([-0.5, 0.5])
@@ -103,7 +103,7 @@ def paper_plots_example1_1(experiment_data_list):
         std_mags = np.std(M, axis=(1, 2))  # Adjust axes as needed
         axs[2, col].plot(std_mags)
         axs[2, col].set_xlabel("Iteration")
-        axs[2, col].set_ylabel(rf"Std Dev of Qubit Magnetizations, $\sigma$")
+        axs[2, col].set_ylabel(r"Std Dev of Qubit Magnetizations, $\sigma$")
         axs[2, col].set_ylim([0, 0.5])
 
     # Adjust layout to prevent overlapping of titles and labels
@@ -157,7 +157,7 @@ def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     # Plot 1: Flux-bias offsets
     axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
     axs[0, 0].set_xlabel("Iteration")
-    axs[0, 0].set_ylabel(rf"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)")
+    axs[0, 0].set_ylabel(r"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)")
     current_ylim = axs[0, 0].get_ylim()
     max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
     axs[0, 0].set_ylim(-max_ylim, max_ylim)
@@ -173,7 +173,7 @@ def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     axs[1, 0].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
     axs[1, 0].set_xlabel("Iteration")
     axs[1, 0].set_ylabel(
-        rf"Std Dev of Qubit Magnetizations (10-Iteration Moving Mean), $\sigma_m$"
+        r"Std Dev of Qubit Magnetizations (10-Iteration Moving Mean), $\sigma_m$"
     )
 
     # Plot 4: Standard deviation of frustration probability (10-iter moving mean)
@@ -182,7 +182,7 @@ def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     axs[1, 1].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
     axs[1, 1].set_xlabel("Iteration")
     axs[1, 1].set_ylabel(
-        rf"Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$"
+        r"Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$"
     )
 
     # Adjust layout to prevent overlapping of titles and labels
@@ -227,7 +227,7 @@ def paper_plots_example2_1():
     """Plotting function for example1_1"""
 
     if MAKE_TIKZ_PLOTS:
-        fn = f"ex2_1_graph_raw"
+        fn = "ex2_1_graph_raw"
         code = tikzplotlib.get_tikz_code(
             standalone=True,
             axis_width="12cm",
@@ -265,7 +265,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
     # Plot FBOs for first embedding in the first axis (top-left)
     axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
     axs[0, 0].set_xlabel("Iteration")
-    axs[0, 0].set_ylabel(rf"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)")
+    axs[0, 0].set_ylabel(r"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)")
     axs[0, 0].set_ylim(max(abs(np.array(axs[0, 0].get_ylim()))) * np.array([-1, 1]))
 
     # Plot Js for first embedding in the second axis (top-right)
@@ -279,7 +279,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
     axs[1, 0].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
     axs[1, 0].set_xlabel("Iteration")
     axs[1, 0].set_ylabel(
-        rf"Std Dev of Qubit Magnetizations (10-Iteration Moving Mean), $\sigma_m$"
+        r"Std Dev of Qubit Magnetizations (10-Iteration Moving Mean), $\sigma_m$"
     )
 
     # Plot std of frustration in fourth axis (bottom-right)
@@ -288,7 +288,7 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
     axs[1, 1].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
     axs[1, 1].set_xlabel("Iteration")
     axs[1, 1].set_ylabel(
-        rf"Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$"
+        r"Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$"
     )
 
     # Adjust layout to prevent overlapping of titles and labels
@@ -296,7 +296,6 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
 
     # Generate TikZ plots or show the canvas
     if MAKE_TIKZ_PLOTS:
-        plot_titles = ["FBOs", "Couplings", "Mag std", "Frust std"]
         file_names = ["ex22_fbos", "ex22_Js", "ex22_mag_std", "ex22_frust_std"]
 
         for i, ax in enumerate(
@@ -366,7 +365,7 @@ def paper_plots_example3_2(
     # Plot 1: Flux-bias offsets
     axs[0, 0].plot(np.array([x[0] for x in all_fbos])[:, :12], alpha=0.5)
     axs[0, 0].set_xlabel("Iteration")
-    axs[0, 0].set_ylabel(rf"Flux-bias Offsets, $\Phi_i$ ($\Phi_0$)")
+    axs[0, 0].set_ylabel(r"Flux-bias Offsets, $\Phi_i$ ($\Phi_0$)")
     current_ylim = axs[0, 0].get_ylim()
     max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
     axs[0, 0].set_ylim(-max_ylim, max_ylim)
@@ -387,7 +386,7 @@ def paper_plots_example3_2(
     axs[1, 0].plot(range(10, len(Y)), np.std(Y[10:], axis=(1, 2)))
     axs[1, 0].set_xlabel("Iteration")
     axs[1, 0].set_ylabel(
-        rf"Std Dev of Qubit Magnetizations (10-Iteration Moving Mean), $\sigma_m$"
+        r"Std Dev of Qubit Magnetizations (10-Iteration Moving Mean), $\sigma_m$"
     )
 
     # Plot 4: Standard deviation of f (10-iter moving mean per orbit)
@@ -403,7 +402,7 @@ def paper_plots_example3_2(
     axs[1, 1].plot(range(10, len(Y)), np.mean(Y_orbit[10:], axis=1))
     axs[1, 1].set_xlabel("Iteration")
     axs[1, 1].set_ylabel(
-        rf"Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$"
+        r"Std Dev of Frustration Prob. (10-Iteration Moving Mean), $\sigma_f$"
     )
 
     # Adjust layout to prevent overlap
