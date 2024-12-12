@@ -15,6 +15,7 @@
 from os.path import exists
 
 import dimod
+import matplotlib
 import networkx as nx
 import numpy as np
 
@@ -54,7 +55,7 @@ def main():
     (qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite) = (
         get_orbits(bqm)
     )
-    cm = plt.cm.get_cmap(name="coolwarm")
+    cm = matplotlib.colormaps["coolwarm"]
     norm = plt.Normalize(vmin=-2, vmax=2)
     plt.rc("font", size=12)
 
