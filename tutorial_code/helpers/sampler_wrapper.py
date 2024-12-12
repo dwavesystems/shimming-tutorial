@@ -42,7 +42,7 @@ class ShimmingMockSampler(MockDWaveSampler):
             substitute_sampler=substitute_sampler,
             substitute_kwargs=substitute_kwargs,
         )
-        num_qubits = self.properties['num_qubits']
+        num_qubits = self.properties["num_qubits"]
         if flux_biases_baseline is None:
             self.flux_biases_baseline = [1e-5] * num_qubits
         else:
