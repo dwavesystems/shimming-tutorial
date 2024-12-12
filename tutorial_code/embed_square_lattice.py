@@ -30,6 +30,7 @@ from minorminer.utils.feasibility import (
     lattice_size_lower_bound,
 )
 
+
 def make_square_bqm(L):
     bqm = dimod.BinaryQuadraticModel(vartype="SPIN")
 
@@ -47,13 +48,13 @@ def make_square_bqm(L):
                 bqm.set_quadratic(x * L + y, (x + 1) * L + y, 1)
     return bqm
 
+
 def embed_square_lattice(
     sampler: MockDWaveSampler,
     L: int,
     use_cache: bool = True,
     **kwargs,
 ) -> tuple[np.ndarray, dimod.BinaryQuadraticModel]:
-
     """Embeds a square lattice of length L (LxL cylinder).
 
     Args:
@@ -87,8 +88,10 @@ def embed_square_lattice(
 
         if not embedding_feasibility_filter(S=G, T=A):
             raise ValueError(f"Embedding {G} on {A} is infeasible")
-        sublattice_size = kwargs.pop('sublattice_size', min(lattice_size_lower_bound(S=G, T=A) + 1,
-                                                            lattice_size_upper_bound(T=A)))
+        sublattice_size = kwargs.pop(
+            "sublattice_size",
+            min(lattice_size_lower_bound(S=G, T=A) + 1, lattice_size_upper_bound(T=A)),
+        )
         if not isinstance(sublattice_size, int) or sublattice_size <= 0:
             raise ValueError(
                 f"'sublattice_size' must be a positive integer. Received {sublattice_size}."
@@ -99,11 +102,16 @@ def embed_square_lattice(
             "\nTo accelerate the process a smaller lattice (L) might be "
             "considered and/or the search restricted to max_num_emb=1."
         )
-        max_num_emb = kwargs.pop('max_num_emb', float('Inf'))
-        embedder_kwargs = {'timeout': kwargs.pop('timeout', 10)}
+        max_num_emb = kwargs.pop("max_num_emb", float("Inf"))
+        embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
         embeddings = embeddings_to_array(
             find_sublattice_embeddings(
-                S=G, T=A, sublattice_size=sublattice_size, max_num_emb=max_num_emb, embedder_kwargs=embedder_kwargs, **kwargs
+                S=G,
+                T=A,
+                sublattice_size=sublattice_size,
+                max_num_emb=max_num_emb,
+                embedder_kwargs=embedder_kwargs,
+                **kwargs,
             ),
             node_order=sorted(G.nodes()),
             as_ndarray=True,
@@ -129,13 +137,15 @@ def embed_square_lattice(
 
 if __name__ == "__main__":
     from time import perf_counter
+
     L = 10  # L=2048 anticipate ~ 14 seconds on i7
-    sampler = MockDWaveSampler(topology_type='pegasus', topology_shape=[16])
+    sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
     t0 = perf_counter()
     embeddings, bqm = embed_square_lattice(
-        sampler=sampler, L=L, max_num_emb=1, use_cache=False)
+        sampler=sampler, L=L, max_num_emb=1, use_cache=False
+    )
     t1 = perf_counter() - t0
-    if embeddings.shape == (1,L*L):
-        print(f'{L}x{L} embedding successfully found in {t1} seconds')
+    if embeddings.shape == (1, L * L):
+        print(f"{L}x{L} embedding successfully found in {t1} seconds")
     else:
-        print(f'Something is wrong, {L}x{L} embedding not found')
+        print(f"Something is wrong, {L}x{L} embedding not found")

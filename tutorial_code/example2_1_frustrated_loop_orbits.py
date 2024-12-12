@@ -55,7 +55,7 @@ def get_edge_colors(Gnx, bqm):
     Returns:
         List[tuple[float, float, float, float]]: a list of tuple of RGBA values
     """
-    cm = matplotlib.cm.get_cmap(name="RdBu_r")
+    cm = matplotlib.colormaps["RdBu_r"]
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(bqm.get_quadratic(u, v))) for (u, v) in Gnx.edges()]
 

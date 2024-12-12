@@ -220,7 +220,7 @@ def run_experiment(
         stats = data_dict["stats"]
     else:
         # prev_execution_time = 193.6231 sec.
-        print(f"Collection of data typically requires several minutes")
+        print("Collection of data typically requires several minutes")
         for iteration in tqdm(range(param["num_iters"]), total=param["num_iters"]):
             if iteration < param["num_iters_unshimmed_flux"]:
                 shim["alpha_Phi"] = 0.0

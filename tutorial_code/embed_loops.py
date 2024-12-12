@@ -75,8 +75,10 @@ def embed_loops(
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    sublattice_size = kwargs.pop('sublattice_size', min(lattice_size_lower_bound(S=G, T=A) + 1,
-                                                        lattice_size_upper_bound(T=A)))
+    sublattice_size = kwargs.pop(
+        "sublattice_size",
+        min(lattice_size_lower_bound(S=G, T=A) + 1, lattice_size_upper_bound(T=A)),
+    )
 
     if not isinstance(sublattice_size, int) or sublattice_size <= 0:
         raise ValueError(
@@ -88,8 +90,8 @@ def embed_loops(
         "\nTo accelerate the process a smaller lattice (L) might be "
         "considered and/or the search restricted to max_num_emb=1."
     )
-    max_num_emb = kwargs.pop('max_num_emb', float('Inf'))
-    embedder_kwargs = {'timeout': kwargs.pop('timeout', 10)}
+    max_num_emb = kwargs.pop("max_num_emb", float("Inf"))
+    embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
     embeddings = embeddings_to_array(
         find_sublattice_embeddings(
             S=G,
@@ -123,14 +125,14 @@ def embed_loops(
 
 def main():
     from time import perf_counter
+
     L = 2048  # L=2048 anticipate ~ 2.5 seconds on i7
-    sampler = MockDWaveSampler(topology_type='pegasus', topology_shape=[16])
+    sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
     t0 = perf_counter()
-    embeddings = embed_loops(
-        sampler=sampler, L=L, max_num_emb=1, use_cache=False)
+    embeddings = embed_loops(sampler=sampler, L=L, max_num_emb=1, use_cache=False)
     t1 = perf_counter() - t0
     if embeddings.size >= 1:
-        print(f'Loop {L} embedding successfully found in {t1} seconds')
+        print(f"Loop {L} embedding successfully found in {t1} seconds")
     else:
         print(f"Something is wrong, {L}x{L} embedding not found")
 
