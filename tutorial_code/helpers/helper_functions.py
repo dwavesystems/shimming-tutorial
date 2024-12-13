@@ -69,9 +69,6 @@ def shim_parameter_rescaling(statistic, num_iters=20, ratio=1.1, tol=0.1):
         exponent = np.polyfit(
             np.log(np.arange(1, num_iters)), np.log(X[1:num_iters]), 1
         )[0]
-        exponent = np.polyfit(
-            np.log(np.arange(1, num_iters)), np.log(X[1:num_iters]), 1
-        )[0]
 
         if exponent > 1.0 + tol:
             return ratio
@@ -112,7 +109,6 @@ def plot_data(
         L (int): 'L' in the experiment's param dictionary
     """
     plt.rcParams["figure.figsize"] = (18, 10)
-    plt.rcParams["figure.figsize"] = (18, 10)
     fig = plt.figure(1)
     plt.clf()
     axs = fig.subplots(2, 6)
@@ -120,14 +116,10 @@ def plot_data(
     plt.sca(axs[0, 0])
     plt.plot(np.reshape(np.array(all_fbos), (len(all_fbos), -1))[:, ::10])
     plt.title("FBOs")
-    plt.plot(np.reshape(np.array(all_fbos), (len(all_fbos), -1))[:, ::10])
-    plt.title("FBOs")
 
     M = np.array(mags)
     Y = movmean(M, 10)
     plt.sca(axs[0, 1])
-    plt.plot(np.std(np.reshape(Y[10:], (len(Y[10:]), -1)), axis=1))
-    plt.title("std of 10-call moving mean of m")
     plt.plot(np.std(np.reshape(Y[10:], (len(Y[10:]), -1)), axis=1))
     plt.title("std of 10-call moving mean of m")
 
@@ -141,7 +133,6 @@ def plot_data(
         np.mean(np.abs(np.diff(M, axis=0)), axis=(1, 2))
     )
     plt.title("mean abs difference in m")
-    plt.title("mean abs difference in m")
 
     plt.sca(axs[1, 0])
     plt.plot(
@@ -149,10 +140,7 @@ def plot_data(
             np.divide(np.array(all_couplings), all_couplings[0]),
             (len(all_couplings), -1),
         )[:, ::10]
-            (len(all_couplings), -1),
-        )[:, ::10]
     )
-    plt.title("couplings (vs. nominal)")
     plt.title("couplings (vs. nominal)")
 
     M = np.array(frust)
@@ -170,8 +158,6 @@ def plot_data(
 
     plt.plot(np.mean(Y_orbit[10:], axis=1))
     plt.title("std of 10-call moving mean of f; avg per orbit")
-    plt.plot(np.mean(Y_orbit[10:], axis=1))
-    plt.title("std of 10-call moving mean of f; avg per orbit")
 
     plt.sca(axs[1, 2])
     plt.hist(Y[10].ravel(), alpha=0.5)
@@ -183,7 +169,6 @@ def plot_data(
         np.mean(np.abs(np.diff(M, axis=0)), axis=(1, 2))
     )
     plt.title("mean abs difference in f")
-    plt.title("mean abs difference in f")
 
     # Convergence of FBOs
     M = np.array(all_fbos)
@@ -193,20 +178,15 @@ def plot_data(
     plist = []
     for t in np.flip(np.arange(len(M) - 19)):
         X = np.flip(np.var(M[-1 - t - 19 : -1 - t] - M[-1 - t], axis=(1, 2)))
-        X = np.flip(np.var(M[-1 - t - 19 : -1 - t] - M[-1 - t], axis=(1, 2)))
         if min(np.abs(X)) == 0:
-            plist.append(0.0)
             plist.append(0.0)
         else:
             plist.append(np.polyfit(np.log(np.arange(1, 20)), np.log(X), 1)[0])
     plt.plot(np.arange(19, len(M)), plist)
     plt.title("fluctuation variance exponent")
-    plt.title("fluctuation variance exponent")
 
     plt.sca(axs[0, 5])
     plt.plot(np.array(all_alpha_phi))
-    plt.yscale("log")
-    plt.title("$\\alpha_\Phi$")
     plt.yscale("log")
     plt.title("$\\alpha_\Phi$")
 
@@ -218,24 +198,18 @@ def plot_data(
     plist = []
     for t in np.flip(np.arange(len(M) - 19)):
         X = np.flip(np.var(M[-1 - t - 19 : -1 - t] - M[-1 - t], axis=(1, 2)))
-        X = np.flip(np.var(M[-1 - t - 19 : -1 - t] - M[-1 - t], axis=(1, 2)))
         if min(np.abs(X)) == 0:
-            plist.append(0.0)
             plist.append(0.0)
         else:
             plist.append(np.polyfit(np.log(np.arange(1, 20)), np.log(X), 1)[0])
     plt.plot(np.arange(19, len(M)), plist)
-    plt.title("fluctuation variance exponent")
     plt.title("fluctuation variance exponent")
 
     plt.sca(axs[1, 5])
     plt.plot(np.array(all_alpha_j))
     plt.yscale("log")
     plt.title("$\\alpha_J$")
-    plt.yscale("log")
-    plt.title("$\\alpha_J$")
 
-    plt.suptitle(f"J={coupling}, L={L}, alpha_Phi={alpha_phi}, alpha_J={alpha_j}")
     plt.suptitle(f"J={coupling}, L={L}, alpha_Phi={alpha_phi}, alpha_J={alpha_j}")
     plt.tight_layout()
     plt.show()
@@ -252,7 +226,6 @@ def get_coupler_colors(G, bqm):
         list[tuple[float]]: list of tuples whose coordinates represent colours used in matplotlib
     """
     cm = matplotlib.cm.get_cmap(name="coolwarm")
-    cm = matplotlib.cm.get_cmap(name="coolwarm")
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(bqm.quadratic[E])) for E in G.edges()]
 
@@ -267,7 +240,6 @@ def get_qubit_colors(G, bqm):
     Returns:
         list[tuple[float]]: list of tuples whose coordinates represent colours used in matplotlib
     """
-    cm = matplotlib.cm.get_cmap(name="coolwarm")
     cm = matplotlib.cm.get_cmap(name="coolwarm")
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(bqm.linear[V])) for V in G.nodes()]
@@ -285,15 +257,11 @@ def load_experiment_data(prefix, data_dict):
     """
     filename = "savedata_" + prefix + ".pkl"
     filepath = Path("cached_experiment_data").joinpath("".join(filename))
-    filename = "savedata_" + prefix + ".pkl"
-    filepath = Path("cached_experiment_data").joinpath("".join(filename))
 
     if not os.path.exists(filepath):
         print(f"{filepath} not found.  Couldn" "t load data.")
-        print(f"{filepath} not found.  Couldn" "t load data.")
         return None
 
-    with lzma.open(filepath, "rb") as f:
     with lzma.open(filepath, "rb") as f:
         loaded_data_dict = pickle.load(f)
 
@@ -321,11 +289,8 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
     """
     filename = "savedata_" + prefix + ".pkl"
     filepath = Path("cached_experiment_data").joinpath("".join(filename))
-    filename = "savedata_" + prefix + ".pkl"
-    filepath = Path("cached_experiment_data").joinpath("".join(filename))
 
     if os.path.exists(filepath) and not overwrite:
-        print(f"{filepath} exists.  Not overwriting.")
         print(f"{filepath} exists.  Not overwriting.")
         return False
 
@@ -345,8 +310,6 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
             sampler_client2 = data_dict["param"]["sampler"].solver.client
             data_dict["param"]["sampler"].solver.client = None
 
-    os.makedirs("cached_experiment_data", exist_ok=True)
-    with lzma.open(filepath, "wb") as f:
     os.makedirs("cached_experiment_data", exist_ok=True)
     with lzma.open(filepath, "wb") as f:
         pickle.dump(data_dict, f)
