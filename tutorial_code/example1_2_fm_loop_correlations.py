@@ -243,6 +243,7 @@ def main(
     num_iters: int = 300,
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 200,
+    max_num_emb: int = 1,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -281,7 +282,7 @@ def main(
         "num_iters_unshimmed_J": num_iters_unshimmed_J,
     }
 
-    embeddings = embed_loops(sampler=sampler, L=param["L"], use_cache=True)
+    embeddings = embed_loops(sampler=sampler, L=param["L"], max_num_emb=max_num_emb, use_cache=True)
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
