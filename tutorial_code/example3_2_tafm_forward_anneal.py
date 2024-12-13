@@ -399,10 +399,12 @@ def run_experiment(
         )
 
         if use_cache:
-            pbar = tqdm(range(param["num_iters"]), ncols=140, desc=f"PROGRESS ({prefix})")
+            pbar = tqdm(
+                range(param["num_iters"]), ncols=140, desc=f"PROGRESS ({prefix})"
+            )
         else:
             pbar = tqdm(range(param["num_iters"]), ncols=140)
-            
+
         if not param["adaptive_step_size"]:
             # Fixed step sizes
             for iteration in pbar:

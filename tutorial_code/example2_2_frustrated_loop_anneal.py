@@ -320,7 +320,9 @@ def main(
         "num_iters_unshimmed_J": num_iters_unshimmed_J,
     }
 
-    embeddings = embed_loops(sampler=sampler, L=param["L"], max_num_emb=max_num_emb, use_cache=use_cache)
+    embeddings = embed_loops(
+        sampler=sampler, L=param["L"], max_num_emb=max_num_emb, use_cache=use_cache
+    )
 
     # Where the shim data (parameters and Hamiltonian terms) are stored
     shim = {
