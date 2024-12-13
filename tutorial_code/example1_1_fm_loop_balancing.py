@@ -244,6 +244,7 @@ def main(
     coupling: float = -0.2,
     num_iters: int = 100,
     num_iters_unshimmed_flux: int = 10,
+    max_num_emb: int = 1,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -263,6 +264,10 @@ def main(
             of flux_biases. Defaults to 100.
         num_iters_unshimmed_J (int): Number of iterations without shimming of
             couplings. Defaults to 200.
+        max_num_emb (int): Maximum number of embeddings to use per programming.
+            Published tutorial data uses several parallel embeddings, but this
+            tutorial uses 1 (max_num_emb=1) by default to bypass the otherwise
+            slow search process.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -283,7 +288,7 @@ def main(
             "num_iters_unshimmed_flux": num_iters_unshimmed_flux,
         }
 
-        embeddings = embed_loops(sampler=sampler, L=param["L"], use_cache=use_cache)
+        embeddings = embed_loops(sampler=sampler, L=param["L"], max_num_emb=max_num_emb, use_cache=use_cache)
 
         # Where the shim data (parameters and Hamiltonian terms) are stored
         shim = {
