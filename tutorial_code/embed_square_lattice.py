@@ -135,11 +135,9 @@ def embed_square_lattice(
     return embeddings, bqm
 
 
-def main(max_num_emb=None):
+def main(max_num_emb=float("inf")):
     from time import perf_counter
 
-    if max_num_emb is None:
-        max_num_emb = 1
     L = 10  # L=2048 anticipate ~ 14 seconds on i7
     sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
     t0 = perf_counter()
