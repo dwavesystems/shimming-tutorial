@@ -243,7 +243,7 @@ def main(
     num_iters: int = 300,
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 200,
-    max_num_emb: int = 1,
+    max_num_emb: float = float('Inf'),
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -259,10 +259,9 @@ def main(
         num_iters (int): Number of sequential programmings.
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
         num_iters_unshimmed_J (int): Number of sequential programmings without J shimming.
-        max_num_emb (int): Maximum number of embeddings to use per programming.
-            Published tutorial data uses several parallel embeddings, but this
-            tutorial uses 1 (max_num_emb=1) by default to bypass the otherwise
-            slow search process.
+        max_num_emb (float): Maximum number of embeddings to use per programming.
+            Published tutorial data uses the maximum number the process can
+            accommodate.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -309,4 +308,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main(use_cache=False)
+    main()
