@@ -26,7 +26,7 @@ from minorminer.utils.parallel_embeddings import (
 
 from minorminer.utils.feasibility import (
     embedding_feasibility_filter,
-    lattice_size_upper_bound,
+    lattice_size,
     lattice_size_lower_bound,
 )
 
@@ -90,7 +90,7 @@ def embed_square_lattice(
             raise ValueError(f"Embedding {G} on {A} is infeasible")
         sublattice_size = kwargs.pop(
             "sublattice_size",
-            min(lattice_size_lower_bound(S=G, T=A) + 1, lattice_size_upper_bound(T=A)),
+            min(lattice_size_lower_bound(S=G, T=A) + 1, lattice_size(T=A)),
         )
         if not isinstance(sublattice_size, int) or sublattice_size <= 0:
             raise ValueError(
