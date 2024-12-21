@@ -55,16 +55,22 @@ def get_edge_colors(Gnx, bqm):
     Returns:
         List[tuple[float, float, float, float]]: a list of tuple of RGBA values
     """
-    cm = matplotlib.cm.get_cmap(name="RdBu_r")
+    cm = matplotlib.colormaps["RdBu_r"]
     norm = matplotlib.colors.Normalize(vmin=-2, vmax=2)
     return [cm(norm(bqm.get_quadratic(u, v))) for (u, v) in Gnx.edges()]
 
 
-def main():
-    """Main function to run example"""
-    # Make an example BQM of three frustrated loops
-    L = 6
-    num_loops = 3
+def main(L=6, num_loops=3, verbose=False):
+    """Main function to run example.
+
+    Completes an experiment matched to Figure 9 of DOI:10.3389/fcomp.2023.1238988,
+    plotting a corresponding figure.
+
+    Args:
+        L (int): Length of the frustrated loop.
+        num_loops (int): Number of independent rings.
+        verbose (bool): Print addition information on orbits to terminal. Defaults to False.
+    """
     bqm = dimod.BinaryQuadraticModel(
         vartype="SPIN",
     )
@@ -77,27 +83,26 @@ def main():
     qubit_orbits, coupler_orbits, qubit_orbits_opposite, coupler_orbits_opposite = (
         orbits.get_orbits(bqm)
     )
-
-    # Print some information about the orbits.
-    print("\nQubit orbits:")
-    print(qubit_orbits)
-    print("\nCoupler orbits:")
-    print(coupler_orbits)
-    print("")
-    print("\nQubit orbits opposite:")
-    for p, q in enumerate(qubit_orbits_opposite):
-        print(f"QubitOrbit{p} = -QubitOrbit{q}")
-    print("")
-    print("\nCoupler orbits opposite:")
-    for p, q in enumerate(coupler_orbits_opposite):
-        print(f"CouplerOrbit{p} = -CouplerOrbit{q}")
-    print("")
+    if verbose:
+        # Print some information about the orbits.
+        print(f"\nQubit orbits: {qubit_orbits}")
+        print(f"\nCoupler orbits: {coupler_orbits}")
+        print("")
+        print("\nQubit orbits opposite:")
+        for p, q in enumerate(qubit_orbits_opposite):
+            print(f"QubitOrbit{p} = -QubitOrbit{q}")
+        print("")
+        print("\nCoupler orbits opposite:")
+        for p, q in enumerate(coupler_orbits_opposite):
+            print(f"CouplerOrbit{p} = -CouplerOrbit{q}")
+        print("")
 
     # Make a networkx whose coupler orbits are indicated on the edges, for drawing.
     Gnx = orbits.to_networkx_graph(qubit_orbits, coupler_orbits)
 
     # Draw the graph
-    plt.figure()
+    fig = plt.figure()
+    fig.canvas.manager.set_window_title("Figure 9: Coupler orbits of frustrated loops")
     options = {
         "node_color": np.atleast_2d([0.8, 0.8, 0.8]),
         "node_size": 400,

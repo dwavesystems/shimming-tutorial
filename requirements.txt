@@ -1,12 +1,4 @@
-networkx==2.8.8
-numpy==1.24.1
-dimod==0.12.3
 pynauty==2.8.6
-matplotlib==3.6.3
-tikzplotlib==0.10.1
-dwave-networkx==0.8.13
-dwave-system==1.18.0
-dwave-ocean-sdk==6.3.0
-minorminer==0.2.11
+matplotlib==3.9.2
+dwave-ocean-sdk==8.0.1
 tqdm==4.64.1
-pydantic < 2.0
