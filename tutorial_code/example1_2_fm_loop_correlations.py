@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-import dimod
+
+from typing import Optional
+
+from tqdm import tqdm
 import numpy as np
 
-from helpers.sampler_wrapper import ShimmingMockSampler
+import dimod
 from dwave.system.samplers import DWaveSampler
-from tqdm import tqdm
 
 from embed_loops import embed_loops
 from helpers.helper_functions import load_experiment_data, save_experiment_data
 from helpers.paper_plotting_functions import paper_plots_example1_2
+from helpers.sampler_wrapper import ShimmingMockSampler
 
 
 def make_fbo_dict(param: dict, shim: dict, embeddings: list) -> dict:
@@ -243,7 +245,7 @@ def main(
     num_iters: int = 300,
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 200,
-    max_num_emb: float = float('Inf'),
+    max_num_emb: Optional[int] = None,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -259,9 +261,9 @@ def main(
         num_iters (int): Number of sequential programmings.
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
         num_iters_unshimmed_J (int): Number of sequential programmings without J shimming.
-        max_num_emb (float): Maximum number of embeddings to use per programming.
-            Published tutorial data uses the maximum number the process can
-            accommodate.
+        max_num_emb (optional, int): Maximum number of embeddings to use per
+            programming. Published tutorial data uses the maximum number the
+            process can accommodate (defaults to max_num_emb=None).
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on

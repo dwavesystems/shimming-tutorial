@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-import dimod
-import networkx as nx
 
+import networkx as nx
 from matplotlib import pyplot as plt
+
+import dimod
 
 from helpers.helper_functions import get_coupler_colors, get_qubit_colors
 from helpers import orbits

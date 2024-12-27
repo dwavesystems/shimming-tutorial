@@ -11,11 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-import dimod
-import numpy as np
+
+from typing import Optional
 
 from tqdm import tqdm
+import numpy as np
+
+import dimod
 
 from helpers.sampler_wrapper import ShimmingMockSampler
 from dwave.system.samplers import DWaveSampler
@@ -459,7 +461,7 @@ def main(
     num_iters: int = 800,
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 300,
-    max_num_emb: int = 1,
+    max_num_emb: Optional[int] = 1,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -476,10 +478,10 @@ def main(
         num_iters (int): Number of sequential programmings.
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
         num_iters_unshimmed_J (int): Number of sequential programmings without J shimming.
-        max_num_emb (int): Maximum number of embeddings to use per programming.
-            Published tutorial data uses several parallel embeddings, but this
-            tutorial uses 1 (max_num_emb=1) by default to bypass the otherwise
-            slow search process.
+        max_num_emb (optional, int): Maximum number of embeddings to use per 
+            programming. Published tutorial data uses several parallel 
+            embeddings (value None, unbounded), but this refactored
+            defaults to 1 to bypass the otherwise slow search process.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on

@@ -14,12 +14,12 @@
 #
 from os.path import exists
 
-import dimod
 import matplotlib
 import networkx as nx
 import numpy as np
+import matplotlib.pyplot as plt
 
-from matplotlib import pyplot as plt
+import dimod
 
 from helpers import orbits
 from helpers.orbits import get_orbits

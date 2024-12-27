@@ -22,10 +22,11 @@ from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.parallel_embeddings import (
     find_sublattice_embeddings,
     embeddings_to_array,
+    lattice_size,
 )
 
 from minorminer.utils.feasibility import (
-    lattice_size,
+    embedding_feasibility_filter,
     lattice_size_lower_bound,
 )
 
@@ -75,6 +76,8 @@ def embed_loops(
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
+    if not embedding_feasibility_filter(S=G, T=A):
+        raise ValueError(f"Embedding {G} on {A} is infeasible")
     sublattice_size = kwargs.pop(
         "sublattice_size",
         min(lattice_size_lower_bound(S=G, T=A) + 1, lattice_size(T=A)),
@@ -90,7 +93,7 @@ def embed_loops(
         "\nTo accelerate the process a smaller lattice (L) might be "
         "considered and/or the search restricted to max_num_emb=1."
     )
-    max_num_emb = kwargs.pop("max_num_emb", float("Inf"))
+    max_num_emb = kwargs.pop("max_num_emb", G.number_of_nodes()//A.number_of_nodes())
     embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
     embeddings = embeddings_to_array(
         find_sublattice_embeddings(
@@ -123,7 +126,7 @@ def embed_loops(
     return embeddings
 
 
-def main(max_num_emb=float("inf")):
+def main(max_num_emb=None):
     from time import perf_counter
 
     L = 2048  # L=2048 anticipate ~ 2.5 seconds on i7

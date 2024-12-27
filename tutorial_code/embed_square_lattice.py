@@ -22,11 +22,11 @@ from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.parallel_embeddings import (
     find_sublattice_embeddings,
     embeddings_to_array,
+    lattice_size,
 )
 
 from minorminer.utils.feasibility import (
     embedding_feasibility_filter,
-    lattice_size,
     lattice_size_lower_bound,
 )
 
@@ -102,7 +102,7 @@ def embed_square_lattice(
             "\nTo accelerate the process a smaller lattice (L) might be "
             "considered and/or the search restricted to max_num_emb=1."
         )
-        max_num_emb = kwargs.pop("max_num_emb", float("Inf"))
+        max_num_emb = kwargs.pop("max_num_emb", 1)  # many can be slow
         embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
         embeddings = embeddings_to_array(
             find_sublattice_embeddings(
@@ -135,7 +135,7 @@ def embed_square_lattice(
     return embeddings, bqm
 
 
-def main(max_num_emb=float("inf")):
+def main(max_num_emb=1):
     from time import perf_counter
 
     L = 10  # L=2048 anticipate ~ 14 seconds on i7
