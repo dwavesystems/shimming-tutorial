@@ -246,6 +246,7 @@ def main(
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 200,
     max_num_emb: Optional[int] = None,
+    L=16,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -263,7 +264,7 @@ def main(
         num_iters_unshimmed_J (int): Number of sequential programmings without J shimming.
         max_num_emb (optional, int): Maximum number of embeddings to use per
             programming. Published tutorial data uses the maximum number the
-            process can accommodate (defaults to max_num_emb=None).
+            process can accommodate.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -274,8 +275,11 @@ def main(
     else:
         sampler = DWaveSampler(solver=solver_name)
 
+    if max_num_emb is None:
+        max_num_emb = len(sampler.nodelist)//L
+
     param = {
-        "L": 16,
+        "L": L,
         "sampler": sampler,
         "coupling": coupling,
         "num_iters": num_iters,

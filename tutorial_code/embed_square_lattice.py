@@ -22,7 +22,6 @@ from dwave.system.testing import MockDWaveSampler
 from minorminer.utils.parallel_embeddings import (
     find_sublattice_embeddings,
     embeddings_to_array,
-    lattice_size,
 )
 
 from minorminer.utils.feasibility import (
@@ -90,7 +89,7 @@ def embed_square_lattice(
             raise ValueError(f"Embedding {G} on {A} is infeasible")
         sublattice_size = kwargs.pop(
             "sublattice_size",
-            min(lattice_size_lower_bound(S=G, T=A) + 1, lattice_size(T=A)),
+            min(lattice_size_lower_bound(S=G, T=A) + 1, max(A.graph.get("rows"), A.graph.get("columns"))),
         )
         if not isinstance(sublattice_size, int) or sublattice_size <= 0:
             raise ValueError(
