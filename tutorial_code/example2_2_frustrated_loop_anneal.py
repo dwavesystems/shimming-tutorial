@@ -276,7 +276,8 @@ def main(
     num_iters: int = 300,
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 200,
-    max_num_emb: Optional[int] = None,
+        max_num_emb: Optional[int] = None,
+    L=16,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example
