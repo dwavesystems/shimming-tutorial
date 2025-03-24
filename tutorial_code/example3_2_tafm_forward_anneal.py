@@ -383,10 +383,7 @@ def run_experiment(
     else:
         data_dict = None
 
-    # prev_execution_times = {'embedded_finite': 212.8416, 'embedded_infinite': 674.3778, 'triangular_infinite': 236.1368}
-
     if data_dict is not None:
-        param = data_dict["param"]
         shim = data_dict["shim"]
         stats = data_dict["stats"]
     else:
@@ -434,7 +431,7 @@ def run_experiment(
                     stats["all_couplings"], num_iters=20, ratio=1.1
                 )
         if use_cache:
-            save_experiment_data(prefix, {"param": param, "shim": shim, "stats": stats})
+            save_experiment_data(prefix, {"shim": shim, "stats": stats})
 
     paper_plots_example3_2(
         halve_boundary_couplers=param["halve_boundary_couplers"],

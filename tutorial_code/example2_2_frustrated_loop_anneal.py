@@ -241,7 +241,6 @@ def run_experiment(
     else:
         data_dict = None
     if data_dict is not None:
-        param = data_dict["param"]
         shim = data_dict["shim"]
         stats = data_dict["stats"]
 
@@ -259,7 +258,7 @@ def run_experiment(
                 shim["alpha_J"] = alpha_J
             run_iteration(param, shim, embeddings, stats)
         if use_cache:
-            save_experiment_data(prefix, {"param": param, "shim": shim, "stats": stats})
+            save_experiment_data(prefix, {"shim": shim, "stats": stats})
 
     paper_plots_example2_2(
         nominal_couplings=shim["nominal_couplings"],

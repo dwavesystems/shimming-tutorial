@@ -261,19 +261,10 @@ def load_experiment_data(prefix, data_dict):
     if not os.path.exists(filepath):
         print(f"{filepath} not found.  Couldn" "t load data.")
         return None
-
+    print(filepath)
     with lzma.open(filepath, "rb") as f:
         loaded_data_dict = pickle.load(f)
-
-    if "param" in data_dict and "sampler" in data_dict["param"]:
-        sampler = data_dict["param"]["sampler"]
-    else:
-        sampler = None
-    data_dict.update(loaded_data_dict)
-    if sampler is not None:
-        data_dict["param"]["sampler"] = sampler
-    print(f"Loaded {filepath}")
-    return data_dict
+    return loaded_data_dict
 
 
 def save_experiment_data(prefix, data_dict, overwrite=True):
@@ -294,30 +285,12 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
         print(f"{filepath} exists.  Not overwriting.")
         return False
 
-    for key in data_dict:
-        data_dict[key] = copy.copy(data_dict[key])
-
-    sampler_client1 = None
-    sampler_client2 = None
-    if "param" in data_dict and "sampler" in data_dict["param"]:
-        # Need to remove client-related fields to make the data serializable.
-        if hasattr(data_dict["param"]["sampler"], "client"):
-            sampler_client1 = data_dict["param"]["sampler"].client
-            data_dict["param"]["sampler"].client = None
-        if hasattr(data_dict["param"]["sampler"], "solver") and hasattr(
-            data_dict["param"]["sampler"].solver, "client"
-        ):
-            sampler_client2 = data_dict["param"]["sampler"].solver.client
-            data_dict["param"]["sampler"].solver.client = None
-
+    if 'param' in data_dict and 'solver' in data_dict['param']:
+        # Not pickleable, just save properties
+        data_dict['param']['solver'] = data_dict['param']['solver'].properties
     os.makedirs("cached_experiment_data", exist_ok=True)
     with lzma.open(filepath, "wb") as f:
         pickle.dump(data_dict, f)
-
-    if sampler_client1 is not None:
-        data_dict["param"]["sampler"].client = sampler_client1
-    if sampler_client2 is not None:
-        data_dict["param"]["sampler"].solver.client = sampler_client2
 
     print(f"Saved {filepath}")
     return True
