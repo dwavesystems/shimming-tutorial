@@ -274,6 +274,9 @@ def main(
     else:
         sampler = DWaveSampler(solver=solver_name)
 
+    alpha_Phi = 1e-5  # Feature enhancement: Could be exposed in main
+    alpha_J = 5e-3  # Feature enhancement: Could be exposed in main
+
     if max_num_emb is None:
         max_num_emb = len(sampler.nodelist) // L
 
@@ -309,7 +312,7 @@ def main(
         "all_alpha_Phi": [],
         "all_alpha_J": [],
     }
-    run_experiment(param, shim, stats, embeddings, 1e-5, 5e-3, use_cache)
+    run_experiment(param, shim, stats, embeddings, alphaPhi, alphaJ, use_cache)
 
 
 if __name__ == "__main__":

@@ -33,6 +33,7 @@ from minorminer.utils.feasibility import (
 class InfeasibleResultsError(Exception):
     """Error raised when no feasible results are found."""
 
+
 def embed_loops(
     sampler: MockDWaveSampler,
     L: int,
@@ -83,7 +84,7 @@ def embed_loops(
 
     lower_bound = lattice_size_lower_bound(S=G, T=A) + 1
     max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns"))
-    sublattice_size = kwargs.pop("sublattice_size", min(lower_bound , max_rows_columns))
+    sublattice_size = kwargs.pop("sublattice_size", min(lower_bound, max_rows_columns))
 
     if not isinstance(sublattice_size, int) or sublattice_size <= 0:
         raise ValueError(
@@ -138,7 +139,7 @@ def main():
     sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
     t0 = perf_counter()
     embeddings = embed_loops(
-        sampler=sampler, L=L, max_num_emb=len(sampler.nodelist)//L, use_cache=False
+        sampler=sampler, L=L, max_num_emb=len(sampler.nodelist) // L, use_cache=False
     )
     t1 = perf_counter() - t0
     if embeddings.size >= 1:

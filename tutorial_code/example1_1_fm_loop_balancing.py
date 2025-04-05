@@ -279,7 +279,7 @@ def main(
         sampler = ShimmingMockSampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
-
+        
     if max_num_emb is None:
         max_num_emb = len(sampler.nodelist) // L
 
@@ -317,7 +317,7 @@ def main(
         }
 
         experiment_data = run_experiment(
-            param, shim, stats, embeddings, alpha_Phi, 0.0, use_cache
+            param, shim, stats, embeddings, alpha_Phi, use_cache
         )
         results.append(experiment_data)
 

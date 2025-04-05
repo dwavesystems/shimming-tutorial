@@ -29,6 +29,7 @@ from minorminer.utils.feasibility import (
     lattice_size_lower_bound,
 )
 
+
 class InfeasibleResultsError(Exception):
     """Error raised when no feasible results are found."""
 
@@ -93,7 +94,9 @@ def embed_square_lattice(
 
         lower_bound = lattice_size_lower_bound(S=G, T=A) + 1
         max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns"))
-        sublattice_size = kwargs.pop("sublattice_size", min(lower_bound , max_rows_columns))
+        sublattice_size = kwargs.pop(
+            "sublattice_size", min(lower_bound, max_rows_columns)
+        )
         if not isinstance(sublattice_size, int) or sublattice_size <= 0:
             raise ValueError(
                 f"'sublattice_size' must be a positive integer. Received {sublattice_size}."
