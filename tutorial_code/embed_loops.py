@@ -82,8 +82,8 @@ def embed_loops(
         raise ValueError(f"Embedding {G} on {A} is infeasible")
 
     lower_bound = lattice_size_lower_bound(S=G, T=A) + 1
-    max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns")
-    sublattice_size = kwargs.pop("sublattice_size", min(lower_bound , max_rows_columns)))
+    max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns"))
+    sublattice_size = kwargs.pop("sublattice_size", min(lower_bound , max_rows_columns))
 
     if not isinstance(sublattice_size, int) or sublattice_size <= 0:
         raise ValueError(

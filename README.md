@@ -18,7 +18,8 @@ and iterative shimming results for several models (executed by default on
 Leap-hosted Quantum Processing Units).
 
 Examples have configurable parameters, to see these use the --help
-command line option. This includes
+command line option. Clear the cache or set --no_cache for specially
+configured runs. This includes
 the flexbility to modify the model, target processor, or embedding
 heuristic for increased performance. To reduce the total number
 of iterations (programmings, thence QPU access time) or learning rate(s).
