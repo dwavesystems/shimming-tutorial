@@ -75,28 +75,6 @@ def make_bqm(param: dict, shim: dict, embeddings: list) -> dimod.BinaryQuadratic
     return bqm
 
 
-def make_logical_bqm(param: dict, shim: dict) -> dimod.BinaryQuadraticModel:
-    """Makes the BQM from the matrix of coupling values.
-
-    Args:
-        param (dict): parameters with keys "L" for length, "sampler" for
-                      sampler (QPU), "coupling" for the coupling energy scale,
-                      and "num_iters" for the number of shimming iterations.
-        shim (dict): shimming data
-
-    Returns:
-        dimod.BinaryQuadraticModel: a shimmed BQM
-    """
-
-    _bqm = dimod.BinaryQuadraticModel(
-        vartype="SPIN",
-    )
-    for spin in range(param["L"]):
-        _bqm.add_quadratic(spin, (spin + 1) % param["L"], shim["couplings"][0, spin])
-
-    return _bqm
-
-
 def adjust_fbos(
     result: dimod.SampleSet, param: dict, shim: dict, embeddings: list, stats: dict
 ) -> None:

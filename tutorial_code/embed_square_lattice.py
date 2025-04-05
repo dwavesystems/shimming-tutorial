@@ -29,6 +29,9 @@ from minorminer.utils.feasibility import (
     lattice_size_lower_bound,
 )
 
+class InfeasibleResultsError(Exception):
+    """Error raised when no feasible results are found."""
+
 
 def make_square_bqm(L):
     bqm = dimod.BinaryQuadraticModel(vartype="SPIN")
@@ -116,9 +119,8 @@ def embed_square_lattice(
             node_order=sorted(G.nodes()),
             as_ndarray=True,
         )
-
         if embeddings.size == 0:
-            raise ValueError(
+            raise InfeasibleResultsError(
                 "No feasible embeddings found. "
                 "\nModifying the source (lattice) and target "
                 "(processor), or find_sublattice_search arguments "

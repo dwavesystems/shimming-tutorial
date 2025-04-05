@@ -30,6 +30,9 @@ from minorminer.utils.feasibility import (
 )
 
 
+class InfeasibleResultsError(Exception):
+    """Error raised when no feasible results are found."""
+
 def embed_loops(
     sampler: MockDWaveSampler,
     L: int,
@@ -111,7 +114,7 @@ def embed_loops(
     )
 
     if embeddings.size == 0:
-        raise ValueError(
+        raise InfeasibleResultsError(
             "No feasible embeddings found. "
             "\nModifying the source (lattice) and target "
             "(processor), or find_sublattice_embeddings arguments "
