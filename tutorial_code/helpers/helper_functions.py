@@ -261,7 +261,6 @@ def load_experiment_data(prefix, data_dict):
     if not os.path.exists(filepath):
         print(f"{filepath} not found.  Couldn" "t load data.")
         return None
-    print(filepath)
     with lzma.open(filepath, "rb") as f:
         loaded_data_dict = pickle.load(f)
     return loaded_data_dict

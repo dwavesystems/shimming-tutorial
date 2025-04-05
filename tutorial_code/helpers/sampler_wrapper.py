@@ -54,6 +54,7 @@ class ShimmingMockSampler(MockDWaveSampler):
         self.mocked_parameters.add("readout_thermalization")
         self.mocked_parameters.add("annealing_time")
 
+
     def sample(self, bqm, **kwargs):
         """Sample with flux_biases transformed to Ising model linear biases."""
 
