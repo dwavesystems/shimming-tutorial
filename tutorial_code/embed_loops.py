@@ -40,26 +40,26 @@ def embed_loops(
 
     Args:
         sampler (int): DWaveSampler for which to embed
-        L (int): lattice length
+        L (int): Lattice length
         use_cache (bool, default=True): When True, embeddings are
             saved to and loaded from a local directory whenever
             possible. If writing to a directory is not possible
             a warning is thrown.
 
         Returns:
-        np.ndarray: An matrix of embeddings
+        np.ndarray: A matrix of embeddings
     """
     if not isinstance(L, int):
-        raise ValueError(f"'L' must be an integer. Received type {type(L).__name__}.")
+        raise TypeError(f"'L' must be an integer. Received type {type(L)}.")
     if L <= 0:
         raise ValueError(f"'L' must be a positive integer. Received {L}.")
 
     if not isinstance(use_cache, bool):
-        raise ValueError(
-            f"'use_cache' must be a boolean. Received type {type(use_cache).__name__}."
+        raise TypeError(
+            f"'use_cache' must be a boolean. Received type {type(use_cache)}."
         )
 
-    solver_name = sampler.properties["chip_id"]  # sampler.solver.name
+    solver_name = sampler.properties["chip_id"]
     cache_filename = f"cached_embeddings/{solver_name}_L{L:04d}_embeddings_cached.txt"
 
     if use_cache and os.path.exists(cache_filename):
@@ -77,10 +77,10 @@ def embed_loops(
 
     if not embedding_feasibility_filter(S=G, T=A):
         raise ValueError(f"Embedding {G} on {A} is infeasible")
-    sublattice_size = kwargs.pop(
-        "sublattice_size",
-        min(lattice_size_lower_bound(S=G, T=A) + 1, max(A.graph.get("rows"), A.graph.get("columns"))),
-    )
+
+    lower_bound = lattice_size_lower_bound(S=G, T=A) + 1
+    max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns")
+    sublattice_size = kwargs.pop("sublattice_size", min(lower_bound , max_rows_columns)))
 
     if not isinstance(sublattice_size, int) or sublattice_size <= 0:
         raise ValueError(
@@ -94,7 +94,8 @@ def embed_loops(
     )
     max_num_emb = kwargs.pop("max_num_emb", None)
     if max_num_emb is None:
-        max_num_emb = G.number_of_nodes()//A.number_of_nodes()  # Default to many
+        max_num_emb = G.number_of_nodes() // A.number_of_nodes()  # Default to many
+
     embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
     embeddings = embeddings_to_array(
         find_sublattice_embeddings(
@@ -121,7 +122,7 @@ def embed_loops(
         try:
             os.makedirs("cached_embeddings/", exist_ok=True)
             np.savetxt(cache_filename, embeddings, fmt="%d")
-        except:
+        except OSError as e:
             warnings.warn("Embedding cache files could not be created")
 
     return embeddings

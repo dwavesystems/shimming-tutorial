@@ -199,8 +199,8 @@ def run_experiment(
         shim (dict): shimming data
         stats (dict): dict of sampled statistics
         embeddings (List[dict]): list of embeddings
-        alpha_Phi (float): learning rate for linear shims. Defaults to 0.
-        alpha_J (float): learning rate for coupling shims. Defaults to 0.
+        alpha_Phi (float): Learning rate for linear shims. Defaults to 0.
+        alpha_J (float): Learning rate for coupling shims. Defaults to 0.
         use_cache (bool): When True an attempt is made to load (save) data from
             (to) the directory cached_experimental_data.
     """
@@ -215,7 +215,6 @@ def run_experiment(
         shim = data_dict["shim"]
         stats = data_dict["stats"]
     else:
-        # prev_execution_time = 182.0092 sec.
         print("Collection of data typically requires several minutes")
         for iteration in tqdm(range(param["num_iters"]), total=param["num_iters"]):
             if iteration < param["num_iters_unshimmed_flux"]:
@@ -254,10 +253,10 @@ def main(
     plotting a corresponding figure.
 
     Args:
-        solver_name (string): option to specify sampler type. The default client QPU
+        solver_name (string): Option to specify sampler type. The default client QPU
             is used by default other options are listed in Leap, to use a locally executed
             classical placeholder for debugging select 'MockDWaveSampler'.
-        coupling (float): coupling strength on chain.
+        coupling (float): Coupling strength on chain.
         num_iters (int): Number of sequential programmings.
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
         num_iters_unshimmed_J (int): Number of sequential programmings without J shimming.
@@ -267,7 +266,7 @@ def main(
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
-            each call. Defaults to True
+            each call. Defaults to True.
     """
     if solver_name == "MockDWaveSampler":
         sampler = ShimmingMockSampler()

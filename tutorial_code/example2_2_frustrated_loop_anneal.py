@@ -245,7 +245,6 @@ def run_experiment(
         stats = data_dict["stats"]
 
     else:
-        # prev_execution_time = 441.86028
         print("Collection of data typically requires several minutes")
         for iteration in tqdm(range(param["num_iters"]), total=param["num_iters"]):
             if iteration < param["num_iters_unshimmed_flux"]:
@@ -275,7 +274,7 @@ def main(
     num_iters: int = 300,
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 200,
-        max_num_emb: Optional[int] = None,
+    max_num_emb: Optional[int] = None,
     L=16,
     use_cache: bool = True,
 ) -> None:
@@ -313,7 +312,7 @@ def main(
         sampler = DWaveSampler(solver=solver_name)
 
     if max_num_emb is None:
-        max_num_emb = len(sampler.nodelist)//L
+        max_num_emb = len(sampler.nodelist) // L
 
     param = {
         "L": L,

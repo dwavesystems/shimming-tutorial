@@ -58,7 +58,7 @@ def embed_square_lattice(
 
     Args:
         sampler (int): DWaveSampler for which to embed
-        L (int): lattice length
+        L (int): Lattice length
         use_cache (bool, default=True): When True, embeddings are
             saved to and loaded from a local directory whenever
             possible. If writing to a directory is not possible
@@ -87,9 +87,10 @@ def embed_square_lattice(
 
         if not embedding_feasibility_filter(S=G, T=A):
             raise ValueError(f"Embedding {G} on {A} is infeasible")
-        sublattice_size = kwargs.pop(
-            "sublattice_size",
-            min(lattice_size_lower_bound(S=G, T=A) + 1, max(A.graph.get("rows"), A.graph.get("columns"))),
+
+        lower_bound = lattice_size_lower_bound(S=G, T=A) + 1
+        max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns")
+        sublattice_size = kwargs.pop("sublattice_size", min(lower_bound , max_rows_columns)))
         )
         if not isinstance(sublattice_size, int) or sublattice_size <= 0:
             raise ValueError(

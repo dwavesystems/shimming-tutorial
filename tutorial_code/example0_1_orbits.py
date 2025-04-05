@@ -41,13 +41,13 @@ def plot_orbits(Gnx, pos, bqm):
 
 
 def make_bqm():
-    """Creates a simple model of four connected spins (a Binary Quadratic Model)
+    """Creates a simple model of four connected spins (a Binary Quadratic Model).
 
-    The BQM model represents four "spns" that interact with four spins that interact with their neighbors.
+    The BQM model represents four spins that interact with their neighbors.
     We define how these spins are influenced (called 'fields') and how they interact (called 'couplings').
 
     Returns:
-        dimod.BQM: a binary quadratic model with four spins and specific coupling between them
+        dimod.BQM: A binary quadratic model with four spins and specific coupling between them
     """
     bqm = dimod.BinaryQuadraticModel(vartype="SPIN")
 
