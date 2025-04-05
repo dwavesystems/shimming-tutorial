@@ -23,7 +23,8 @@ from helpers.helper_functions import get_coupler_colors, get_qubit_colors
 from helpers import orbits
 
 
-def plot_orbits(Gnx, pos, bqm):
+def plot_orbits(Gnx: nx.Graph, pos: dict, bqm: dimod.BinaryQuadraticModel):
+    """Plot orbits associated to graphs. """
     options = {"node_size": 600, "width": 4}
     nx.draw(
         Gnx,
