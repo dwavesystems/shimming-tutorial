@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 
 import matplotlib
 import networkx as nx
@@ -132,4 +133,15 @@ def main(L=6, num_loops=3, verbose=False):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="example2_1_frustrated_loop_orbits")
+    parser.add_argument(
+        "--verbose", action="store_true", help="Print additional verbose information"
+    )
+    parser.add_argument(
+        "--L", default=6, type=int, help="Length of the frustrated loop (int)"
+    )
+    parser.add_argument(
+        "--num_loops", default=3, type=int, help="Number of independent rings"
+    )
+    args = parser.parse_args()
+    main(L=args.L, num_loops=args.num_loops, verbose=args.verbose)

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import argparse
 from os.path import exists
 
 import matplotlib
@@ -83,4 +84,7 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='example2_1_frustrated_loop_orbits')
+    args = parser.parse_args()
+    
     main()

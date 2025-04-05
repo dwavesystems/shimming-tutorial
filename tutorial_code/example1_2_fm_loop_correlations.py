@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 from typing import Optional
 
 from tqdm import tqdm
@@ -274,7 +275,7 @@ def main(
         sampler = DWaveSampler(solver=solver_name)
 
     if max_num_emb is None:
-        max_num_emb = len(sampler.nodelist)//L
+        max_num_emb = len(sampler.nodelist) // L
 
     param = {
         "L": L,
@@ -312,4 +313,49 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="example1_2_fm_loop_correlations")
+    parser.add_argument(
+        "--solver_name",
+        type=str,
+        help="option to specify QPU solver, or MockDWaveSampler for a toy example without a QPU",
+    )
+    parser.add_argument(
+        "--coupling", default=-0.2, type=float, help="coupling strength on chain"
+    )
+    parser.add_argument(
+        "--num_iters", default=300, type=int, help="number of sequential programmings"
+    )
+    parser.add_argument(
+        "--num_iters_unshimmed_flux",
+        default=100,
+        type=int,
+        help="number of sequential programmings without flux shimming",
+    )
+    parser.add_argument(
+        "--num_iters_unshimmed_J",
+        default=200,
+        type=int,
+        help="number of sequential programmings without J shimming",
+    )
+    parser.add_argument(
+        "--max_num_emb",
+        type=int,
+        help="maximum number of embeddings to use per programming",
+    )
+    parser.add_argument("--L", default=16, type=int, help="Length of the loop (int)")
+    parser.add_argument(
+        "--no_cache",
+        action="store_true",
+        help="do not save to, or load, embeddings or data from cache",
+    )
+    args = parser.parse_args()
+    main(
+        solver_name=args.solver_name,
+        coupling=args.coupling,
+        num_iters=args.num_iters,
+        num_iters_unshimmed_flux=args.num_iters_unshimmed_flux,
+        num_iters_unshimmed_J=args.num_iters_unshimmed_J,
+        max_num_emb=args.max_num_emb,
+        L=args.L,
+        use_cache=not args.no_cache,
+    )

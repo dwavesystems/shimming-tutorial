@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+
 import networkx as nx
 from matplotlib import pyplot as plt
 
@@ -152,4 +154,9 @@ def main(verbose: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="example0_1_orbits")
+    parser.add_argument(
+        "--verbose", action="store_true", help="Print additional verbose information"
+    )
+    args = parser.parse_args()
+    main(verbose=args.verbose)

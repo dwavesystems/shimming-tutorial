@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import argparse
 from typing import Optional
 
 from tqdm import tqdm
@@ -476,7 +476,7 @@ def main(
         num_iters_unshimmed_flux (int): Number of sequential programmings without flux shimming.
         num_iters_unshimmed_J (int): Number of sequential programmings without J shimming.
         max_num_emb (int): Maximum number of embeddings to use per
-            programming. Published tutorial data uses several parallel 
+            programming. Published tutorial data uses several parallel
             embeddings, but this refactored defaults to 1 to bypass the
             otherwise slow parallel embedding process.
         use_cache (bool): When True embeddings and data are read from
@@ -567,4 +567,48 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="example3_2_tafm_forward_anneal")
+    parser.add_argument(
+        "--solver_name",
+        type=str,
+        help="option to specify QPU solver, or MockDWaveSampler for a toy example without a QPU",
+    )
+    parser.add_argument(
+        "--coupling", default=0.9, type=float, help="coupling strength on chain"
+    )
+    parser.add_argument(
+        "--num_iters", default=800, type=int, help="number of sequential programmings"
+    )
+    parser.add_argument(
+        "--num_iters_unshimmed_flux",
+        default=100,
+        type=int,
+        help="number of sequential programmings without flux shimming",
+    )
+    parser.add_argument(
+        "--num_iters_unshimmed_J",
+        default=300,
+        type=int,
+        help="number of sequential programmings without J shimming",
+    )
+    parser.add_argument(
+        "--max_num_emb",
+        default=1,
+        type=int,
+        help="maximum number of embeddings to use per programming (published data uses several parallel, but default is 1 to save time)",
+    )
+    parser.add_argument(
+        "--no_cache",
+        action="store_true",
+        help="do not save to, or load, embeddings or data from cache",
+    )
+    args = parser.parse_args()
+    main(
+        solver_name=args.solver_name,
+        coupling=args.coupling,
+        num_iters=args.num_iters,
+        num_iters_unshimmed_flux=args.num_iters_unshimmed_flux,
+        num_iters_unshimmed_J=args.num_iters_unshimmed_J,
+        max_num_emb=args.max_num_emb,
+        use_cache=not args.no_cache,
+    )
