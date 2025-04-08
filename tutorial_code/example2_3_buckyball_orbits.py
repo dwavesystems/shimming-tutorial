@@ -81,7 +81,4 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='example2_1_frustrated_loop_orbits')
-    args = parser.parse_args()
-    
     main()

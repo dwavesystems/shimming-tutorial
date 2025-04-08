@@ -1,5 +1,4 @@
-.. image:: https://img.shields.io/pypi/pyversions/dwave-ocean-sdk.svg
-    :target: https://pypi.python.org/pypi/dwave-ocean-sdk
+![](https://img.shields.io/pypi/pyversions/dwave-ocean-sdk.svg)
 
 # Shimming Tutorial
 
@@ -17,15 +16,17 @@ calculation of embeddings (exectued locally),
 and iterative shimming results for several models (executed by default on
 Leap-hosted Quantum Processing Units).
 
-Examples have configurable parameters, to see these use the --help
-command line option. Clear the cache or set --no_cache for specially
+Examples have configurable parameters, to see these use the `--help`
+command line option. Clear the cache or set `--no_cache` for specially
 configured runs. This includes
 the flexbility to modify the model, target processor, or embedding
 heuristic for increased performance. To reduce the total number
 of iterations (programmings, thence QPU access time) or learning rate(s).
-For example
-```python example3_2_tafm_forward_anneal.py --solver_name MockDWaveSampler --num_iters 20 --num_iters_unshimmed_flux 4 --num_iters_unshimmed_J 8 ```
-Runs with only 20 total samplesets accelerating data acquisition (albeit
+For example,
+```
+python example3_2_tafm_forward_anneal.py --solver_name MockDWaveSampler --num_iters 20 --num_iters_unshimmed_flux 4 --num_iters_unshimmed_J 8
+```
+runs with only 20 total samplesets accelerating data acquisition (albeit
 not to convergence as shown in the paper). In addition we specify the
 solver as MockDWaveSampler allowing local execution with artificial noise,
 allowing intuition.
