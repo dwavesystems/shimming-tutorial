@@ -458,6 +458,8 @@ def main(
     num_iters_unshimmed_flux: int = 100,
     num_iters_unshimmed_J: int = 300,
     max_num_emb: int = 1,
+    alpha_Phi: float = 2e-6,
+    alpha_J: float = 0.02,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -478,6 +480,8 @@ def main(
             programming. Published tutorial data uses several parallel
             embeddings, but this refactored defaults to 1 to bypass the
             otherwise slow parallel embedding process.
+        alpha_Phi (float): learning rate for linear shims. Defaults to 2e-6.
+        alpha_J (float): learning rate for coupling shims. Defaults to 0.02.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -558,7 +562,7 @@ def main(
             "all_psi": [],
         }
         experiment_data = run_experiment(
-            param, shim, stats, embeddings, logical_bqm, 2e-6, 0.02, use_cache
+            param, shim, stats, embeddings, logical_bqm, alpha_Phi, alpha_J, use_cache
         )
         results.append(experiment_data)
 
@@ -595,6 +599,12 @@ if __name__ == "__main__":
         default=1,
         type=int,
         help="maximum number of embeddings to use per programming (published data uses several parallel, but default is 1 to save time)",
+    )
+    parser.add_argument(
+        "--alpha_Phi", default=2e-6, type=float, help="Learning rate for flux shimming"
+    )
+    parser.add_argument(
+        "--alpha_J", default=0.02, type=float, help="Learning rate for coupler shimming"
     )
     parser.add_argument(
         "--no_cache",

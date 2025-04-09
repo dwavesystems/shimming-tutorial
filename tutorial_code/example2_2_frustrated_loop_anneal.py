@@ -374,10 +374,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("--L", default=16, type=int, help="Length of the loop (int)")
     parser.add_argument(
-        "--alpha_Phi", default=5e-6, type=int, help="Length of the loop (int)"
+        "--alpha_Phi", default=5e-6, type=float, help="Learning rate for flux shimming"
     )
     parser.add_argument(
-        "--alpha_J", default=5e-2, type=int, help="Length of the loop (int)"
+        "--alpha_J", default=5e-2, type=float, help="Learning rate for coupler shimming"
     )
     parser.add_argument(
         "--no_cache",
