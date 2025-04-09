@@ -279,7 +279,7 @@ def main(
         sampler = ShimmingMockSampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
-        
+
     if max_num_emb is None:
         max_num_emb = len(sampler.nodelist) // L
 

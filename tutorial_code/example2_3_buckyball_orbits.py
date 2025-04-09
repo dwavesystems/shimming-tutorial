@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import argparse
 from os.path import exists
 
 import matplotlib
@@ -42,10 +41,7 @@ def main():
         raise FileNotFoundError(
             f"CSV file not found in specified paths. Checked: 'data/bucky_ball.csv' and '{path_to_csv}'"
         )
-    J = {
-        (int(e[0]), int(e[1])): w
-        for *e, w in np.loadtxt(path_to_csv, delimiter=",")
-    }
+    J = {(int(e[0]), int(e[1])): w for *e, w in np.loadtxt(path_to_csv, delimiter=",")}
 
     bqm = dimod.BQM.from_ising(h={}, J=J)
 

@@ -24,7 +24,7 @@ from helpers import orbits
 
 
 def plot_orbits(Gnx: nx.Graph, pos: dict, bqm: dimod.BinaryQuadraticModel):
-    """Plot orbits associated to graphs. """
+    """Plot orbits associated to graphs."""
     options = {"node_size": 600, "width": 4}
     nx.draw(
         Gnx,
