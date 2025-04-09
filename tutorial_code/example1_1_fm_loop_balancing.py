@@ -317,7 +317,7 @@ def main(
         }
 
         experiment_data = run_experiment(
-            param, shim, stats, embeddings, alpha_Phi, use_cache
+            param, shim, stats, embeddings, alpha_Phi, use_cache=use_cache
         )
         results.append(experiment_data)
 
