@@ -246,6 +246,8 @@ def main(
     num_iters_unshimmed_J: int = 200,
     max_num_emb: Optional[int] = None,
     L=16,
+    alpha_Phi=1e-5,
+    alpha_J=5e-3,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -264,6 +266,9 @@ def main(
         max_num_emb (optional, int): Maximum number of embeddings to use per
             programming. Published tutorial data uses the maximum number the
             process can accommodate.
+        L (int): Loop length
+        alpha_Phi (float): Learning rate for fluxes. Defaults to 1e-5
+        alpha_J (float): Learning rate for couplings. Defaults to 5e-3
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -273,9 +278,6 @@ def main(
         sampler = ShimmingMockSampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
-
-    alpha_Phi = 1e-5  # Feature enhancement: Could be exposed in main
-    alpha_J = 5e-3  # Feature enhancement: Could be exposed in main
 
     if max_num_emb is None:
         max_num_emb = len(sampler.nodelist) // L
@@ -312,7 +314,7 @@ def main(
         "all_alpha_Phi": [],
         "all_alpha_J": [],
     }
-    run_experiment(param, shim, stats, embeddings, alphaPhi, alphaJ, use_cache)
+    run_experiment(param, shim, stats, embeddings, alpha_Phi, alpha_J, use_cache)
 
 
 if __name__ == "__main__":
@@ -346,6 +348,12 @@ if __name__ == "__main__":
         help="maximum number of embeddings to use per programming",
     )
     parser.add_argument("--L", default=16, type=int, help="Length of the loop (int)")
+    parser.add_argument(
+        "--alpha_Phi", default=1e-5, type=int, help="Length of the loop (int)"
+    )
+    parser.add_argument(
+        "--alpha_J", default=5e-3, type=int, help="Length of the loop (int)"
+    )
     parser.add_argument(
         "--no_cache",
         action="store_true",

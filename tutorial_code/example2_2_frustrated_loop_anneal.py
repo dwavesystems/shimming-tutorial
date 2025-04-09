@@ -256,6 +256,8 @@ def main(
     num_iters_unshimmed_J: int = 200,
     max_num_emb: Optional[int] = None,
     L=16,
+    alpha_Phi=5e-6,
+    alpha_J=5e-2,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example
@@ -275,11 +277,13 @@ def main(
         num_iters_unshimmed_flux (int): option to specify the number of
             iteratrions that doesn't shim flux_biases. Defaults to 100.
         num_iters_unshimmed_J (int): option to specify number of iterations
-            that doesn't shim alpha_J. Defaults to 200.
+            that that doesn't shim couplers. Defaults to 200.
         max_num_emb (optional, int): Maximum number of embeddings to use per
             programming. Published tutorial data uses the maximum number the
             process can accommodate.
         L (int): Size of loop. Defaults to 16
+        alpha_Phi (float): Learning rate for fluxes. Defaults to 5e-6.
+        alpha_J (float): Learning rate for couplings. Defaults to 5e-2.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -290,9 +294,6 @@ def main(
         sampler = ShimmingMockSampler()
     else:
         sampler = DWaveSampler(solver=solver_name)
-
-    alpha_Phi = 5e-6  # Feature enhancement, move to main
-    alpha_J = 5e-2  # Feature enhancement, move to main
 
     if max_num_emb is None:
         max_num_emb = len(sampler.nodelist) // L
@@ -372,6 +373,12 @@ if __name__ == "__main__":
         help="maximum number of embeddings to use per programming",
     )
     parser.add_argument("--L", default=16, type=int, help="Length of the loop (int)")
+    parser.add_argument(
+        "--alpha_Phi", default=5e-6, type=int, help="Length of the loop (int)"
+    )
+    parser.add_argument(
+        "--alpha_J", default=5e-2, type=int, help="Length of the loop (int)"
+    )
     parser.add_argument(
         "--no_cache",
         action="store_true",
