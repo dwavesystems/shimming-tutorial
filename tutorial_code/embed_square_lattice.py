@@ -74,9 +74,10 @@ def embed_square_lattice(
 
     bqm = make_square_bqm(L)
 
+    max_num_emb = kwargs.pop("max_num_emb", 1)  # many can be slow
     solver_name = sampler.properties["chip_id"]  # sampler.solver.name
     cache_filename = (
-        f"cached_embeddings/{solver_name}_L{L:02d}_square_embeddings_cached.txt"
+        f"cached_embeddings/square_embeddings_{solver_name}_L{L:02d}_MNE{max_num_emb}.txt"
     )
 
     if use_cache and os.path.exists(cache_filename):
@@ -107,7 +108,6 @@ def embed_square_lattice(
             "\nTo accelerate the process a smaller lattice (L) might be "
             "considered and/or the search restricted to max_num_emb=1."
         )
-        max_num_emb = kwargs.pop("max_num_emb", 1)  # many can be slow
         embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
         embeddings = embeddings_to_array(
             find_sublattice_embeddings(

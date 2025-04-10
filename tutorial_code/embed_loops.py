@@ -64,7 +64,8 @@ def embed_loops(
         )
 
     solver_name = sampler.properties["chip_id"]
-    cache_filename = f"cached_embeddings/{solver_name}_L{L:04d}_embeddings_cached.txt"
+    max_num_emb = kwargs.pop("max_num_emb", None)
+    cache_filename = f"cached_embeddings/loop_embeddings_{solver_name}_L{L:04d}_MNE{max_num_emb}.txt"
 
     if use_cache and os.path.exists(cache_filename):
         embeddings = np.loadtxt(cache_filename, dtype=int)
@@ -96,7 +97,6 @@ def embed_loops(
         "\nTo accelerate the process a smaller lattice (L) might be "
         "considered and/or the search restricted to max_num_emb=1."
     )
-    max_num_emb = kwargs.pop("max_num_emb", None)
     if max_num_emb is None:
         max_num_emb = G.number_of_nodes() // A.number_of_nodes()  # Default to many
 
