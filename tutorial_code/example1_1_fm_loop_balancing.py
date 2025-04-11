@@ -210,8 +210,27 @@ def run_experiment(
        dict: Experiment statistics.
     """
     if use_cache:
+        L = param["L"]
+        assert L == len(embeddings[0])
+        MNE = len(embeddings)
+        coupling = param["coupling"]
         solver_name = param["sampler"].properties["chip_id"]
-        prefix = f"{solver_name}_example1_1_aPhi{alpha_Phi}_aJ{alpha_J}"
+        num_iters = param["num_iters"]
+        num_iters_unshimmed_flux = param["num_iters_unshimmed_flux"]
+        identifier = "".join(
+            f"_{v}"
+            for v in [
+                MNE,
+                coupling,
+                L,
+                solver_name,
+                alpha_Phi,
+                alpha_J,
+                num_iters,
+                num_iters_unshimmed_flux,
+            ]
+        )
+        prefix = f"example1_1{identifier}"
         data_dict = {"param": param, "shim": shim, "stats": stats}
         data_dict = load_experiment_data(prefix, data_dict)
     else:
@@ -261,11 +280,9 @@ def main(
             select 'MockDWaveSampler'.
         coupling (float): Strength of coupling, defaults to -0.2 (ferromagnetic).
         num_iters (int): Total number of programmings (iterations). Defaults to
-            300.
+            100.
         num_iters_unshimmed_flux (int): Number of iterations without shimming
-            of flux_biases. Defaults to 100.
-        num_iters_unshimmed_J (int): Number of iterations without shimming of
-            couplings. Defaults to 200.
+            of flux_biases. Defaults to 10.
         max_num_emb (optional, int): Maximum number of embeddings to use per
             programming. Published tutorial data uses the maximum number the
             process can accommodate.
