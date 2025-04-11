@@ -17,9 +17,8 @@ and iterative shimming results for several models (executed by default on
 Leap-hosted Quantum Processing Units).
 
 Examples have configurable parameters, to see these use the `--help`
-command line option. Clear the cache or set `--no_cache` for specially
-configured runs. This includes
-the flexbility to modify the model, target processor, or embedding
+command line option. This includes the flexibility to reuse cached
+embeddings and data, modify the model, target processor, or embedding
 heuristic for increased performance. To reduce the total number
 of iterations (programmings, thence QPU access time) or learning rate(s).
 For example,
@@ -30,6 +29,14 @@ runs with only 20 total samplesets accelerating data acquisition (albeit
 not to convergence as shown in the paper). In addition we specify the
 solver as MockDWaveSampler allowing local execution with artificial noise,
 allowing intuition.
+
+The original shimming tutorial uses an Advantage generation processor
+by default. This tutorial is adaptable to other processors and uses the default,
+generally-accessible processor.
+It should be noted that defaulted parameters such as the learning rates,
+number of reads and iterations are expected to be functions of the noise and
+energy scales of the target processor, and may require adjustment in
+order to demonstrate comparable phenomena to the paper.
 
 ## Orbit examples (run locally)
 
