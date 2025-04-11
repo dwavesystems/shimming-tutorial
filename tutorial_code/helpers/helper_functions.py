@@ -259,7 +259,7 @@ def load_experiment_data(prefix, data_dict):
     filepath = Path("cached_experiment_data").joinpath("".join(filename))
 
     if not os.path.exists(filepath):
-        print(f"{filepath} not found.  Couldn" "t load data.")
+        print(f"Cached data is not found at {filepath}. Data will be generated.")
         return None
     with lzma.open(filepath, "rb") as f:
         loaded_data_dict = pickle.load(f)
@@ -284,9 +284,9 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
         print(f"{filepath} exists.  Not overwriting.")
         return False
 
-    if 'param' in data_dict and 'solver' in data_dict['param']:
+    if "param" in data_dict and "solver" in data_dict["param"]:
         # Not pickleable, just save properties
-        data_dict['param']['solver'] = data_dict['param']['solver'].properties
+        data_dict["param"]["solver"] = data_dict["param"]["solver"].properties
     os.makedirs("cached_experiment_data", exist_ok=True)
     with lzma.open(filepath, "wb") as f:
         pickle.dump(data_dict, f)

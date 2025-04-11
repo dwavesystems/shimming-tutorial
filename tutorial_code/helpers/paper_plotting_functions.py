@@ -38,13 +38,14 @@ if MAKE_TIKZ_PLOTS:
     import tikzplotlib
 
 
-def paper_plots_example1_1(experiment_data_list):
+def paper_plots_example1_1(experiment_data_list, indices_to_plot="first"):
     """Plotting function for example1_1
 
     Args:
         alpha_phi (float): 'alpha_Phi' in the shim dictionary from example1_1
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_1
         mags (list[np.ndarray]): 'mags' in the stats dictionary from example1_1
+        indices_to_plot (str): 'first' or 'all'. Which embedding to plot.
     """
     num_experiments = len(experiment_data_list)
     # Create a figure with 1 row and 3 columns for side-by-side plots
@@ -61,10 +62,15 @@ def paper_plots_example1_1(experiment_data_list):
         mags = data["mags"]
 
         # Plot 1: Flux-bias offsets
-        axs[0, col].plot(np.array([x[0] for x in all_fbos]))
+        if indices_to_plot == "first":
+            axs[0, col].plot(np.array([x[0] for x in all_fbos]))
+            ylabel = " [first loop only]"
+        else:
+            axs[0, col].plot(np.array([y for x in all_fbos for y in x]))
+            ylabel = ""
         axs[0, col].set_title(rf"$\alpha_\phi$={alpha_phi:.1e}")
         axs[0, col].set_xlabel("Iteration")
-        axs[0, col].set_ylabel(r"Flux-bias offsets, $\phi_f$")
+        axs[0, col].set_ylabel(r"Flux-bias offsets, $\phi_f$" + ylabel)
         current_ylim = axs[0, col].get_ylim()
         max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
         axs[0, col].set_ylim(-max_ylim, max_ylim)
@@ -141,13 +147,16 @@ def paper_plots_example1_1(experiment_data_list):
         plt.show()
 
 
-def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
+def paper_plots_example1_2(
+    *, all_couplings, all_fbos, mags, frust, indices_to_plot="first"
+):
     """
     Plotting function for example1_2, combining Flux-bias offsets and Couplings on a single canvas.
 
     Args:
         all_couplings (list[np.ndarray]): 'all_couplings' in the stats dictionary from example1_2
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example1_2
+        indices_to_plot (str): 'first' or 'all'. Which embedding to plot.
     """
     fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     fig.canvas.manager.set_window_title(
@@ -155,17 +164,26 @@ def paper_plots_example1_2(*, all_couplings, all_fbos, mags, frust):
     )
 
     # Plot 1: Flux-bias offsets
-    axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
+    if indices_to_plot == "first":
+        axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
+        ylabel = " [first loop only]"
+    else:
+        axs[0, 0].plot(np.array([y for x in all_fbos for y in x]))
+        ylabel = ""
     axs[0, 0].set_xlabel("Iteration")
-    axs[0, 0].set_ylabel(r"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)")
+    axs[0, 0].set_ylabel(r"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)" + ylabel)
     current_ylim = axs[0, 0].get_ylim()
     max_ylim = max(abs(current_ylim[0]), abs(current_ylim[1])) * 1.1
     axs[0, 0].set_ylim(-max_ylim, max_ylim)
 
     # Plot 2: Couplings
-    axs[0, 1].plot(np.array([x[0] for x in all_couplings]))
+
+    if indices_to_plot == "first":
+        axs[0, 1].plot(np.array([x[0] for x in all_couplings]))
+    else:
+        axs[0, 1].plot(np.array([y for x in all_couplings for y in x]))
     axs[0, 1].set_xlabel("Iteration")
-    axs[0, 1].set_ylabel(r"Couplings, $J_{i,j}$")
+    axs[0, 1].set_ylabel(r"Couplings, $J_{i,j}$" + ylabel)
 
     # Plot 3: Standard deviation of magnetizations (10-iter moving mean)
     M = np.array(mags)
@@ -248,7 +266,9 @@ def paper_plots_example2_1():
         plt.show()
 
 
-def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, frust):
+def paper_plots_example2_2(
+    *, nominal_couplings, all_fbos, all_couplings, mags, frust, indices_to_plot="first"
+):
     """
     Plotting function for example2_2.
 
@@ -258,20 +278,32 @@ def paper_plots_example2_2(*, nominal_couplings, all_fbos, all_couplings, mags, 
         all_fbos (list[np.ndarray]): 'all_fbos' in the stats dictionary from example2_2
         mags (np.ndarray): 'mags' in the stats dictionary from example2_2
         frust (np.ndarray): 'frust' in the stats dictionary from example2_2
+        indices_to_plot (str): 'first' or 'all'. Which embedding to plot.
     """
     fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     fig.canvas.manager.set_window_title("Figure 10: Shimming a frustrated loop")
 
     # Plot FBOs for first embedding in the first axis (top-left)
-    axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
+    if indices_to_plot == "first":
+        ylabel = " [first chain only]"
+        axs[0, 0].plot(np.array([x[0] for x in all_fbos]))
+    else:
+        ylabel = ""
+        axs[0, 0].plot(np.array([y for x in all_fbos for y in x]))
+
     axs[0, 0].set_xlabel("Iteration")
-    axs[0, 0].set_ylabel(r"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)")
+    axs[0, 0].set_ylabel(r"Flux-bias offsets, $\Phi_i$ ($\Phi_0$)" + ylabel)
     axs[0, 0].set_ylim(max(abs(np.array(axs[0, 0].get_ylim()))) * np.array([-1, 1]))
 
     # Plot Js for first embedding in the second axis (top-right)
-    axs[0, 1].plot(np.array([x[0] / nominal_couplings for x in all_couplings]))
+    if indices_to_plot == "first":
+        axs[0, 1].plot(np.array([x[0] / nominal_couplings for x in all_couplings]))
+    else:
+        axs[0, 1].plot(
+            np.array([y / nominal_couplings for x in all_couplings] for y in x)
+        )
     axs[0, 1].set_xlabel("Iteration")
-    axs[0, 1].set_ylabel(r"Couplings (relative to nominal), $J_{ij}/|J_{ij}|$")
+    axs[0, 1].set_ylabel(r"Couplings (relative to nominal), $J_{ij}/|J_{ij}|$" + ylabel)
 
     # Plot std of magnitudes in third axis (bottom-left)
     M = np.array(mags)
