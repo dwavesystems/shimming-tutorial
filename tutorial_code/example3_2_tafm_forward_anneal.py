@@ -372,11 +372,33 @@ def run_experiment(
     """
 
     if use_cache:
+        shim_type = shim["type"]
+        halve_boundary_couplers = param["halve_boundary_couplers"]
+        L = param["L"]
+        assert L * L == len(embeddings[0])
+        MNE = len(embeddings)
+        coupling = param["coupling"]
         solver_name = param["sampler"].properties["chip_id"]
-        prefix = (
-            f'{solver_name}_example3_2_{shim["type"]}{"_adaptive" * int(param["adaptive_step_size"])}'
-            f'_halve{param["halve_boundary_couplers"]}_aPhi{alpha_Phi}_aJ{alpha_J}'
+        num_iters = param["num_iters"]
+        num_iters_unshimmed_flux = param["num_iters_unshimmed_flux"]
+        num_iters_unshimmed_J = param["num_iters_unshimmed_J"]
+        identifier = "".join(
+            f"_{v}"
+            for v in [
+                shim_type,
+                halve_boundary_couplers,
+                L,
+                MNE,
+                coupling,
+                solver_name,
+                alpha_Phi,
+                alpha_J,
+                num_iters,
+                num_iters_unshimmed_flux,
+                num_iters_unshimmed_J,
+            ]
         )
+        prefix = f"example3_2{identifier}"
         data_dict = {"param": param, "shim": shim, "stats": stats}
         data_dict = load_experiment_data(prefix, data_dict)
     else:
@@ -418,7 +440,7 @@ def run_experiment(
                 run_iteration(param, shim, stats, embeddings, logical_bqm)
 
         else:
-            # Adaptive step sizes
+            # Adaptive step sizes: an example implementation
             shim["alpha_Phi"] = alpha_Phi
             shim["alpha_J"] = alpha_J
             for iteration in pbar:
@@ -460,6 +482,7 @@ def main(
     max_num_emb: int = 1,
     alpha_Phi: float = 2e-6,
     alpha_J: float = 0.02,
+    L: int = 12,
     use_cache: bool = True,
 ) -> None:
     """Main function to run example.
@@ -482,6 +505,7 @@ def main(
             otherwise slow parallel embedding process.
         alpha_Phi (float): learning rate for linear shims. Defaults to 2e-6.
         alpha_J (float): learning rate for coupling shims. Defaults to 0.02.
+        L (int): linear scale of the square lattice to embed. Defaults to 12.
         use_cache (bool): When True embeddings and data are read from
             (and saved to) local directories, repeated executions can reuse
             collected data. When False embeddings and data are recalculated on
@@ -494,12 +518,16 @@ def main(
         sampler = DWaveSampler(solver=solver_name)
 
     adaptive_step_size = False
-    halve_boundary_couplers = False
 
     results = []
-    for shimtype in ["embedded_finite", "embedded_infinite", "triangular_infinite"]:
+    for shimtype, halve_boundary_couplers in [
+        ("embedded_finite", False),
+        ("triangular_infinite", False),
+        ("triangular_infinite", True),
+    ]:
+
         param = {
-            "L": 12,
+            "L": L,
             "sampler": sampler,
             "chain_strength": 2.0,
             "coupling": coupling,
@@ -577,7 +605,10 @@ if __name__ == "__main__":
         help="option to specify QPU solver, or MockDWaveSampler for a toy example without a QPU",
     )
     parser.add_argument(
-        "--coupling", default=0.9, type=float, help="coupling strength on chain"
+        "--coupling",
+        default=0.9,
+        type=float,
+        help="coupling strength on the square lattice",
     )
     parser.add_argument(
         "--num_iters", default=800, type=int, help="number of sequential programmings"
@@ -601,6 +632,9 @@ if __name__ == "__main__":
         help="maximum number of embeddings to use per programming (published data uses several parallel, but default is 1 to save time)",
     )
     parser.add_argument(
+        "--L", default=12, type=int, help="Linear dimension of the square lattice (int)"
+    )
+    parser.add_argument(
         "--alpha_Phi", default=2e-6, type=float, help="Learning rate for flux shimming"
     )
     parser.add_argument(
@@ -619,5 +653,6 @@ if __name__ == "__main__":
         num_iters_unshimmed_flux=args.num_iters_unshimmed_flux,
         num_iters_unshimmed_J=args.num_iters_unshimmed_J,
         max_num_emb=args.max_num_emb,
+        L=args.L,
         use_cache=not args.no_cache,
     )
