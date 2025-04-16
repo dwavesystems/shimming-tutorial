@@ -212,7 +212,7 @@ def run_experiment(
     if use_cache:
         L = param["L"]
         assert L == len(embeddings[0])
-        MNE = len(embeddings)
+        max_num_embs = len(embeddings)
         coupling = param["coupling"]
         solver_name = param["sampler"].properties["chip_id"]
         num_iters = param["num_iters"]
@@ -220,7 +220,7 @@ def run_experiment(
         identifier = "".join(
             f"_{v}"
             for v in [
-                MNE,
+                max_num_embs,
                 coupling,
                 L,
                 solver_name,
@@ -365,7 +365,7 @@ if __name__ == "__main__":
         type=int,
         help="maximum number of embeddings to use per programming",
     )
-    parser.add_argument("--L", default=16, type=int, help="Length of the loop (int)")
+    parser.add_argument("--L", default=16, type=int, help="Length of the loop")
     parser.add_argument(
         "--no_cache",
         action="store_true",

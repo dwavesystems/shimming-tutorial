@@ -138,7 +138,7 @@ if __name__ == "__main__":
         "--verbose", action="store_true", help="Print additional verbose information"
     )
     parser.add_argument(
-        "--L", default=6, type=int, help="Length of the frustrated loop (int)"
+        "--L", default=6, type=int, help="Length of the loop"
     )
     parser.add_argument(
         "--num_loops", default=3, type=int, help="Number of independent rings"

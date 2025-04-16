@@ -376,7 +376,7 @@ def run_experiment(
         halve_boundary_couplers = param["halve_boundary_couplers"]
         L = param["L"]
         assert L * L == len(embeddings[0])
-        MNE = len(embeddings)
+        max_num_embs = len(embeddings)
         coupling = param["coupling"]
         solver_name = param["sampler"].properties["chip_id"]
         num_iters = param["num_iters"]
@@ -388,7 +388,7 @@ def run_experiment(
                 shim_type,
                 halve_boundary_couplers,
                 L,
-                MNE,
+                max_num_embs,
                 coupling,
                 solver_name,
                 alpha_Phi,
@@ -632,7 +632,7 @@ if __name__ == "__main__":
         help="maximum number of embeddings to use per programming (published data uses several parallel, but default is 1 to save time)",
     )
     parser.add_argument(
-        "--L", default=12, type=int, help="Linear dimension of the square lattice (int)"
+        "--L", default=12, type=int, help="Linear dimension of the LxL square lattice"
     )
     parser.add_argument(
         "--alpha_Phi", default=2e-6, type=float, help="Learning rate for flux shimming"
