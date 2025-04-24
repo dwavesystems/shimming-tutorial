@@ -13,27 +13,65 @@
 # limitations under the License.
 #
 import os
-
 import dimod
+import warnings
 import numpy as np
 
-from dwave.system.samplers import DWaveSampler
+from dwave.system.testing import MockDWaveSampler
 
-from helpers.embedding_helpers import raster_embedding_search
+from minorminer.utils.parallel_embeddings import (
+    find_sublattice_embeddings,
+    embeddings_to_array,
+)
+
+from minorminer.utils.feasibility import (
+    embedding_feasibility_filter,
+    lattice_size_lower_bound,
+)
 
 
-def embed_loops(L, try_to_load=True, raster_breadth=2):
-    """Embed loops of length L
+class InfeasibleResultsError(Exception):
+    """Error raised when no feasible results are found."""
+
+
+def embed_loops(
+    sampler: MockDWaveSampler,
+    L: int,
+    use_cache: bool = True,
+    **kwargs,
+) -> np.ndarray:
+    """Embeds a ring of length L.
 
     Args:
-        L (int): chain length
-        try_to_load (bool, optional): Flag for loading from cached data. Defaults to True.
-        raster_breadth (int, optional): breadth parameter for raster embedding search. Defaults to 2.
+        sampler (int): DWaveSampler for which to embed
+        L (int): Lattice length
+        use_cache (bool, default=True): When True, embeddings are
+            saved to and loaded from a local directory whenever
+            possible. If writing to a directory is not possible
+            a warning is thrown.
 
-    Returns:
-        numpy.ndarray: a matrix of embeddings
+        Returns:
+        np.ndarray: A matrix of embeddings
     """
-    sampler = DWaveSampler()  # As configured
+    if not isinstance(L, int):
+        raise TypeError(f"'L' must be an integer. Received type {type(L)}.")
+    if L <= 0:
+        raise ValueError(f"'L' must be a positive integer. Received {L}.")
+
+    if not isinstance(use_cache, bool):
+        raise TypeError(
+            f"'use_cache' must be a boolean. Received type {type(use_cache)}."
+        )
+
+    solver_name = sampler.properties["chip_id"]
+    max_num_emb = kwargs.pop("max_num_emb", None)
+    cache_filename = f"cached_embeddings/loop_embeddings_{solver_name}_L{L:04d}_MNE{max_num_emb}.txt"
+
+    if use_cache and os.path.exists(cache_filename):
+        embeddings = np.loadtxt(cache_filename, dtype=int)
+        print(f"Loaded {cache_filename}")
+        return embeddings
+
     bqm = dimod.BinaryQuadraticModel(
         vartype="SPIN",
     )
@@ -42,29 +80,72 @@ def embed_loops(L, try_to_load=True, raster_breadth=2):
     G = dimod.to_networkx_graph(bqm)
     A = sampler.to_networkx_graph()
 
-    cache_filename = (
-        f"cached_embeddings/{sampler.solver.name}__L{L:04d}_embeddings_cached.txt"
-    )
-    if try_to_load:
-        try:
-            embeddings = np.loadtxt(cache_filename, dtype=int)
-            print(f"Loaded embedding from file {cache_filename}")
-            return embeddings
-        except (ValueError, FileNotFoundError) as e:
-            print(f"Failed to load {cache_filename} with `np.loadtxt`")
-            print("Error:", e)
-            print("Finding embedding via raster embedding search instead.")
-    embeddings = raster_embedding_search(A, G, raster_breadth=raster_breadth)
+    if not embedding_feasibility_filter(S=G, T=A):
+        raise ValueError(f"Embedding {G} on {A} is infeasible")
 
-    os.makedirs("cached_embeddings/", exist_ok=True)
-    np.savetxt(cache_filename, embeddings, fmt="%d")
+    lower_bound = lattice_size_lower_bound(S=G, T=A) + 1
+    max_rows_columns = max(A.graph.get("rows"), A.graph.get("columns"))
+    sublattice_size = kwargs.pop("sublattice_size", min(lower_bound, max_rows_columns))
+
+    if not isinstance(sublattice_size, int) or sublattice_size <= 0:
+        raise ValueError(
+            f"'sublattice_size' must be a positive integer. Received {sublattice_size}."
+        )
+
+    print(
+        "Creating embeddings may take several minutes."
+        "\nTo accelerate the process a smaller lattice (L) might be "
+        "considered and/or the search restricted to max_num_emb=1."
+    )
+    if max_num_emb is None:
+        max_num_emb = G.number_of_nodes() // A.number_of_nodes()  # Default to many
+
+    embedder_kwargs = {"timeout": kwargs.pop("timeout", 10)}
+    embeddings = embeddings_to_array(
+        find_sublattice_embeddings(
+            S=G,
+            T=A,
+            sublattice_size=sublattice_size,
+            max_num_emb=max_num_emb,
+            embedder_kwargs=embedder_kwargs,
+            **kwargs,
+        ),
+        node_order=sorted(G.nodes()),
+        as_ndarray=True,
+    )
+
+    if embeddings.size == 0:
+        raise InfeasibleResultsError(
+            "No feasible embeddings found. "
+            "\nModifying the source (lattice) and target "
+            "(processor), or find_sublattice_embeddings arguments "
+            "such as timeout may resolve the issue."
+        )
+
+    if use_cache:
+        try:
+            os.makedirs("cached_embeddings/", exist_ok=True)
+            np.savetxt(cache_filename, embeddings, fmt="%d")
+        except OSError as e:
+            warnings.warn("Embedding cache files could not be created")
 
     return embeddings
 
 
 def main():
-    L = 8  # Length of chain to embed
-    embeddings = embed_loops(L, raster_breadth=2)
+    from time import perf_counter
+
+    L = 2048  # L=2048 anticipate ~ 2.5 seconds on i7
+    sampler = MockDWaveSampler(topology_type="pegasus", topology_shape=[16])
+    t0 = perf_counter()
+    embeddings = embed_loops(
+        sampler=sampler, L=L, max_num_emb=len(sampler.nodelist) // L, use_cache=False
+    )
+    t1 = perf_counter() - t0
+    if embeddings.size >= 1:
+        print(f"Loop {L} embedding successfully found in {t1} seconds")
+    else:
+        print(f"Something is wrong, {L}x{L} embedding not found")
 
 
 if __name__ == "__main__":

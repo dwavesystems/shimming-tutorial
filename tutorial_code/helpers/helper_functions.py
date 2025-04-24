@@ -92,7 +92,8 @@ def plot_data(
     coupling,
     L,
 ):
-    """Plots diagnostics for the convergence of shims
+    """
+    Plots diagnostics for the convergence of shims
 
     Args:
         all_fbos (list(np.ndarray)): 'all_fbos' in the experiment's stats dictionary
@@ -258,22 +259,11 @@ def load_experiment_data(prefix, data_dict):
     filepath = Path("cached_experiment_data").joinpath("".join(filename))
 
     if not os.path.exists(filepath):
-        print(f"{filepath} not found.  Couldn" "t load data.")
+        print(f"Cached data is not found at {filepath}. Data will be generated.")
         return None
-
     with lzma.open(filepath, "rb") as f:
         loaded_data_dict = pickle.load(f)
-
-    temp = None
-    if "param" in data_dict and "sampler" in data_dict["param"]:
-        temp = data_dict["param"]["sampler"]
-    for key in data_dict:
-        data_dict[key] = loaded_data_dict[key]
-        if temp is not None:
-            data_dict["param"]["sampler"] = temp
-
-    print(f"Loaded {filepath}")
-    return data_dict
+    return loaded_data_dict
 
 
 def save_experiment_data(prefix, data_dict, overwrite=True):
@@ -294,14 +284,9 @@ def save_experiment_data(prefix, data_dict, overwrite=True):
         print(f"{filepath} exists.  Not overwriting.")
         return False
 
-    for key in data_dict:
-        data_dict[key] = copy.copy(data_dict[key])
-
-    # Need to remove some sampler fields to make the data serializable.
-    if "param" in data_dict and "sampler" in data_dict["param"]:
-        data_dict["param"]["sampler"].solver.client = None
-        data_dict["param"]["sampler"].client = None
-
+    if "param" in data_dict and "solver" in data_dict["param"]:
+        # Not pickleable, just save properties
+        data_dict["param"]["solver"] = data_dict["param"]["solver"].properties
     os.makedirs("cached_experiment_data", exist_ok=True)
     with lzma.open(filepath, "wb") as f:
         pickle.dump(data_dict, f)
